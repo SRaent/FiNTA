@@ -50,7 +50,9 @@ int main(){
 	
 //	I2 = ifft_2d_real(FI1,w,h);
 //	cv::Mat I3(h,w, CV_8UC1, cv::Scalar(0));
-	cv::Mat I3 = cv::imread("../Franzi_CPD_012.tif", CV_LOAD_IMAGE_GRAYSCALE);
+	cv::Mat I2 = cv::imread("../Franzi_CPD_012.tif", CV_LOAD_IMAGE_GRAYSCALE);
+	cv::Rect myROI(0,0,1024,884);
+	cv::Mat I3 = I2(myROI);
 	cv::Size s = I3.size();
 	
 	fftw_complex* FI1 = fft_2d(I3);
@@ -64,7 +66,12 @@ int main(){
 	cv::Mat I5(s.height,s.width,CV_64F);
 	GaussianBlur(I4,I5,cv::Size(7,7),1);
 	
+	cv::normalize(I5,I5,1,0,32);
+	cv::Scalar meanI5 = mean(I5);
+	clamp(I5,meanI5[0] * 0.85,1);
+	
 	cv::normalize(I5,I5,255,0,32);
+	
 	cv::imwrite("Filter1.tif",I5);
 	
 	

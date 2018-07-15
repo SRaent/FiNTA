@@ -118,7 +118,6 @@ cv::Mat cv_ifft_2d_real(fftw_complex* in, unsigned long long w, unsigned long lo
 	
 	for(unsigned long long x = 0; x < w; ++x){
 		for(unsigned long long y = 0; y < h; ++y){
-//			img.data[(y * w) + x] = comp[(x * h) + y][0] /((double)w * (double)h); // the ffwt library does not normalize the data so the data has to be devided by w*h
 			img.at<double>(y,x) = comp[(x * h) + y][0] /((double)w * (double)h);
 		}
 	}
@@ -161,5 +160,18 @@ void cutouteroval_ft(fftw_complex* img,double rad,unsigned long w, unsigned long
 	}
 }
 
+void clamp(cv::Mat &img, double lower, double upper){
+	cv::Size s = img.size();
+	for(unsigned long long x = 0; x < s.width; ++x){
+		for(unsigned long long y = 0; y < s.height; ++y){
+			if (img.at<double>(y,x) >= upper) {
+				img.at<double>(y,x) = upper;
+			}
+			else if (img.at<double>(y,x) <= lower){
+				img.at<double>(y,x) = lower;
+			}
+		}
+	}
+}
 
 #endif
