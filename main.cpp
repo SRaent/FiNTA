@@ -68,12 +68,6 @@ int main(){
 	cv::imwrite("Filter1.tif",I5);
 	
 	
-	uint8 a = 0x00;
-	uint8 b = 0x01;
-	uint8 c = 0x00;
-	
-	a = b & c;
-	PRINT((double)a)
 //	I3.at<uchar>(2,2) = 12;
 //	cv::Scalar s = I3.at<uchar>(2,2);
 //	I3.data[5] = 255;
