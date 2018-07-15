@@ -160,6 +160,10 @@ void cutouteroval_ft(fftw_complex* img,double rad,unsigned long w, unsigned long
 	}
 }
 
+void clamp(cv::Mat &mat, double lowerBound, double upperBound) {
+    min(max(mat, lowerBound), upperBound, mat);
+}
+/*
 void clamp(cv::Mat &img, double lower, double upper){
 	cv::Size s = img.size();
 	for(unsigned long long x = 0; x < s.width; ++x){
@@ -173,5 +177,5 @@ void clamp(cv::Mat &img, double lower, double upper){
 		}
 	}
 }
-
+*/
 #endif
