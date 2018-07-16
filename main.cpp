@@ -74,6 +74,21 @@ int main(){
 	
 	cv::imwrite("Filter1.tif",I5);
 	
+	int steps = 1000;
+	for (int i = 0; i <= steps; ++i){
+		double angle =  (double)i/steps * 2* PI;
+		double x = cos(angle);
+		double y = sin(angle);
+		double angle2 = atan2(y,x);
+//		PRINT(angle)
+//		PRINT(angle2)
+		PRINT(cos(angle2) - x)
+//		PRINT(x)
+		PRINT(sin(angle2) - y)
+//		PRINT(y)
+	}
+	
+	
 	
 //	I3.at<uchar>(2,2) = 12;
 //	cv::Scalar s = I3.at<uchar>(2,2);
