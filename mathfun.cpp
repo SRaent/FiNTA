@@ -113,7 +113,7 @@ double** ifft_2d_real(fftw_complex* in, unsigned long long w, unsigned long long
 	}
 	return img;
 }
-
+//inverse fourier transform returning a cv::Mat object. argiments: array to be reverse fourier transformed, image width, image height, dealloccate array to be reverse fourier transformed when done?
 cv::Mat cv_ifft_2d_real(fftw_complex* in, unsigned long long w, unsigned long long h, bool free = 1){
 	fftw_complex* comp = ifft_2d(in,w,h);
 	
@@ -132,7 +132,7 @@ cv::Mat cv_ifft_2d_real(fftw_complex* in, unsigned long long w, unsigned long lo
 }
 
 
-
+// sets all pixels of a image img to 0 that are inside a ellipse with "radius" rad, while taking the "topology" of a discrete fourier transfrom into aount (the center where the frequency is 0 is devidet between the 4 corners). also the ellips is streched according to the aspect ratio of the image given by w and h (width and hight).
 void cutinneroval_ft(fftw_complex* img,double rad,unsigned long w, unsigned long h){
 	rad = (pow(w,2) + pow(h,2)) * rad/4.0;
 	double rel = sqrt(w/h);
@@ -147,7 +147,7 @@ void cutinneroval_ft(fftw_complex* img,double rad,unsigned long w, unsigned long
 		}
 	}
 }
-
+//almost same as cutinneroval_ft only the outside of the oval is set to 0
 void cutouteroval_ft(fftw_complex* img,double rad,unsigned long w, unsigned long h){
 	rad = (pow(w,2) + pow(h,2)) * rad/4.0;
 	double rel = sqrt(w/h);
@@ -162,34 +162,72 @@ void cutouteroval_ft(fftw_complex* img,double rad,unsigned long w, unsigned long
 		}
 	}
 }
-
-void clamp(cv::Mat &mat, double lowerBound, double upperBound) {
-    min(max(mat, lowerBound), upperBound, mat);
+// clamps a cv::Mat between lower and upper (if a value is outside the bounds of lower and upper, it is set to lower or upper respectively)
+void clamp(cv::Mat &mat, double lower, double upper) {
+    min(max(mat, lower), upper, mat);
 }
 
-
-std::vector<double*> circlefun(cv::Mat img, double xpos, double ypos, double inner, double outer){
+// retrns a "function" that maps the intensety of a pixel inside a certain radius range to their angle to the x axis. the function consists of 2 vectors in a array, where the first vector carrys the angle and the second carrys the pixel value.
+std::vector<double>* circlefun(cv::Mat img, double xpos, double ypos, double inner, double outer){
+	std::vector<double>* fun = new std::vector<double>[2];
 	cv::Size s = img.size();
 	unsigned long long xmin = std::max((unsigned long long)0,(unsigned long long)floor(xpos - outer));
 	unsigned long long xmax = std::min((unsigned long long)ceil(xpos + outer), (unsigned long long)s.width);
 	unsigned long long ymin = std::max((unsigned long long)0,(unsigned long long)floor(ypos - outer));
 	unsigned long long ymax = std::min((unsigned long long)ceil(ypos + outer), (unsigned long long)s.height);
 	double rad = 0;
-	std::vector<double*> fun;
 	for (unsigned long long x = xmin; x < xmax ; ++x){
 		for (unsigned long long y = ymin; y < ymax; ++y){
 			rad = sqrt(pow((double)x-xpos,2) + pow((double)y-ypos,2));
 			if (inner <= rad && rad >= outer && x != xpos && y != ypos){
-				fun.push_back(new double[2]);
-				fun.back()[0] = atan2((double)y-ypos,(double)x-xpos);
-				fun.back()[1] = img.at<double>(y,x);
+				(fun[0]).push_back(atan2((double)y-ypos,(double)x-xpos));
+				(fun[1]).push_back(img.at<double>(y,x));
 			}
-			
 		}
 	}
 	
 	return fun;
 }
 
+
+// specifically designed to take the output of circlefun in the first argument. the function fun has to be a array containing 2 vectors. the first vector has to contain the angle between -pi and pi, and tha 2nd vector the assosiated value. this function produces equidistant gaussian weighted averages in "steps" (2nd argument) positions between -pi and pi, where the first value is -pi and the last slightly smaller than pi, because pi and - pi are equivalent, and the value would be dublicated. the standart deviation of the normal distribution used to weigh the values of fun, is given by "dev" the 3rd argument. the last argument is used to stop the function to free the memory occupied by "fun", since it is usually no longer required.
+double** gaussavgcircle(std::vector<double>* fun,unsigned long long steps,double dev, bool free = 1){
+	double** avg = new double*[2];
+	avg[0] = new double[steps];
+	avg[1] = new double[steps];
+	double acc_val;
+	double acc_dense;
+	double val;
+	for ( unsigned long long i = 0; i < steps; ++i){
+		avg[0][i] = ((double)i * 2.0 * PI / (double)steps) - PI;
+	}
+	
+	for ( unsigned long long i = 0; i < steps; ++i){
+		acc_val = 0;
+		acc_dense = 0;
+		val = 0;
+		
+		for ( unsigned long long j = 0; j < (fun[0]).size(); ++j){
+			val = exp(-pow(fun[0][j] - avg[0][i],2)/pow(dev * 1.4142135623730950488016, 2));
+			val += exp(-pow(fun[0][j] - avg[0][i] - (2 * PI),2)/pow(dev * 1.4142135623730950488016, 2));
+			val += exp(-pow(fun[0][j] - avg[0][i] + (2 * PI),2)/pow(dev * 1.4142135623730950488016, 2));
+			acc_dense += val;
+			acc_val += val * fun[1][j];
+		}
+		if (acc_val == 0){
+			avg[1][i] = 0;
+		}
+		else {
+			avg[1][i] = acc_val/acc_dense;
+		}
+		
+	}
+	
+	if (free) {
+		delete fun;
+	}
+	
+	return avg;
+}
 
 #endif
