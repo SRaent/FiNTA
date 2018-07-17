@@ -176,12 +176,13 @@ std::vector<double>* circlefun(cv::Mat img, double xpos, double ypos, double inn
 	unsigned long long ymin = std::max((unsigned long long)0,(unsigned long long)floor(ypos - outer));
 	unsigned long long ymax = std::min((unsigned long long)ceil(ypos + outer), (unsigned long long)s.height);
 	double rad = 0;
-	for (unsigned long long x = xmin; x < xmax ; ++x){
-		for (unsigned long long y = ymin; y < ymax; ++y){
+	for (unsigned long long x = xmin; x <= xmax ; ++x){
+		for (unsigned long long y = ymin; y <= ymax; ++y){
 			rad = sqrt(pow((double)x-xpos,2) + pow((double)y-ypos,2));
-			if (inner <= rad && rad >= outer && x != xpos && y != ypos){
+			if (inner <= rad && rad <= outer && x != xpos && y != ypos){
 				(fun[0]).push_back(atan2((double)y-ypos,(double)x-xpos));
 				(fun[1]).push_back(img.at<double>(y,x));
+//				std::cout << (fun[0]).back() << " " << (fun[1]).back() << " " << x << " " << y << " " << rad << std::endl; //to test the function
 			}
 		}
 	}
@@ -208,7 +209,7 @@ double** gaussavgcircle(std::vector<double>* fun,unsigned long long steps,double
 		val = 0;
 		
 		for ( unsigned long long j = 0; j < (fun[0]).size(); ++j){
-			val = exp(-pow(fun[0][j] - avg[0][i],2)/pow(dev * 1.4142135623730950488016, 2));
+			val = exp(-pow(fun[0][j] - avg[0][i],2)/pow(dev * 1.4142135623730950488016, 2)); //the 1.414... is the sqrt(2) and saves computing time.
 			val += exp(-pow(fun[0][j] - avg[0][i] - (2 * PI),2)/pow(dev * 1.4142135623730950488016, 2));
 			val += exp(-pow(fun[0][j] - avg[0][i] + (2 * PI),2)/pow(dev * 1.4142135623730950488016, 2));
 			acc_dense += val;
@@ -220,11 +221,12 @@ double** gaussavgcircle(std::vector<double>* fun,unsigned long long steps,double
 		else {
 			avg[1][i] = acc_val/acc_dense;
 		}
+//		std::cout << avg[0][i] << " " << avg[1][i] << std::endl; //to test the function
 		
 	}
 	
 	if (free) {
-		delete fun;
+		delete[] fun;
 	}
 	
 	return avg;

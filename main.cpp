@@ -74,7 +74,9 @@ int main(){
 	
 	cv::imwrite("Filter1.tif",I5);
 	
+	std::vector<double>* test = circlefun(I5,500,500,0,10);
 	
+	double** testavg = gaussavgcircle(test,100,0.7);
 	
 	
 //	I3.at<uchar>(2,2) = 12;
