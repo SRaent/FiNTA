@@ -232,4 +232,24 @@ double** gaussavgcircle(std::vector<double>* fun,unsigned long long steps,double
 	return avg;
 }
 
+
+//this function is specificaly designed to take the output of gaussavgcircle. it looks for local maxima in the input vector and outputs their locations in a vector. it also needs the length of the array, since in c++ it can not be determined during runtime. usually the length would be the number of steps in the gaussavgcircle function.
+std::vector<unsigned long long> findpks(double* vals,unsigned long long length){
+	std::vector<unsigned long long> pks;
+	
+	if (vals[1] < vals[0] && vals[0] > vals[length - 1]){
+		pks.push_back(0);
+	}
+	for (unsigned long long v = 1; v < length - 2; ++v){
+		if (vals[v - 1] < vals[v] && vals[v] > vals[v+1]){
+			pks.push_back(v);
+		}
+	}
+	
+	if (vals[length - 2] < vals[length - 1] && vals[length - 1] > vals[0]){
+		pks.push_back(length - 1);
+	}
+	return pks;
+}
+
 #endif

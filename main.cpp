@@ -42,7 +42,7 @@ int main(){
 	
 //	if(importsemtif("../Franzi_CPD_012.tif",I1,&w,&h)){
 //		cout << "image could not be imported" << endl;
-//	}
+//	
 	
 //	fftw_complex* FI1 = fft_2d(I1,w,h);
 	
@@ -70,14 +70,35 @@ int main(){
 	cv::Scalar meanI5 = mean(I5);
 	clamp(I5,meanI5[0] * 0.85,1);
 	
-	cv::normalize(I5,I5,255,0,32);
+	cv::normalize(I5,I5,1,0,32);
 	
-	cv::imwrite("Filter1.tif",I5);
+//	cv::imwrite("Filter1.tif",I5);
 	
-	std::vector<double>* test = circlefun(I5,500,500,0,10);
+	unsigned long long px = 500;
+	unsigned long long py = 500;
+	double r = 10;
 	
-	double** testavg = gaussavgcircle(test,100,0.7);
+	std::vector<double>* test = circlefun(I5,px,py,0,r);
+	unsigned long long steps = 100;
+	double** testavg = gaussavgcircle(test,steps,0.5);
 	
+	std::vector<unsigned long long> pks = findpks(testavg[1],steps);
+	/*
+	for (unsigned long long i = 0; i < pks.size(); ++i){
+		std::cout << testavg[0][pks[i]] << " " << testavg[1][pks[i]] << std::endl;
+	}
+	*/
+	cv::namedWindow("filtered image", 0x00000001);
+	
+	cv::circle(I5,cv::Point(px,py),r,1);
+	
+	for (unsigned long long i = 0; i < pks.size(); ++i){
+		cv::line(I5, cv::Point(px,py), cv::Point(px + (r * cos(testavg[0][pks[i]])), py + (r * sin(testavg[0][pks[i]]))),1);
+	}
+	
+	
+	imshow("filtered image", I5);
+	cv::waitKey(0);
 	
 //	I3.at<uchar>(2,2) = 12;
 //	cv::Scalar s = I3.at<uchar>(2,2);
@@ -107,6 +128,6 @@ int main(){
 		cout << endl;
 	}
 */	
-	
+	return 0;
 }
 
