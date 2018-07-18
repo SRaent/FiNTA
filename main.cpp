@@ -20,6 +20,7 @@
 #include "datafun.cpp"
 #include "mathfun.cpp"
 #include "node.h"
+#include "node.cpp"
 
 
 using namespace std;

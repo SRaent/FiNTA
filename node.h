@@ -19,8 +19,11 @@ class node {
 	std::vector<node*> neighbors;
 	std::vector<node*> connections;
 	std::vector<node*>* list;
-	node(unsigned long long, unsigned long long);
-	node(unsigned long long, unsigned long long, node*, std::vector<node*>*);
+	bool procreated;
+	double x;
+	double y;
+	node(double, double);
+	node(double, double, node*, std::vector<node*>*);
 };
 
 #endif
