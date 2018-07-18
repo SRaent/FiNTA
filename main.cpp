@@ -1,6 +1,14 @@
 
 #define PRINT(x) std::cout << #x << " => " << x << std::endl;
 
+#define PX 412
+#define PY 495
+#define RV 7
+#define RS 5
+#define RF RV
+#define STEPS 100
+#define DEV 0.4
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -22,8 +30,8 @@
 #include "node.h"
 #include "node.cpp"
 
-
 using namespace std;
+
 
 
 //images are saved in 2 dimensional arrays and the pixels are to be adressed by img[x][y] this has the effect, that any loops acessing all pixels have to loop x first and then y so y is the faster changin index(for performance reasons). but when actually writing image data to a file, doing this will result in x and y being swapped, unless the loop order is swiched(sacreficing some performance).
@@ -41,7 +49,6 @@ double** I2;
 
 
 int main(){
-	
 //	if(importsemtif("../Franzi_CPD_012.tif",I1,&w,&h)){
 //		cout << "image could not be imported" << endl;
 //	
@@ -80,11 +87,11 @@ int main(){
 	unsigned long long py = 495;
 	double r = 7;
 	
-	std::vector<double>* test = circlefun(I5,px,py,0,r);
-	unsigned long long steps = 100;
-	double** testavg = gaussavgcircle(test,steps,0.4);
+	std::vector<double>* test = circlefun(I5,PX,PY,0,RV);
+//	unsigned long long steps = 100;
+	double** testavg = gaussavgcircle(test,STEPS,DEV);
 	
-	std::vector<unsigned long long> pks = findpks(testavg[1],steps);
+	std::vector<unsigned long long> pks = findpks(testavg[1],STEPS);
 	/*
 	for (unsigned long long i = 0; i < pks.size(); ++i){
 		std::cout << testavg[0][pks[i]] << " " << testavg[1][pks[i]] << std::endl;
@@ -92,10 +99,10 @@ int main(){
 	*/
 	cv::namedWindow("filtered image", 0x00000001);
 	
-	cv::circle(I5,cv::Point(px,py),r,255);
+	cv::circle(I5,cv::Point(PX,PY),RV,255);
 	
 	for (unsigned long long i = 0; i < pks.size(); ++i){
-		cv::line(I5, cv::Point(px,py), cv::Point(px + (r * cos(testavg[0][pks[i]])), py + (r * sin(testavg[0][pks[i]]))),255);
+		cv::line(I5, cv::Point(PX,PY), cv::Point(PX + (RV * cos(testavg[0][pks[i]])), PY + (RV * sin(testavg[0][pks[i]]))), 255);
 	}
 	
 	

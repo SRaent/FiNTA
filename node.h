@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <vector>
-#include <string.h>
 
 
 
@@ -16,6 +15,7 @@
 #include <opencv2/imgproc.hpp>
 
 class node {
+	public:
 	std::vector<node*> neighbors;
 	std::vector<node*> connections;
 	std::vector<node*>* list;
@@ -24,6 +24,7 @@ class node {
 	double y;
 	node(double, double);
 	node(double, double, node*, std::vector<node*>*);
+	void procreate(cv::Mat);
 };
 
 #endif
