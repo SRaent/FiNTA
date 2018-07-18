@@ -19,6 +19,7 @@
 #include "datafun.h"
 #include "datafun.cpp"
 #include "mathfun.cpp"
+#include "node.h"
 
 
 using namespace std;
@@ -70,17 +71,17 @@ int main(){
 	cv::Scalar meanI5 = mean(I5);
 	clamp(I5,meanI5[0] * 0.85,1);
 	
-	cv::normalize(I5,I5,1,0,32);
+	cv::normalize(I5,I5,255,0,32);
 	
 //	cv::imwrite("Filter1.tif",I5);
 	
-	unsigned long long px = 500;
-	unsigned long long py = 500;
-	double r = 10;
+	unsigned long long px = 412;
+	unsigned long long py = 495;
+	double r = 7;
 	
 	std::vector<double>* test = circlefun(I5,px,py,0,r);
 	unsigned long long steps = 100;
-	double** testavg = gaussavgcircle(test,steps,0.5);
+	double** testavg = gaussavgcircle(test,steps,0.4);
 	
 	std::vector<unsigned long long> pks = findpks(testavg[1],steps);
 	/*
@@ -90,15 +91,17 @@ int main(){
 	*/
 	cv::namedWindow("filtered image", 0x00000001);
 	
-	cv::circle(I5,cv::Point(px,py),r,1);
+	cv::circle(I5,cv::Point(px,py),r,255);
 	
 	for (unsigned long long i = 0; i < pks.size(); ++i){
-		cv::line(I5, cv::Point(px,py), cv::Point(px + (r * cos(testavg[0][pks[i]])), py + (r * sin(testavg[0][pks[i]]))),1);
+		cv::line(I5, cv::Point(px,py), cv::Point(px + (r * cos(testavg[0][pks[i]])), py + (r * sin(testavg[0][pks[i]]))),255);
 	}
 	
 	
-	imshow("filtered image", I5);
-	cv::waitKey(0);
+	cv::imwrite("sucsess.tif",I5);
+	
+//	imshow("filtered image", I5);
+//	cv::waitKey(0);
 	
 //	I3.at<uchar>(2,2) = 12;
 //	cv::Scalar s = I3.at<uchar>(2,2);
