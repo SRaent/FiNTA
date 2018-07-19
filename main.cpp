@@ -6,6 +6,7 @@
 #define RV 7 //vision radius
 #define RS 5 //step radius
 #define RN RV //neighbor radius
+#define RF RV //forbidden radius
 #define STEPS 100
 #define DEV 0.4
 
