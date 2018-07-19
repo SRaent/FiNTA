@@ -3,9 +3,9 @@
 
 #define PX 412
 #define PY 495
-#define RV 7
-#define RS 5
-#define RF RV
+#define RV 7 //vision radius
+#define RS 5 //step radius
+#define RN RV //neighbor radius
 #define STEPS 100
 #define DEV 0.4
 
