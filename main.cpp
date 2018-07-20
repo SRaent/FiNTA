@@ -38,28 +38,7 @@ using namespace std;
 //images are saved in 2 dimensional arrays and the pixels are to be adressed by img[x][y] this has the effect, that any loops acessing all pixels have to loop x first and then y so y is the faster changin index(for performance reasons). but when actually writing image data to a file, doing this will result in x and y being swapped, unless the loop order is swiched(sacreficing some performance).
 
 
-
-
-uint8** I1;
-
-double** I2;
-
-//uint32 w,h;
-
-
-
-
 int main(){
-//	if(importsemtif("../Franzi_CPD_012.tif",I1,&w,&h)){
-//		cout << "image could not be imported" << endl;
-//	
-	
-//	fftw_complex* FI1 = fft_2d(I1,w,h);
-	
-	
-	
-//	I2 = ifft_2d_real(FI1,w,h);
-//	cv::Mat I3(h,w, CV_8UC1, cv::Scalar(0));
 	cv::Mat I2 = cv::imread("../Franzi_CPD_012.tif", CV_LOAD_IMAGE_GRAYSCALE);
 	cv::Rect myROI(0,0,1024,884);
 	cv::Mat I3 = I2(myROI);
@@ -82,64 +61,20 @@ int main(){
 	
 	cv::normalize(I5,I5,255,0,32);
 	
-//	cv::imwrite("Filter1.tif",I5);
 	
-	unsigned long long px = 412;
-	unsigned long long py = 495;
-	double r = 7;
+	std::vector<node*> list;
+	list.push_back(new node(PX,PY));
 	
-	std::vector<double>* test = circlefun(I5,PX,PY,0,RV);
-//	unsigned long long steps = 100;
-	double** testavg = gaussavgcircle(test,STEPS,DEV);
+	(list[0])->list = &list;
 	
-	std::vector<unsigned long long> pks = findpks(testavg[1],STEPS);
-	/*
-	for (unsigned long long i = 0; i < pks.size(); ++i){
-		std::cout << testavg[0][pks[i]] << " " << testavg[1][pks[i]] << std::endl;
-	}
-	*/
-	cv::namedWindow("filtered image", 0x00000001);
-	
-	cv::circle(I5,cv::Point(PX,PY),RV,255);
-	
-	for (unsigned long long i = 0; i < pks.size(); ++i){
-		cv::line(I5, cv::Point(PX,PY), cv::Point(PX + (RV * cos(testavg[0][pks[i]])), PY + (RV * sin(testavg[0][pks[i]]))), 255);
-	}
-	
-	
-	cv::imwrite("sucsess.tif",I5);
-	
-//	imshow("filtered image", I5);
-//	cv::waitKey(0);
-	
-//	I3.at<uchar>(2,2) = 12;
-//	cv::Scalar s = I3.at<uchar>(2,2);
-//	I3.data[5] = 255;
-//	cv::Scalar s = (I3.at<uchar>(0,5));
-//	PRINT(s.val[0])
-//	cv::imwrite("gausssmooth.tif", I3);
-	
-//	cv::Mat cvFT = cv::Mat(s.height,s.width,CV_64FC2);
-	
-//	cv::dft(I3,cvFT,16);
-	
-	
-/*
-	for (unsigned long long i = 0; i < s.height; ++i){
-		for (unsigned long long j = 0; j < s.width; ++j){  
-			cout << (double)I4.at<double>(i,j) << " ";
+	for (unsigned long long i = 0; i < 3; ++i){
+		unsigned long long end = list.size();
+		for (unsigned long long it = 0; it != end; ++it){
+			if (list[it]->procreated){
+				list[it]->procreate(I5);
+			}
 		}
-		cout << endl;
 	}
-*/
-/*
-	for (unsigned long long x = 0; x < s.width; ++x){
-		for (unsigned long long y = 0; y < s.height; ++y){
-			cout << log(sqrt(pow(FI1[(x * s.height) + y][0],2) + pow(FI1[(x * s.height) + y][1],2)) + 1 ) << " ";
-		}
-		cout << endl;
-	}
-*/	
+	
 	return 0;
 }
-

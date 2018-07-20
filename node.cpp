@@ -54,7 +54,7 @@ void node::procreate(cv::Mat img){
 		double ynew = y + (double)RS * sin(smoothfun[0][(*it)]);
 		if (xnew > 0 && xnew < s.width && ynew > 0 && ynew < s.height){
 			too_close = false;
-			for (std::vector<node*>::iterator it = neighbors.begin();!too_close || it != neighbors.end(); ++it){
+			for (std::vector<node*>::iterator it = neighbors.begin();!too_close && it != neighbors.end(); ++it){
 				if (pow(xnew - (*it)->x,2) + pow(ynew - (*it)->y,2) < pow(RF,2)){
 					too_close = true;
 				}
