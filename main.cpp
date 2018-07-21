@@ -7,10 +7,11 @@
 #define PY 495
 #define RV 8 //vision radius
 #define RS 5 //step radius
-#define RN RS*SQRT2 //neighbor radius
-#define RF RS/SQRT2 //forbidden radius
+#define RN RF * 2 //neighbor radius
+#define RF RS // SQRT2  //forbidden radius
+#define RM 0 //minimum vision radius
 #define STEPS 100
-#define DEV 0.4
+#define DEV 0.37
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -67,14 +68,18 @@ int main(){
 	std::vector<node*> list;
 	new node(PX,PY,&list,&I5);
 	
-	for (unsigned long long i = 0; i < 300; ++i){
+	unsigned long long i = 1;
+	for (bool buisy = 1; buisy ;){
+		buisy = 0;
 		unsigned long long end = list.size();
 		for (unsigned long long it = 0; it < end; ++it){
 			if (!(list[it]->procreated)){
 				list[it]->procreate();
+				buisy = 1;
 			}
 		}
-		cout << i << endl;
+		cout << i++ << endl;
+		
 	}
 	
 	for (unsigned long long i = 0; i < list.size(); ++i){
@@ -85,7 +90,8 @@ int main(){
 	}
 //	cv::line(I5,cv::Point(PX,PY),cv::Point(499.64,413.84),255);
 //	cv::line(I5,cv::Point(PX,PY),cv::Point(2,2),255);
-	cv::imwrite("doubt.tif",I5);
+	cv::imwrite("doubt.tif",I3);
+	cv::imwrite("doubt2.tif",I5);
 	
 	return 0;
 }

@@ -50,7 +50,7 @@ node::node(double xinit, double yinit,node* mother){
 
 void node::procreate(bool free = 1){
 	procreated = 1;
-	std::vector<double>* fun = circlefun(*img, x, y, 0, RV);
+	std::vector<double>* fun = circlefun(*img, x, y, RM, RV);
 	double** smoothfun = gaussavgcircle(fun, STEPS, DEV);
 	std::vector<unsigned long long> pks = findpks(smoothfun[1], STEPS);
 	node* child = NULL;
