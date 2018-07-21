@@ -49,6 +49,7 @@ node::node(double xinit, double yinit,node* mother){
 }
 
 void node::procreate(bool free = 1){
+	procreated = 1;
 	std::vector<double>* fun = circlefun(*img, x, y, 0, RV);
 	double** smoothfun = gaussavgcircle(fun, STEPS, DEV);
 	std::vector<unsigned long long> pks = findpks(smoothfun[1], STEPS);
@@ -69,6 +70,7 @@ void node::procreate(bool free = 1){
 				list->push_back(child);
 				neighbors.push_back(child);
 				connections.push_back(child);
+//				std::cout << xnew << " " << ynew << std::endl;
 			}
 		}
 	}

@@ -67,7 +67,7 @@ int main(){
 	std::vector<node*> list;
 	new node(PX,PY,&list,&I5);
 	
-	for (unsigned long long i = 0; i < 20; ++i){
+	for (unsigned long long i = 0; i < 300; ++i){
 		unsigned long long end = list.size();
 		for (unsigned long long it = 0; it < end; ++it){
 			if (!(list[it]->procreated)){
