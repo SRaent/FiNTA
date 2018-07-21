@@ -1,2 +1,0 @@
-# Actin
-Actin fiber analysis
