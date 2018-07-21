@@ -19,12 +19,14 @@ class node {
 	std::vector<node*> neighbors;
 	std::vector<node*> connections;
 	std::vector<node*>* list;
+	cv::Mat* img;
+	cv::Size s;
 	bool procreated;
 	double x;
 	double y;
-	node(double, double);
-	node(double, double, node*, std::vector<node*>*);
-	void procreate(cv::Mat);
+	node(double, double,std::vector<node*>*,cv::Mat*);
+	node(double, double, node*);
+	void procreate(bool);
 };
 
 #endif

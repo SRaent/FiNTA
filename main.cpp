@@ -5,7 +5,7 @@
 
 #define PX 412
 #define PY 495
-#define RV 7 //vision radius
+#define RV 8 //vision radius
 #define RS 5 //step radius
 #define RN RS*SQRT2 //neighbor radius
 #define RF RS/SQRT2 //forbidden radius
@@ -65,15 +65,13 @@ int main(){
 	
 	
 	std::vector<node*> list;
-	list.push_back(new node(PX,PY));
-	
-	(list[0])->list = &list;
+	new node(PX,PY,&list,&I5);
 	
 	for (unsigned long long i = 0; i < 20; ++i){
 		unsigned long long end = list.size();
 		for (unsigned long long it = 0; it < end; ++it){
 			if (!(list[it]->procreated)){
-				list[it]->procreate(I5);
+				list[it]->procreate();
 			}
 		}
 		cout << i << endl;

@@ -19,16 +19,22 @@
 
 
 
-node::node(double xinit, double yinit){
-	procreated = 0;
-	x = xinit;
-	y = yinit;
-}
-node::node(double xinit, double yinit,node* mother,std::vector<node*>* listinit){
-	procreated = 0;
-	x = xinit;
-	y = yinit;
+node::node(double xinit, double yinit,std::vector<node*>* listinit, cv::Mat* initimg){
 	list = listinit;
+	img = initimg;
+	s = img->size();
+	procreated = 0;
+	x = xinit;
+	y = yinit;
+	list->push_back(this);
+}
+node::node(double xinit, double yinit,node* mother){
+	procreated = 0;
+	x = xinit;
+	y = yinit;
+	list = mother->list;
+	img = mother->img;
+	s = img->size();
 	neighbors.push_back(mother);
 	connections.push_back(mother);
 	
@@ -42,11 +48,10 @@ node::node(double xinit, double yinit,node* mother,std::vector<node*>* listinit)
 	list->push_back(this);
 }
 
-void node::procreate(cv::Mat img){
-	std::vector<double>* fun = circlefun(img, x, y, 0, RV);
+void node::procreate(bool free = 1){
+	std::vector<double>* fun = circlefun(*img, x, y, 0, RV);
 	double** smoothfun = gaussavgcircle(fun, STEPS, DEV);
 	std::vector<unsigned long long> pks = findpks(smoothfun[1], STEPS);
-	cv::Size s = img.size();
 	node* child = NULL;
 	bool too_close = false;
 	for (std::vector<unsigned long long>::iterator it = pks.begin(); it != pks.end(); ++it){
@@ -60,12 +65,16 @@ void node::procreate(cv::Mat img){
 				}
 			}
 			if(!too_close){
-				child = new node(xnew, ynew, this, list);
+				child = new node(xnew, ynew, this);
 				list->push_back(child);
 				neighbors.push_back(child);
 				connections.push_back(child);
 			}
 		}
+	}
+	if (free){
+		delete[] smoothfun[0];
+		delete[] smoothfun[1];
 	}
 }
 
