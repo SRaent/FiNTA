@@ -10,7 +10,7 @@
 #define RT RV// vision for threshold
 #define RN RF * 2 //neighbor radius
 #define RF RS // SQRT2  //forbidden radius
-#define RM 3 //minimum vision radius
+#define RM 0 //minimum vision radius
 #define STEPS 100
 #define DEV 0.37
 #define LT 2 // line thiccness for connectable test
