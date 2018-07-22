@@ -1,5 +1,5 @@
 
-#define PRINT(x) std::cout << #x << " => " << x << std::endl;
+#define PRINT(x) cout << #x << " => " << x << endl;
 
 #define SQRT2 (double)1.4142135623730950488016
 
@@ -27,6 +27,8 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
+using namespace std;
+using namespace cv;
 
 #include "datafun.h"
 #include "datafun.cpp"
@@ -34,7 +36,6 @@
 #include "node.h"
 #include "node.cpp"
 
-using namespace std;
 
 
 
@@ -42,30 +43,30 @@ using namespace std;
 
 
 int main(){
-	cv::Mat I2 = cv::imread("../Franzi_CPD_012.tif", CV_LOAD_IMAGE_GRAYSCALE);
-	cv::Rect myROI(0,0,1024,884);
-	cv::Mat I3 = I2(myROI);
-	cv::Size s = I3.size();
+	Mat I2 = imread("../Franzi_CPD_012.tif", CV_LOAD_IMAGE_GRAYSCALE);
+	Rect myROI(0,0,1024,884);
+	Mat I3 = I2(myROI);
+	Size s = I3.size();
 	
 	fftw_complex* FI1 = fft_2d(I3);
 	
 	cutouteroval_ft(FI1,0.3,s.width,s.height);
 	cutinneroval_ft(FI1,0.00125,s.width,s.height);
 	
-	cv::Mat I4 = cv_ifft_2d_real(FI1,s.width,s.height);
+	Mat I4 = cv_ifft_2d_real(FI1,s.width,s.height);
 	
 	
-	cv::Mat I5(s.height,s.width,CV_64F);
-	GaussianBlur(I4,I5,cv::Size(7,7),1);
+	Mat I5(s.height,s.width,CV_64F);
+	GaussianBlur(I4,I5,Size(7,7),1);
 	
-	cv::normalize(I5,I5,1,0,32);
-	cv::Scalar meanI5 = mean(I5);
+	normalize(I5,I5,1,0,32);
+	Scalar meanI5 = mean(I5);
 	clamp(I5,meanI5[0] * 0.85,1);
 	
-	cv::normalize(I5,I5,255,0,32);
+	normalize(I5,I5,255,0,32);
 	
 	
-	std::vector<node*> list;
+	vector<node*> list;
 	new node(PX,PY,&list,&I5);
 	
 	unsigned long long i = 1;
@@ -84,14 +85,14 @@ int main(){
 	
 	for (unsigned long long i = 0; i < list.size(); ++i){
 		for (unsigned long long j = 0; j < list[i]->connections.size(); ++j){
-			cv::line(I5,cv::Point(list[i]->x,list[i]->y),cv::Point(list[i]->connections[j]->x,list[i]->connections[j]->y),255);
+			line(I5,Point(list[i]->x,list[i]->y),Point(list[i]->connections[j]->x,list[i]->connections[j]->y),255);
 			
 		}
 	}
-//	cv::line(I5,cv::Point(PX,PY),cv::Point(499.64,413.84),255);
-//	cv::line(I5,cv::Point(PX,PY),cv::Point(2,2),255);
-	cv::imwrite("doubt.tif",I3);
-	cv::imwrite("doubt2.tif",I5);
+//	line(I5,Point(PX,PY),Point(499.64,413.84),255);
+//	line(I5,Point(PX,PY),Point(2,2),255);
+	imwrite("doubt.tif",I3);
+	imwrite("doubt2.tif",I5);
 	
 	return 0;
 }

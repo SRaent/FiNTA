@@ -16,15 +16,15 @@
 
 class node {
 	public:
-	std::vector<node*> neighbors;
-	std::vector<node*> connections;
-	std::vector<node*>* list;
-	cv::Mat* img;
-	cv::Size s;
+	vector<node*> neighbors;
+	vector<node*> connections;
+	vector<node*>* list;
+	Mat* img;
+	Size s;
 	bool procreated;
 	double x;
 	double y;
-	node(double, double,std::vector<node*>*,cv::Mat*);
+	node(double, double,vector<node*>*,Mat*);
 	node(double, double, node*);
 	void procreate(bool);
 };
