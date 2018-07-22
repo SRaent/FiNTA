@@ -169,9 +169,9 @@ void clamp(Mat &mat, double lower, double upper) {
 }
 
 // retrns a "function" that maps the intensety of a pixel inside a certain radius range to their angle to the x axis. the function consists of 2 vectors in a array, where the first vector carrys the angle and the second carrys the pixel value.
-vector<double>* circlefun(Mat img, double xpos, double ypos, double inner, double outer){
+vector<double>* circlefun(Mat* img, double xpos, double ypos, double inner, double outer){
 	vector<double>* fun = new vector<double>[2];
-	Size s = img.size();
+	Size s = img->size();
 	unsigned long long xmin = max((unsigned long long)0,(unsigned long long)floor(xpos - outer));
 	unsigned long long xmax = min((unsigned long long)ceil(xpos + outer), (unsigned long long)s.width);
 	unsigned long long ymin = max((unsigned long long)0,(unsigned long long)floor(ypos - outer));
@@ -182,7 +182,7 @@ vector<double>* circlefun(Mat img, double xpos, double ypos, double inner, doubl
 			rad = sqrt(pow((double)x-xpos,2) + pow((double)y-ypos,2));
 			if (inner <= rad && rad <= outer && x != xpos && y != ypos){
 				(fun[0]).push_back(atan2((double)y-ypos,(double)x-xpos));
-				(fun[1]).push_back(img.at<double>(y,x));
+				(fun[1]).push_back(img->at<double>(y,x));
 //				cout << (fun[0]).back() << " " << (fun[1]).back() << " " << x << " " << y << " " << rad << endl; //to test the function
 			}
 		}
@@ -254,9 +254,11 @@ vector<unsigned long long> findpks(double* vals,unsigned long long length, bool 
 	return pks;
 }
 
-vector<double>* linefun(Mat img, double xstart, double ystart, double xend, double yend, double thic){
+
+//function to get the intensity of a image along a loing with a certain thicness
+vector<double>* linefun(Mat* img, double xstart, double ystart, double xend, double yend, double thic){
 	vector<double>* fun = new vector<double>[2];
-	Size s = img.size();
+	Size s = img->size();
 	
 	double dx = xend - xstart;
 	double dy = yend - ystart;
@@ -272,22 +274,60 @@ vector<double>* linefun(Mat img, double xstart, double ystart, double xend, doub
 	double e4y = yend - thic*0.5*dx/len;
 	
 	
-	unsigned long long xmax = ceil(min(max(max(e1x,e2x),max(e3x,e4x)),(double)s.height));
+	unsigned long long xmax = ceil(min(max(max(e1x,e2x),max(e3x,e4x)),(double)s.width));
 	unsigned long long xmin = floor(max(min(min(e1x,e2x),min(e3x,e4x)),0.0));
-	unsigned long long ymax = ceil(min(max(max(e1y,e2y),max(e3y,e4y)),(double)s.width));
+	unsigned long long ymax = ceil(min(max(max(e1y,e2y),max(e3y,e4y)),(double)s.height));
 	unsigned long long ymin = floor(max(min(min(e1y,e2y),min(e3y,e4y)),0.0));
 	
 	for ( unsigned long long x = xmin; x <= xmax; ++x){
 		for (unsigned long long y = ymin; y <= ymax; ++y){
 			if ((y-e2y)*(e3x-e2x) <= (e3y-e2y)*(x-e2x) && (y-e1y)*(e4x-e1x) >= (e4y-e1y)*(x-e1x) && (y-e1y)*(e2x-e1x) <= (e2y-e1y)*(x-e1x) && (y-e4y)*(e3x-e4x) >= (e3y-e4y)*(x-e4x)){
 				fun[0].push_back((((x - xstart) * dx) + ((y - ystart) * dy))/len);
-				fun[1].push_back(img.at<double>(y,x));
+				fun[1].push_back(img->at<double>(y,x));
+//				cout << fun[0].back() << " " << fun[1].back() << endl;
 			}
 		}
 	}
-	
 	return fun;
 }
 
+bool gaussavgoverthresh(vector<double>* fun,double length,unsigned long long steps,double dev, double thresh, bool free = 1){
+	double avgx[steps];
+	bool overthresh = true;
+	double acc_val;
+	double acc_dense;
+	double val;
+	for ( unsigned long long i = 0; i < steps; ++i){
+		avgx[i] = ((double)i * length / (double)steps);
+	}
+	
+	for ( unsigned long long i = 0; i < steps && overthresh; ++i){
+		acc_val = 0;
+		acc_dense = 0;
+		val = 0;
+		
+		for ( unsigned long long j = 0; j < (fun[0]).size(); ++j){
+			val = exp(-pow(fun[0][j] - avgx[i],2)/pow(dev * SQRT2, 2)); //the 1.414... is the sqrt(2) and saves computing time.
+			acc_dense += val;
+			acc_val += val * fun[1][j];
+		}
+		if (acc_val == 0){
+			overthresh = false;
+//			PRINT(acc_val)
+		}
+		else if (acc_val/acc_dense < thresh) {
+			overthresh = false;
+//			PRINT(overthresh)
+		}
+//		cout << avg[0][i] << " " << avg[1][i] << endl; //to test the function
+		
+	}
+	
+	if (free) {
+		delete[] fun;
+	}
+	
+	return overthresh;
+}
 
 #endif

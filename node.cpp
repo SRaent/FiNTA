@@ -19,7 +19,7 @@
 
 
 
-node::node(double xinit, double yinit,vector<node*>* listinit, Mat* initimg){
+node::node(double xinit, double yinit,std::vector<node*>* listinit, cv::Mat* initimg){
 	list = listinit;
 	img = initimg;
 	s = img->size();
@@ -38,7 +38,7 @@ node::node(double xinit, double yinit,node* mother){
 	neighbors.push_back(mother);
 	connections.push_back(mother);
 	
-	for (vector<node*>::iterator it = list->begin(); it != list->end(); ++it){
+	for (std::vector<node*>::iterator it = list->begin(); it != list->end(); ++it){
 //		if (sqrt(pow((*it)->x - x,2) + pow((*it)->y - y,2)) <= RN && *it != mother){
 		if (abs((*it)->x - x) <= RN && abs((*it)->y - y) <= RN && *it != mother){
 			neighbors.push_back(*it);			
@@ -50,27 +50,33 @@ node::node(double xinit, double yinit,node* mother){
 
 void node::procreate(bool free = 1){
 	procreated = 1;
-	vector<double>* fun = circlefun(*img, x, y, RM, RV);
-	double** smoothfun = gaussavgcircle(fun, STEPS, DEV);
-	vector<unsigned long long> pks = findpks(smoothfun[1], STEPS);
+	std::vector<double>* fun = circlefun(img, x, y, RM, RV);
+	double** smoothfun = gaussavgcircle(fun, STEPS, DEV, free);
+	std::vector<unsigned long long> pks = findpks(smoothfun[1], STEPS);
 	node* child = NULL;
 	bool too_close = false;
-	for (vector<unsigned long long>::iterator it = pks.begin(); it != pks.end(); ++it){
+	bool connectable = false;
+	for (std::vector<unsigned long long>::iterator it = pks.begin(); it != pks.end(); ++it){
 		double xnew = x + (double)RS * cos(smoothfun[0][(*it)]);
 		double ynew = y + (double)RS * sin(smoothfun[0][(*it)]);
+		double xtest = x + (double)RT * cos(smoothfun[0][(*it)]);
+		double ytest = y + (double)RT * sin(smoothfun[0][(*it)]);
 		if (xnew > 0 && xnew < s.width && ynew > 0 && ynew < s.height){
 			too_close = false;
-			for (vector<node*>::iterator it = neighbors.begin();!too_close && it != neighbors.end(); ++it){
+			for (std::vector<node*>::iterator it = neighbors.begin();!too_close && it != neighbors.end(); ++it){
 				if (pow(xnew - (*it)->x,2) + pow(ynew - (*it)->y,2) < pow(RF,2)){
 					too_close = true;
 				}
 			}
-			if(!too_close){
+			vector<double>* lfun = linefun(img, x, y, xtest, ytest, LT);
+			connectable = gaussavgoverthresh(lfun, RS, LT, LD, CT, free);
+			
+			if(!too_close && connectable){
 				child = new node(xnew, ynew, this);
 				list->push_back(child);
 				neighbors.push_back(child);
 				connections.push_back(child);
-//				cout << xnew << " " << ynew << endl;
+//				std::cout << xnew << " " << ynew << std::endl;
 			}
 		}
 	}
