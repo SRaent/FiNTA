@@ -55,13 +55,15 @@ int main(){
 	
 	fftw_complex* FI1 = fft_2d(I3);
 	
-	cutouteroval_ft(FI1,0.3,s.width,s.height);
-	cutinneroval_ft(FI1,0.00125,s.width,s.height);
+	cutouteroval_ft(FI1,1.6/8,s.width,s.height);
+	cutinneroval_ft(FI1,0.4/8,s.width,s.height);
+//	cutinneroval_ft(FI1,0.035355,s.width,s.height);
 	
 	Mat I4 = cv_ifft_2d_real(FI1,s.width,s.height);
 	
 	
 	Mat I5(s.height,s.width,CV_64F);
+	
 	GaussianBlur(I4,I5,Size(7,7),1);
 	
 	normalize(I5,I5,1,0,32);
@@ -97,6 +99,7 @@ int main(){
 	}
 //	line(I5,Point(PX,PY),Point(499.64,413.84),255);
 //	line(I5,Point(PX,PY),Point(2,2),255);
+	
 	imwrite("doubt.tif",I3);
 	imwrite("doubt2.tif",I5);
 	

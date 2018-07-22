@@ -135,7 +135,7 @@ Mat cv_ifft_2d_real(fftw_complex* in, unsigned long long w, unsigned long long h
 
 // sets all pixels of a image img to 0 that are inside a ellipse with "radius" rad, while taking the "topology" of a discrete fourier transfrom into aount (the center where the frequency is 0 is devidet between the 4 corners). also the ellips is streched according to the aspect ratio of the image given by w and h (width and hight).
 void cutinneroval_ft(fftw_complex* img,double rad,unsigned long w, unsigned long h){
-	rad = (pow(w,2) + pow(h,2)) * rad/4.0;
+	rad = (pow(w,2) + pow(h,2)) * rad * rad/4.0;
 	double rel = sqrt(w/h);
 	double xcent = w/2.0;
 	double ycent = h/2.0;
@@ -150,7 +150,7 @@ void cutinneroval_ft(fftw_complex* img,double rad,unsigned long w, unsigned long
 }
 //almost same as cutinneroval_ft only the outside of the oval is set to 0
 void cutouteroval_ft(fftw_complex* img,double rad,unsigned long w, unsigned long h){
-	rad = (pow(w,2) + pow(h,2)) * rad/4.0;
+	rad = (pow(w,2) + pow(h,2)) * rad * rad/4.0;
 	double rel = sqrt(w/h);
 	double xcent = w/2.0;
 	double ycent = h/2.0;

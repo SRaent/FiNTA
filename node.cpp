@@ -69,7 +69,7 @@ void node::procreate(bool free = 1){
 				}
 			}
 			vector<double>* lfun = linefun(img, x, y, xtest, ytest, LT);
-			connectable = gaussavgoverthresh(lfun, RS, LT, LD, CT, free);
+			connectable = gaussavgoverthresh(lfun, LT, LS, LD, CT, free);
 			
 			if(!too_close && connectable){
 				child = new node(xnew, ynew, this);
