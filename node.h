@@ -19,6 +19,7 @@ class node {
 	vector<node*> neighbors;
 	vector<node*> connections;
 	vector<node*>* list;
+	node* mother;
 	Mat* img;
 	Size s;
 	bool procreated;
