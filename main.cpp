@@ -5,18 +5,18 @@
 
 #define PX 412
 #define PY 495
-#define RV 10 //vision radius
-#define RS 5 //step radius
+#define RV 8 //vision radius
+#define RS 4 //step radius
 #define RT RV// vision for threshold
 #define RN RF * 2 //neighbor radius
 #define RF RS // SQRT2  //forbidden radius
 #define RM 0 //minimum vision radius
 #define STEPS 100
-#define DEV 0.37
-#define LT 2 // line thiccness for connectable test
+#define DEV 0.38
+#define LT 3 // line thiccness for connectable test
 #define LD 0.2 //deviation of smoothing if line function for connectable test
 #define LS RS*LT // steps for averaging the line function
-#define CT 4 // Connectabel threshhold. if the smoothed function goes below this, no new node will be spawned.
+#define CT 6 // Connectabel threshhold. if the smoothed function goes below this, no new node will be spawned.
 
 #include <stdlib.h>
 #include <stdio.h>
