@@ -56,50 +56,35 @@ void node::procreate(bool free = 1){
 	std::vector<unsigned long long> pks = findpks(smoothfun[1], STEPS);
 	node* child = NULL;
 	bool too_close = false;
-	bool connectable = false;
 	bool closable = false;
 	double min_dist = numeric_limits<double>::infinity();
 	bool unconned = true;
 	double dist = 0;
 	for (std::vector<unsigned long long>::iterator it = pks.begin(); it != pks.end(); ++it){
-		closable = false;
 		double xnew = x + (double)RS * cos(smoothfun[0][(*it)]);
 		double ynew = y + (double)RS * sin(smoothfun[0][(*it)]);
 		double xtest = x + (double)RT * cos(smoothfun[0][(*it)]);
 		double ytest = y + (double)RT * sin(smoothfun[0][(*it)]);
 		if (xnew > 0 && xnew < s.width && ynew > 0 && ynew < s.height){
-			min_dist = numeric_limits<double>::infinity();;
+			closable = false;
 			too_close = false;
+			min_dist = numeric_limits<double>::infinity();
 			for (unsigned long long j = 0; j < neighbors.size(); ++j){
 				dist = pow(xnew - (neighbors[j])->x,2) + pow(ynew - (neighbors[j])->y,2);
 				if (dist < pow(RF,2)){
 					too_close = true;
-					if(dist < min_dist){
+					if(dist < min_dist && !connected(neighbors[j],ML)){
 						child = neighbors[j];
-						unconned = true;
-						if (child == mother){
-							unconned = false;
-						}
-						else{
-							for (unsigned long long con = 0; unconned && con < mother->connections.size(); ++con){
-								unconned = !(child == mother->connections[con]);
-//								if (!unconned)
-//									cout << "n" << flush;
-							}
-						}
-						if (unconned && too_close){
-							min_dist = dist;
-							closable = true;
-						}
+						min_dist = dist;
+						closable = true;
 					}
 				}
 			}
 			
 			if(closable || !too_close) {
 				vector<double>* lfun = linefun(img, x, y, xtest, ytest, LT);
-				connectable = gaussavgoverthresh(lfun, LT, LS, LD, CT, free);
 				
-				if(connectable){
+				if(gaussavgoverthresh(lfun, LT, LS, LD, CT, free)){
 					if (!too_close){
 						child = new node(xnew, ynew, this);
 						list->push_back(child);
@@ -122,6 +107,36 @@ void node::procreate(bool free = 1){
 		delete[] smoothfun[0];
 		delete[] smoothfun[1];
 	}
+}
+
+bool node::connected(node* n, unsigned long long l){
+	bool ret = false;
+	for (unsigned long long i = 0; i < connections.size() && !ret; ++i){
+		if (connections[i] == n){
+			ret = true;
+//			cout << l << " ";
+		}
+		else if (l > 0 && !ret){
+			ret = connections[i]->connected(n,this,(l - 1));
+		}
+	}
+	return ret;
+}
+
+bool node::connected(node* n, node* origin, unsigned long long l){
+	bool ret = false;
+	for (unsigned long long i = 0; i < connections.size() && !ret; ++i){
+		if (connections[i] != origin){
+			if (connections[i] == n){
+				ret =  true;
+//				cout << l << " ";
+			}
+			else if (l > 0 && !ret){
+				ret = connections[i]->connected(n,this,(l - 1));
+			}
+		}
+	}
+	return ret;
 }
 
 #endif

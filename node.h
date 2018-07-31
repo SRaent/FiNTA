@@ -28,6 +28,8 @@ class node {
 	node(double, double,vector<node*>*,Mat*);
 	node(double, double, node*);
 	void procreate(bool);
+	bool connected(node*, unsigned long long);
+	bool connected(node*, node*, unsigned long long);
 };
 
 #endif
