@@ -94,7 +94,6 @@ void node::procreate(bool free = 1){
 					}
 					else{
 //						cout << "C" << flush;
-						list->push_back(child);
 						neighbors.push_back(child);
 						connections.push_back(child);
 						child->connections.push_back(this);
@@ -114,7 +113,7 @@ bool node::connected(node* n, unsigned long long l){
 	for (unsigned long long i = 0; i < connections.size() && !ret; ++i){
 		if (connections[i] == n){
 			ret = true;
-//			cout << l << " ";
+			cout << l << " " << flush;
 		}
 		else if (l > 0 && !ret){
 			ret = connections[i]->connected(n,this,(l - 1));
@@ -129,7 +128,7 @@ bool node::connected(node* n, node* origin, unsigned long long l){
 		if (connections[i] != origin){
 			if (connections[i] == n){
 				ret =  true;
-//				cout << l << " ";
+				cout << l << " " << flush;
 			}
 			else if (l > 0 && !ret){
 				ret = connections[i]->connected(n,this,(l - 1));

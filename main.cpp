@@ -12,12 +12,12 @@
 #define RF RS // SQRT2  //forbidden radius
 #define RM 0 //minimum vision radius
 #define STEPS 100
-#define DEV 0.4
+#define DEV 0.39
 #define LT 3 // line thiccness for connectable test
 #define LD 0.2 //deviation of smoothing if line function for connectable test
 #define LS RS*LT // steps for averaging the line function
-#define CT 10 // Connectabel threshhold. if the smoothed function goes below this, no new node will be spawned.
-#define ML 7 //minimum loop length
+#define CT 7 // Connectabel threshhold. if the smoothed function goes below this, no new node will be spawned.
+#define ML 5 //minimum loop length
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -88,7 +88,7 @@ int main(){
 				buisy = 1;
 			}
 		}
-		cout << i++ << endl;
+//		cout << i++ << endl;
 		
 	}
 	
