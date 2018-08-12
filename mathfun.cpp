@@ -60,7 +60,7 @@ fftw_complex* fft_2d(const Mat &img){
 	
 	for(unsigned long long i = 0; i < s.height; ++i){
 		for (unsigned long long j = 0; j < s.width; ++j){
-			in[(j * s.height) + i][0] = img.at<uchar>(i,j); // the in[(i * h) + j][0] referes to the real part of the fftw_complex data type
+			in[(j * s.height) + i][0] = img.at<double>(i,j); // the in[(i * h) + j][0] referes to the real part of the fftw_complex data type
 		}
 	}
 	
@@ -130,6 +130,38 @@ Mat cv_ifft_2d_real(fftw_complex* in, unsigned long long w, unsigned long long h
 		fftw_free(comp);
 	}
 	return img;
+}
+
+
+Mat convolve_hessian(Mat img, unsigned long long ksize, double dev){
+	Mat kernel[3];
+	kernel[0] = Mat(ksize,ksize, CV_64F);
+	kernel[1] = Mat(ksize,ksize, CV_64F);
+	kernel[2] = Mat(ksize,ksize, CV_64F);
+	Point m(ksize/2,ksize/2);
+	
+	Vec3d vals;
+	for( unsigned long long y = 0; y < ksize; ++y){
+		for (unsigned long long x = 0; x < ksize; ++x){
+			(kernel[0]).at<double>(y,x) = exp(-(pow(((double)x - m.x),2) + pow(((double)y - m.y),2))/(2.0*dev*dev))*(pow(((double)x - m.x)/dev,2) - 1.0)/(2.0*pow(dev,4)*PI);
+			(kernel[1]).at<double>(y,x) = exp(-(pow(((double)x - m.x),2) + pow(((double)y - m.y),2))/(2.0*dev*dev)) * ((double)x - m.x) * ((double)y - m.y)/(2.0 * pow(dev,6) * PI);
+			(kernel[2]).at<double>(y,x) = exp(-(pow(((double)x - m.x),2) + pow(((double)y - m.y),2))/(2.0*dev*dev))*(pow(((double)y - m.y)/dev,2) - 1.0)/(2.0*pow(dev,4)*PI);
+		}
+	}
+	vector<Mat> res;
+	Mat R1;
+	Mat R2;
+	Mat R3;
+	res.push_back(R1);
+	res.push_back(R2);
+	res.push_back(R3);
+	
+	filter2D(img, res[0], -1 ,kernel[0], m, 0, BORDER_DEFAULT);
+	filter2D(img, res[1], -1 ,kernel[1], m, 0, BORDER_DEFAULT);
+	filter2D(img, res[2], -1 ,kernel[2], m, 0, BORDER_DEFAULT);
+	Mat ret;
+	cv::merge(res,ret);
+	return ret;
 }
 
 
