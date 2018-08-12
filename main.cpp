@@ -86,8 +86,9 @@ int main(){
 	filter2D(I3, I5, -1 ,kernel, anchor, 0, BORDER_DEFAULT);
 	*/
 	
-	Mat hessian = convolve_hessian(I5,31,4);
-	normalize(hessian,hessian,255,0,32);
+	Mat hessian = convolve_hessian(I5,15,1.8);
+	Mat tubeness = tubeness_hessian(hessian);
+	normalize(tubeness,tubeness,255,0,32);
 	
 	/*
 	vector<node*> list;
@@ -118,6 +119,6 @@ int main(){
 //	I2.convertTo(I2,CV_8U);
 	hessian.convertTo(hessian, CV_8UC3);
 	imwrite("doubt.tif",I3);
-	imwrite("doubt2.tif",hessian);
+	imwrite("doubt2.tif",tubeness);
 	return 0;
 }

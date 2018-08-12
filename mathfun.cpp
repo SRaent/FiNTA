@@ -164,6 +164,18 @@ Mat convolve_hessian(Mat img, unsigned long long ksize, double dev){
 	return ret;
 }
 
+Mat tubeness_hessian(Mat hes){
+	Size s = hes.size();
+	double ls = 0;
+	Mat ret(s.height, s.width, CV_64F);
+	for (unsigned long long y = 0; y < s.height; ++y){
+		for (unsigned long long x = 0; x < s.width; ++x){
+			Vec3d vals = hes.at<Vec3d>(y,x);
+			ret.at<double>(y,x) = -(vals[0] + vals[2] - sqrt(pow(vals[0],2) - 2.0 * vals[0] * vals[2] + 4.0 * pow(vals[1],2) + pow(vals[2],2)))/2.0;
+		}
+	}
+	return ret;
+}
 
 // sets all pixels of a image img to 0 that are inside a ellipse with "radius" rad, while taking the "topology" of a discrete fourier transfrom into aount (the center where the frequency is 0 is devidet between the 4 corners). also the ellips is streched according to the aspect ratio of the image given by w and h (width and hight).
 void cutinneroval_ft(fftw_complex* img,double rad,unsigned long w, unsigned long h){
