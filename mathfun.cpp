@@ -60,7 +60,7 @@ fftw_complex* fft_2d(const Mat &img){
 	
 	for(unsigned long long i = 0; i < s.height; ++i){
 		for (unsigned long long j = 0; j < s.width; ++j){
-			in[(j * s.height) + i][0] = img.at<uchar>(i,j); // the in[(i * h) + j][0] referes to the real part of the fftw_complex data type
+			in[(j * s.height) + i][0] = img.at<double>(i,j); // the in[(i * h) + j][0] referes to the real part of the fftw_complex data type
 		}
 	}
 	
@@ -133,15 +133,59 @@ Mat cv_ifft_2d_real(fftw_complex* in, unsigned long long w, unsigned long long h
 }
 
 
+Mat convolve_hessian(Mat img, unsigned long long ksize, double dev){
+	Mat kernel[3];
+	kernel[0] = Mat(ksize,ksize, CV_64F);
+	kernel[1] = Mat(ksize,ksize, CV_64F);
+	kernel[2] = Mat(ksize,ksize, CV_64F);
+	Point m(ksize/2,ksize/2);
+	
+	Vec3d vals;
+	for( unsigned long long y = 0; y < ksize; ++y){
+		for (unsigned long long x = 0; x < ksize; ++x){
+			(kernel[0]).at<double>(y,x) = exp(-(pow(((double)x - m.x),2) + pow(((double)y - m.y),2))/(2.0*dev*dev))*(pow(((double)x - m.x)/dev,2) - 1.0)/(2.0*pow(dev,4)*PI);
+			(kernel[1]).at<double>(y,x) = exp(-(pow(((double)x - m.x),2) + pow(((double)y - m.y),2))/(2.0*dev*dev)) * ((double)x - m.x) * ((double)y - m.y)/(2.0 * pow(dev,6) * PI);
+			(kernel[2]).at<double>(y,x) = exp(-(pow(((double)x - m.x),2) + pow(((double)y - m.y),2))/(2.0*dev*dev))*(pow(((double)y - m.y)/dev,2) - 1.0)/(2.0*pow(dev,4)*PI);
+		}
+	}
+	vector<Mat> res;
+	Mat R1;
+	Mat R2;
+	Mat R3;
+	res.push_back(R1);
+	res.push_back(R2);
+	res.push_back(R3);
+	
+	filter2D(img, res[0], -1 ,kernel[0], m, 0, BORDER_DEFAULT);
+	filter2D(img, res[1], -1 ,kernel[1], m, 0, BORDER_DEFAULT);
+	filter2D(img, res[2], -1 ,kernel[2], m, 0, BORDER_DEFAULT);
+	Mat ret;
+	cv::merge(res,ret);
+	return ret;
+}
+
+Mat tubeness_hessian(Mat hes){
+	Size s = hes.size();
+	double ls = 0;
+	Mat ret(s.height, s.width, CV_64F);
+	for (unsigned long long y = 0; y < s.height; ++y){
+		for (unsigned long long x = 0; x < s.width; ++x){
+			Vec3d vals = hes.at<Vec3d>(y,x);
+			ret.at<double>(y,x) = -(vals[0] + vals[2] - sqrt(pow(vals[0],2) - 2.0 * vals[0] * vals[2] + 4.0 * pow(vals[1],2) + pow(vals[2],2)))/2.0;
+		}
+	}
+	return ret;
+}
+
 // sets all pixels of a image img to 0 that are inside a ellipse with "radius" rad, while taking the "topology" of a discrete fourier transfrom into aount (the center where the frequency is 0 is devidet between the 4 corners). also the ellips is streched according to the aspect ratio of the image given by w and h (width and hight).
 void cutinneroval_ft(fftw_complex* img,double rad,unsigned long w, unsigned long h){
-	rad = (pow(w,2) + pow(h,2)) * rad * rad/4.0;
-	double rel = sqrt(w/h);
-	double xcent = w/2.0;
-	double ycent = h/2.0;
+	rad = pow((double)h * rad / 2.0,2);
+	double rel = (double)h / (double)w;
+	double xcent = (double)w/2.0;
+	double ycent = (double)h/2.0;
 	for(unsigned long x = 0; x < w; ++x){
 		for(unsigned long y = 0; y < h; ++y){
-			if ((x <= xcent && y <= ycent && (pow((x/rel),2) + pow((y*rel),2) < rad)) || (x >= xcent && y <= ycent && pow(((w - x)/rel),2) + pow((y*rel),2) < rad) || (x <= xcent && y >= ycent && pow((x/rel),2) + pow(((h - y)*rel),2) < rad) || (x >= xcent && y >= ycent && pow(((w - x)/rel),2) + pow(((h - y)*rel),2) < rad)){
+			if ((x <= xcent && y <= ycent && (pow((x * rel),2) + pow(y,2) < rad)) || (x >= xcent && y <= ycent && pow(((w - x) * rel),2) + pow(y,2) < rad) || (x <= xcent && y >= ycent && pow((x * rel),2) + pow((h - y),2) < rad) || (x >= xcent && y >= ycent && pow(((w - x) * rel),2) + pow((h - y),2) < rad)){
 				img[(x * h) + y][0] = 0;
 				img[(x * h) + y][1] = 0;
 			}
@@ -150,13 +194,13 @@ void cutinneroval_ft(fftw_complex* img,double rad,unsigned long w, unsigned long
 }
 //almost same as cutinneroval_ft only the outside of the oval is set to 0
 void cutouteroval_ft(fftw_complex* img,double rad,unsigned long w, unsigned long h){
-	rad = (pow(w,2) + pow(h,2)) * rad * rad/4.0;
-	double rel = sqrt(w/h);
-	double xcent = w/2.0;
-	double ycent = h/2.0;
+	rad = pow((double)h * rad / 2.0,2);
+	double rel = (double)h / (double)w;
+	double xcent = (double)w/2.0;
+	double ycent = (double)h/2.0;
 	for(unsigned long x = 0; x < w; ++x){
 		for(unsigned long y = 0; y < h; ++y){
-			if ((x <= xcent && y <= ycent && (pow((x/rel),2) + pow((y*rel),2) > rad)) || (x >= xcent && y <= ycent && pow(((w - x)/rel),2) + pow((y*rel),2) > rad) || (x <= xcent && y >= ycent && pow((x/rel),2) + pow(((h - y)*rel),2) > rad) || (x >= xcent && y >= ycent && pow(((w - x)/rel),2) + pow(((h - y)*rel),2) > rad)){
+			if ((x <= xcent && y <= ycent && (pow((x * rel),2) + pow(y,2) > rad)) || (x >= xcent && y <= ycent && pow(((w - x) * rel),2) + pow(y,2) > rad) || (x <= xcent && y >= ycent && pow((x * rel),2) + pow((h - y),2) > rad) || (x >= xcent && y >= ycent && pow(((w - x) * rel),2) + pow((h - y),2) > rad)){
 				img[(x * h) + y][0] = 0;
 				img[(x * h) + y][1] = 0;
 			}
