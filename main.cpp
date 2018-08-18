@@ -89,7 +89,9 @@ int main(){
 	
 	Mat hessian = convolve_hessian(I5,15,1.8);
 	Mat tubeness = tubeness_hessian(hessian);
+	Mat viz = visualize_hessian(hessian);
 	normalize(tubeness,tubeness,255,0,32);
+	normalize(viz,viz,255,0,32);
 	
 	/*
 	vector<node*> list;
@@ -121,5 +123,6 @@ int main(){
 	hessian.convertTo(hessian, CV_8UC3);
 	imwrite("doubt.tif",I3);
 	imwrite("doubt2.tif",tubeness);
+	imwrite("viz.tif",viz);
 	return 0;
 }
