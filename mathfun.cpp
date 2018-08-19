@@ -177,52 +177,6 @@ Mat tubeness_hessian(Mat hes){
 	return ret;
 }
 
-Mat visualize_hessian(Mat hes){
-	Size s = hes.size();
-	Mat ret(s.height,s.width, CV_64FC3);
-	Vec3d res;
-	Vec3d vals;
-	double l1;
-	double l2;
-	double maxb = -100000;
-	double minb = 100000;
-	for (unsigned long long y = 0; y < s.height; ++y){
-		for (unsigned long long x = 0; x < s.width; ++x){
-			vals = hes.at<Vec3d>(y,x);
-			//not optimal performance, but i dont give a shit atm
-			l1 = (vals[0] + vals[2] - sqrt(pow(vals[0] - vals[2],2) + 4.0 * pow(vals[1],2)))/2.0;
-			l2 = (vals[0] + vals[2] + sqrt(pow(vals[0] - vals[2],2) + 4.0 * pow(vals[1],2)))/2.0;
-			res[0] = (atan2(vals[0] - vals[2] - sqrt(pow(vals[0] - vals[2],2) + 4.0 * pow(vals[1],2)),2.0 * vals[1])) * 90.0/PI + 180;
-			while (res[0] > 180.0){
-				res[0] -= 180.0;
-			}
-			res[1] = (l2 - l1)/(abs(l1) + abs(l2));
-			res[2] = l1;
-//			PRINT(res[0])
-			if (0.0 > res[1] || res[1] > 1.0 || 180 < res [0] || res[0] < 0){
-//				PRINT(res[0])
-//				PRINT(res[1])
-//				PRINT(res[2])
-			}
-			if (res[0] < minb){
-				minb = res[0];
-			}
-			if(res[0] > maxb){
-				maxb = res[0];
-			}
-			res[0] = 0.5;
-			res[1] = 0.5;
-			res[2] = 0.5;
-			ret.at<Vec3d>(y,x) = res;
-//			ret.at<Vec3d>(y,x) = vals;
-		}
-	}
-	cvtColor(ret,ret,CV_HSV2RGB);
-	PRINT(maxb)
-	PRINT(minb)
-	return ret;
-}
-
 Mat convertHSVtoBGR(Mat img){
 	Size s = img.size();
 	Mat ret(s.height,s.width, CV_64FC3);
@@ -231,12 +185,96 @@ Mat convertHSVtoBGR(Mat img){
 	double p;
 	double q;
 	double t;
+	Vec3d BGR;
+	Vec3d vals;
 	for (unsigned long long y = 0; y < s.height; ++y){
 		for (unsigned long long x = 0; x < s.width; ++x){
-			
+			vals = img.at<Vec3d>(y,x);
+			hi = vals[0] / 60;
+			f = vals[0] / 60.0 - hi;
+			p = vals[2] * (1.0 - vals[1]);
+			q = vals[2] * (1.0 - vals[1] * f);
+			t = vals[2] * (1.0 - vals[1] * (1.0 - f));
+			switch(hi) {
+				case 0: BGR[0] = p; BGR[1] = t; BGR[2] = vals[2]; break;
+				case 1: BGR[0] = p; BGR[1] = vals[2]; BGR[2] = q; break;
+				case 2: BGR[0] = t; BGR[1] = vals[2]; BGR[2] = p; break;
+				case 3: BGR[0] = vals[2]; BGR[1] = q; BGR[2] = p; break;
+				case 4: BGR[0] = vals[2]; BGR[1] = p; BGR[2] = t; break;
+				case 5: BGR[0] = q; BGR[1] = p; BGR[2] = vals[2]; break;
+				case 6: BGR[0] = p; BGR[1] = t; BGR[2] = vals[2]; break;
+			}
+			ret.at<Vec3d>(y,x) = BGR;
 		}
 	}
+	return ret;
 }
+
+Mat visualize_hessian(Mat hes){
+	Size s = hes.size();
+	Mat ret(s.height,s.width, CV_64FC3);
+	Mat H(s.height,s.width, CV_64F);
+	Mat S(s.height,s.width, CV_64F);
+	Mat V(s.height,s.width, CV_64F);
+	Vec3d vals;
+	double l1;
+	double l2;
+	double maxV = -numeric_limits<double>::infinity();
+	double minV = numeric_limits<double>::infinity();
+	
+//	double maxH = -numeric_limits<double>::infinity();
+//	double minH = numeric_limits<double>::infinity();
+	
+	for (unsigned long long y = 0; y < s.height; ++y){
+		for (unsigned long long x = 0; x < s.width; ++x){
+			vals = hes.at<Vec3d>(y,x);
+			//not optimal performance, but i dont give a shit atm
+			l1 = (vals[0] + vals[2] - sqrt(pow(vals[0] - vals[2],2) + 4.0 * pow(vals[1],2)))/2.0;
+			l2 = (vals[0] + vals[2] + sqrt(pow(vals[0] - vals[2],2) + 4.0 * pow(vals[1],2)))/2.0;
+			H.at<double>(y,x) = (atan2(vals[0] - vals[2] - sqrt(pow(vals[0] - vals[2],2) + 4.0 * pow(vals[1],2)),2.0 * vals[1])) * 360.0/PI + 360;
+			while (H.at<double>(y,x) > 360){
+				H.at<double>(y,x) -= 360.0;
+			}
+			if (H.at<double>(y,x) < 0.0){
+				PRINT(H.at<double>(y,x))
+			}
+			if (H.at<double>(y,x) > 360.0){
+				PRINT(H.at<double>(y,x))
+			}
+			S.at<double>(y,x) = (abs(l2) - abs(l1))/(abs(l1) + abs(l2));
+			V.at<double>(y,x) = -l1;
+			
+			if (maxV < -l1){
+				maxV = -l1;
+			}
+			if (minV > -l1){
+				minV = -l1;
+			}
+			/*
+			if (maxH < H.at<double>(y,x)){
+				maxH = H.at<double>(y,x);
+			}
+			if (minH > H.at<double>(y,x)){
+				minH = H.at<double>(y,x);
+			}*/
+
+		}
+	}
+	
+//	PRINT(minH)
+//	PRINT(maxH)
+	
+	V = V - minV;
+	V = V / (maxV - minV);
+	vector<Mat> HSV;
+	HSV.push_back(H);
+	HSV.push_back(S);
+	HSV.push_back(V);
+	cv::merge(HSV,ret);
+	ret = convertHSVtoBGR(ret);
+	return ret;
+}
+
 
 // sets all pixels of a image img to 0 that are inside a ellipse with "radius" rad, while taking the "topology" of a discrete fourier transfrom into aount (the center where the frequency is 0 is devidet between the 4 corners). also the ellips is streched according to the aspect ratio of the image given by w and h (width and hight).
 void cutinneroval_ft(fftw_complex* img,double rad,unsigned long w, unsigned long h){

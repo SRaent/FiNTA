@@ -87,6 +87,9 @@ int main(){
 	filter2D(I3, I5, -1 ,kernel, anchor, 0, BORDER_DEFAULT);
 	*/
 	
+//	circle(I5,Point(s.width / 2,s.height),500,0,10);
+//	circle(I5,Point(s.width / 2,s.height),500,255,4);
+	
 	Mat hessian = convolve_hessian(I5,15,1.8);
 	Mat tubeness = tubeness_hessian(hessian);
 	Mat viz = visualize_hessian(hessian);
