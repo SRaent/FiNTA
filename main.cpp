@@ -90,9 +90,12 @@ int main(){
 //	circle(I5,Point(s.width / 2,s.height),500,0,10);
 //	circle(I5,Point(s.width / 2,s.height),500,255,4);
 	
+	
 	Mat hessian = convolve_hessian(I5,15,1.8);
 	Mat tubeness = tubeness_hessian(hessian);
 	Mat viz = visualize_hessian(hessian);
+//	hessian_weighted_angle_distribution(hessian,10);
+	hessian_weighted_relative_angle_distribution(hessian, 25, 50);
 	normalize(tubeness,tubeness,255,0,32);
 	normalize(viz,viz,255,0,32);
 	

@@ -171,7 +171,7 @@ Mat tubeness_hessian(Mat hes){
 	for (unsigned long long y = 0; y < s.height; ++y){
 		for (unsigned long long x = 0; x < s.width; ++x){
 			vals = hes.at<Vec3d>(y,x);
-			ret.at<double>(y,x) = -(vals[0] + vals[2] - sqrt(pow(vals[0],2) - 2.0 * vals[0] * vals[2] + 4.0 * pow(vals[1],2) + pow(vals[2],2)))/2.0;
+			ret.at<double>(y,x) = -(vals[0] + vals[2] - sqrt(pow(vals[0] - vals[2],2) + 4.0 * pow(vals[1],2)))/2.0;
 		}
 	}
 	return ret;
@@ -232,7 +232,7 @@ Mat visualize_hessian(Mat hes){
 			l1 = (vals[0] + vals[2] - sqrt(pow(vals[0] - vals[2],2) + 4.0 * pow(vals[1],2)))/2.0;
 			l2 = (vals[0] + vals[2] + sqrt(pow(vals[0] - vals[2],2) + 4.0 * pow(vals[1],2)))/2.0;
 			H.at<double>(y,x) = (atan2(vals[0] - vals[2] - sqrt(pow(vals[0] - vals[2],2) + 4.0 * pow(vals[1],2)),2.0 * vals[1])) * 360.0/PI + 360;
-			while (H.at<double>(y,x) > 360){
+			while (H.at<double>(y,x) >= 360.0){
 				H.at<double>(y,x) -= 360.0;
 			}
 			if (H.at<double>(y,x) < 0.0){
@@ -275,7 +275,63 @@ Mat visualize_hessian(Mat hes){
 	return ret;
 }
 
+void hessian_weighted_angle_distribution(Mat hes, unsigned long long border){
+	Size s = hes.size();
+	int bins = 180;
+	double w;
+	double a;
+	double hist[bins] = {0.0};
+	Vec3d vals;
+	for (unsigned long long y = border; y < s.height - border; ++y){
+		for (unsigned long long x = border; x < s.width - border; ++x){
+			vals = hes.at<Vec3d>(y,x);
+			w = min((vals[0] + vals[2] - sqrt(pow(vals[0] - vals[2],2) + 4.0 * pow(vals[1],2)))/2.0,0.0);
+			a = (atan2(vals[0] - vals[2] - sqrt(pow(vals[0] - vals[2],2) + 4.0 * pow(vals[1],2)),2.0 * vals[1])) * 180.0/PI + 180;
+			while (a >= 180.0){
+				a -= 180.0;
+			}
+			hist[(int)a] -= w;
+		}
+	}
+	for (int i = 0; i < 180; ++i){
+		cout << i << " " << hist[i] << endl;
+	}
+}
 
+void hessian_weighted_relative_angle_distribution(Mat hes, double dev, unsigned long long border){
+	Size s = hes.size();
+	int bins = 180;
+	double w;
+	double a;
+	double hist[bins] = {0.0};
+	double hist_rel[bins/2] = {0.0};
+	Vec3d vals;
+	for (unsigned long long y0 = border; y0 < s.height - border; ++y0){
+//		PRINT(y0)
+		for (unsigned long long x0 = border; x0 < s.width - border; ++x0){
+			memset(hist, 0, bins * sizeof(hist[0]));
+			for (unsigned long long y = max(0,(int)(y0 - 3*dev)); y < min(s.height,(int)(y0 + 3*dev)); ++y){
+				for (unsigned long long x = max(0,(int)(x0 - 3*dev)); x < min(s.width,(int)(x0 + 3*dev)); ++x){
+					vals = hes.at<Vec3d>(y,x);
+					w = min((vals[0] + vals[2] - sqrt(pow(vals[0] - vals[2],2) + 4.0 * pow(vals[1],2)))/2.0,0.0) * exp(-(pow(x - x0,2) + pow(y - y0,2))/pow(dev * SQRT2, 2));
+					a = (atan2(vals[0] - vals[2] - sqrt(pow(vals[0] - vals[2],2) + 4.0 * pow(vals[1],2)),2.0 * vals[1])) * 180.0/PI + 180;
+					while (a >= 180.0){
+						a -= 180.0;
+					}
+					hist[(int)a] -= w;
+				}
+			}
+			for (int i = 0; i < bins; ++i){
+				for(int j = 0; j < bins/2; ++j){
+					hist_rel[j] += hist[i] * hist[(i + j)%bins];
+				}
+			}
+		}
+	}
+	for(int j = 0; j < bins/2; ++j){
+		cout << hist_rel[j] << endl;
+	}
+}
 // sets all pixels of a image img to 0 that are inside a ellipse with "radius" rad, while taking the "topology" of a discrete fourier transfrom into aount (the center where the frequency is 0 is devidet between the 4 corners). also the ellips is streched according to the aspect ratio of the image given by w and h (width and hight).
 void cutinneroval_ft(fftw_complex* img,double rad,unsigned long w, unsigned long h){
 	rad = pow((double)h * rad / 2.0,2);
