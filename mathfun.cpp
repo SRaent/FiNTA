@@ -301,29 +301,37 @@ void hessian_weighted_angle_distribution(Mat hes, unsigned long long border){
 void hessian_weighted_relative_angle_distribution(Mat hes, double dev, unsigned long long border){
 	Size s = hes.size();
 	int bins = 180;
-	double w;
-	double a;
+	double W;
 	double hist[bins] = {0.0};
 	double hist_rel[bins/2] = {0.0};
 	Vec3d vals;
+	
+	Mat a(s.height,s.width, CV_64F);
+	Mat w(s.height,s.width, CV_64F);
+	
+	for (unsigned long long y = 0; y < s.height; ++y){
+		for (unsigned long long x = 0; x < s.width; ++x){
+			vals = hes.at<Vec3d>(y,x);
+			w.at<double>(y,x) = min((vals[0] + vals[2] - sqrt(pow(vals[0] - vals[2],2) + 4.0 * pow(vals[1],2)))/2.0,0.0);
+			a.at<double>(y,x) = (atan2(vals[0] - vals[2] - sqrt(pow(vals[0] - vals[2],2) + 4.0 * pow(vals[1],2)),2.0 * vals[1])) * 180.0/PI + 180;
+			while (a.at<double>(y,x) >= 180.0){
+				a.at<double>(y,x) -= 180.0;
+			}
+		}
+	}
 	for (unsigned long long y0 = border; y0 < s.height - border; ++y0){
 //		PRINT(y0)
 		for (unsigned long long x0 = border; x0 < s.width - border; ++x0){
 			memset(hist, 0, bins * sizeof(hist[0]));
-			for (unsigned long long y = max(0,(int)(y0 - 3*dev)); y < min(s.height,(int)(y0 + 3*dev)); ++y){
-				for (unsigned long long x = max(0,(int)(x0 - 3*dev)); x < min(s.width,(int)(x0 + 3*dev)); ++x){
-					vals = hes.at<Vec3d>(y,x);
-					w = min((vals[0] + vals[2] - sqrt(pow(vals[0] - vals[2],2) + 4.0 * pow(vals[1],2)))/2.0,0.0) * exp(-(pow(x - x0,2) + pow(y - y0,2))/pow(dev * SQRT2, 2));
-					a = (atan2(vals[0] - vals[2] - sqrt(pow(vals[0] - vals[2],2) + 4.0 * pow(vals[1],2)),2.0 * vals[1])) * 180.0/PI + 180;
-					while (a >= 180.0){
-						a -= 180.0;
-					}
-					hist[(int)a] -= w;
+			for (unsigned long long y = max(0,(int)(y0 - 2.0*dev)); y < min(s.height,(int)(y0 + 2.0*dev)); ++y){
+				for (unsigned long long x = max(0,(int)(x0 - 2.0*dev)); x < min(s.width,(int)(x0 + 2.0*dev)); ++x){
+					W = w.at<double>(y,x) * exp(-(pow(x - x0,2) + pow(y - y0,2))/pow(dev * SQRT2, 2));
+					hist[(int)a.at<double>(y,x)] -= W;
 				}
 			}
 			for (int i = 0; i < bins; ++i){
 				for(int j = 0; j < bins/2; ++j){
-					hist_rel[j] += hist[i] * hist[(i + j)%bins];
+					hist_rel[j] += pow(hist[i] * hist[(i + j)%bins],2);
 				}
 			}
 		}

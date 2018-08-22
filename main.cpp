@@ -52,7 +52,7 @@ using namespace cv;
 
 
 int main(){
-	Mat I2 = imread("../Franzi_CPD_012.tif", CV_LOAD_IMAGE_GRAYSCALE);
+	Mat I2 = imread("/home/moritz/Documents/Moritz_pics/2018_08_22/D_WT_c2_Perifery.tif", CV_LOAD_IMAGE_GRAYSCALE);
 	if(!I2.data){
 		cout << "bild existiert NICHT" << endl;
 		return -1;
@@ -94,8 +94,8 @@ int main(){
 	Mat hessian = convolve_hessian(I5,15,1.8);
 	Mat tubeness = tubeness_hessian(hessian);
 	Mat viz = visualize_hessian(hessian);
-//	hessian_weighted_angle_distribution(hessian,10);
-	hessian_weighted_relative_angle_distribution(hessian, 25, 50);
+	hessian_weighted_angle_distribution(hessian,10);
+//	hessian_weighted_relative_angle_distribution(hessian, 10, 100);
 	normalize(tubeness,tubeness,255,0,32);
 	normalize(viz,viz,255,0,32);
 	
