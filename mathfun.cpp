@@ -164,6 +164,31 @@ Mat convolve_hessian(Mat img, unsigned long long ksize, double dev){
 	return ret;
 }
 
+Mat  process_hessian(Mat hes){
+	Size s = hes.size();
+	Mat ret(s.height, s.width, CV_64FC3);
+	Vec3d vals;
+	Vec3d res;
+	double cs;
+	double as;
+	
+	
+	for (unsigned long long y = 0; y < s.height; ++y){
+		for (unsigned long long x = 0; x < s.width; ++x){
+			vals = hes.at<Vec3d>(y,x);
+			cs = vals[0] + vals[2];
+			as = sqrt(pow(vals[0] - vals[2],2) + 4.0 * pow(vals[1],2)))/2.0;
+			res[0] = max(as - cs,0.0)/2.0;
+			res[1] = max(-as - cs,0.0)/2.0;
+			res[2] = (atan2(vals[0] - vals[2] - as)) * 180.0/PI + 180;
+			while (res[2] >= 180)
+				res[2] -= 180;
+			 }
+			 ret.at<Vec3d>(y,x) = res;
+		}
+	}
+}
+
 Mat tubeness_hessian(Mat hes){
 	Size s = hes.size();
 	Mat ret(s.height, s.width, CV_64F);
@@ -377,6 +402,28 @@ void clamp(Mat &mat, double lower, double upper) {
 
 // retrns a "function" that maps the intensety of a pixel inside a certain radius range to their angle to the x axis. the function consists of 2 vectors in a array, where the first vector carrys the angle and the second carrys the pixel value.
 vector<double>* circlefun(Mat* img, double xpos, double ypos, double inner, double outer){
+	vector<double>* fun = new vector<double>[2];
+	Size s = img->size();
+	unsigned long long xmin = max((unsigned long long)0,(unsigned long long)floor(xpos - outer));
+	unsigned long long xmax = min((unsigned long long)ceil(xpos + outer), (unsigned long long)s.width);
+	unsigned long long ymin = max((unsigned long long)0,(unsigned long long)floor(ypos - outer));
+	unsigned long long ymax = min((unsigned long long)ceil(ypos + outer), (unsigned long long)s.height);
+	double rad = 0;
+	for (unsigned long long x = xmin; x <= xmax ; ++x){
+		for (unsigned long long y = ymin; y <= ymax; ++y){
+			rad = sqrt(pow((double)x-xpos,2) + pow((double)y-ypos,2));
+			if (inner <= rad && rad <= outer && x != xpos && y != ypos){
+				(fun[0]).push_back(atan2((double)y-ypos,(double)x-xpos));
+				(fun[1]).push_back(img->at<double>(y,x));
+//				cout << (fun[0]).back() << " " << (fun[1]).back() << " " << x << " " << y << " " << rad << endl; //to test the function
+			}
+		}
+	}
+	
+	return fun;
+}
+
+vector<double>* circlefun_hessian(Mat* img, double xpos, double ypos, double inner, double outer){
 	vector<double>* fun = new vector<double>[2];
 	Size s = img->size();
 	unsigned long long xmin = max((unsigned long long)0,(unsigned long long)floor(xpos - outer));
