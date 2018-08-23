@@ -15,7 +15,7 @@
 #include <opencv2/imgproc.hpp>
 
 
-#define PI 3.1415926535897932384626433832795
+#define PI (double)3.1415926535897932384626433832795
 
 
 
@@ -431,9 +431,11 @@ vector<double>* circlefun_hessian(Mat* img, double xpos, double ypos, double inn
 	unsigned long long ymin = max((unsigned long long)0,(unsigned long long)floor(ypos - outer));
 	unsigned long long ymax = min((unsigned long long)ceil(ypos + outer), (unsigned long long)s.height);
 	double rad = 0;
+	double radsqr = 0;
 	for (unsigned long long x = xmin; x <= xmax ; ++x){
 		for (unsigned long long y = ymin; y <= ymax; ++y){
-			rad = sqrt(pow((double)x-xpos,2) + pow((double)y-ypos,2));
+			radsqr = pow((double)x-xpos,2) + pow((double)y-ypos,2);
+			rad = sqrt(radsqr);
 			if (inner <= rad && rad <= outer && x != xpos && y != ypos){
 				(fun[0]).push_back(atan2((double)y-ypos,(double)x-xpos));
 				(fun[1]).push_back(img->at<double>(y,x));
