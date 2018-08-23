@@ -164,31 +164,6 @@ Mat convolve_hessian(Mat img, unsigned long long ksize, double dev){
 	return ret;
 }
 
-Mat  process_hessian(Mat hes){
-	Size s = hes.size();
-	Mat ret(s.height, s.width, CV_64FC3);
-	Vec3d vals;
-	Vec3d res;
-	double cs;
-	double as;
-	
-	
-	for (unsigned long long y = 0; y < s.height; ++y){
-		for (unsigned long long x = 0; x < s.width; ++x){
-			vals = hes.at<Vec3d>(y,x);
-			cs = vals[0] + vals[2];
-			as = sqrt(pow(vals[0] - vals[2],2) + 4.0 * pow(vals[1],2)))/2.0;
-			res[0] = max(as - cs,0.0)/2.0;
-			res[1] = max(-as - cs,0.0)/2.0;
-			res[2] = (atan2(vals[0] - vals[2] - as)) * 180.0/PI + 180;
-			while (res[2] >= 180)
-				res[2] -= 180;
-			 }
-			 ret.at<Vec3d>(y,x) = res;
-		}
-	}
-}
-
 Mat tubeness_hessian(Mat hes){
 	Size s = hes.size();
 	Mat ret(s.height, s.width, CV_64F);
@@ -442,8 +417,8 @@ vector<double>* circlefun_hessian(Mat* img, double xpos, double ypos, double inn
 			radsqr = pow(dx,2) + pow(dy,2);
 			rad = sqrt(radsqr);
 			if (inner <= rad && rad <= outer && x != xpos && y != ypos){
-				vals = img.at<Vec3d>(y,x);
-				(fun[0]).push_back(atan2(dy,dx);
+				vals = img->at<Vec3d>(y,x);
+				(fun[0]).push_back(atan2(dy,dx));
 				(fun[1]).push_back((pow(dy,2)*vals[0] - 2.0 * vals[1] * dx * dy + vals[2] * pow(dx,2))/radsqr);
 //				cout << (fun[0]).back() << " " << (fun[1]).back() << " " << x << " " << y << " " << rad << endl; //to test the function
 			}
