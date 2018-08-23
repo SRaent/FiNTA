@@ -12,7 +12,7 @@
 #define RF RS // SQRT2  //forbidden radius
 #define RM 0 //minimum vision radius
 #define STEPS 100
-#define DEV 0.37 //deviation of gaussian smooth of circlefun
+#define DEV 0.47 //deviation of gaussian smooth of circlefun
 #define LT 2 // line thiccness for connectable test
 #define LD 0.2 //deviation of smoothing if line function for connectable test
 #define LS RS*LT // steps for averaging the line function
@@ -52,7 +52,7 @@ using namespace cv;
 
 
 int main(){
-	Mat I2 = imread("/home/moritz/Documents/Moritz_pics/2018_08_22/D_WT_c2_Perifery.tif", CV_LOAD_IMAGE_GRAYSCALE);
+	Mat I2 = imread("../Franzi_CPD_012.tif", CV_LOAD_IMAGE_GRAYSCALE);
 	if(!I2.data){
 		cout << "bild existiert NICHT" << endl;
 		return -1;
@@ -93,42 +93,42 @@ int main(){
 	
 	Mat hessian = convolve_hessian(I5,15,1.8);
 	Mat tubeness = tubeness_hessian(hessian);
-	Mat viz = visualize_hessian(hessian);
-	hessian_weighted_angle_distribution(hessian,10);
+//	Mat viz = visualize_hessian(hessian);
+//	hessian_weighted_angle_distribution(hessian,10);
 //	hessian_weighted_relative_angle_distribution(hessian, 10, 100);
 	normalize(tubeness,tubeness,255,0,32);
-	normalize(viz,viz,255,0,32);
+//	normalize(viz,viz,255,0,32);
 	
-	/*
+	
 	vector<node*> list;
-	new node(PX,PY,&list,&I5);
+	new node(PX,PY,&list,&hessian);
 	
 	unsigned long long i = 1;
-	for (bool buisy = 1; buisy ;){
+	for (bool buisy = 1; buisy && i < 50 ;){
 		buisy = 0;
 		unsigned long long end = list.size();
 		for (unsigned long long it = 0; it < end; ++it){
 			if (!(list[it]->procreated)){
-				list[it]->procreate();
+				list[it]->procreate_hessian();
 				buisy = 1;
 			}
 		}
-//		cout << i++ << endl;
+		cout << i++ << endl;
 		
 	}
 	
 	for (unsigned long long i = 0; i < list.size(); ++i){
 		for (unsigned long long j = 0; j < list[i]->connections.size(); ++j){
-			line(I5,Point(list[i]->x,list[i]->y),Point(list[i]->connections[j]->x,list[i]->connections[j]->y),255);
+			line(tubeness,Point(list[i]->x,list[i]->y),Point(list[i]->connections[j]->x,list[i]->connections[j]->y),255);
 			
 		}
-	}*/
+	}
 //	line(I5,Point(PX,PY),Point(499.64,413.84),255);
 //	line(I5,Point(PX,PY),Point(2,2),255);
 //	I2.convertTo(I2,CV_8U);
 	hessian.convertTo(hessian, CV_8UC3);
 	imwrite("doubt.tif",I3);
 	imwrite("doubt2.tif",tubeness);
-	imwrite("viz.tif",viz);
+//	imwrite("viz.tif",viz);
 	return 0;
 }

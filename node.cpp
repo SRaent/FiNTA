@@ -108,6 +108,41 @@ void node::procreate(bool free = 1){
 	}
 }
 
+
+void node::procreate_hessian(bool free = 1){
+	procreated = 1;
+	std::vector<double>* fun = circlefun_hessian(img, x, y, RM, RV);
+	double** smoothfun = gaussavgcircle(fun, STEPS, DEV, free);
+	std::vector<unsigned long long> pks = findpks(smoothfun[1], STEPS);
+	node* child = NULL;
+	bool too_close = false;
+	double dist = 0;
+	for (std::vector<unsigned long long>::iterator it = pks.begin(); it != pks.end(); ++it){
+		double xnew = x + (double)RS * cos(smoothfun[0][(*it)]);
+		double ynew = y + (double)RS * sin(smoothfun[0][(*it)]);
+		if (xnew > 0 && xnew < s.width && ynew > 0 && ynew < s.height){
+			too_close = false;
+			for (unsigned long long j = 0; j < neighbors.size(); ++j){
+				dist = pow(xnew - (neighbors[j])->x,2) + pow(ynew - (neighbors[j])->y,2);
+				if (dist < pow(RF,2)){
+					too_close = true;
+				}
+			}
+			if (!too_close){
+				child = new node(xnew, ynew, this);
+				list->push_back(child);
+				neighbors.push_back(child);
+				connections.push_back(child);
+//				std::cout << xnew << " " << ynew << std::endl;
+			}
+		}
+	}
+	if (free){
+		delete[] smoothfun[0];
+		delete[] smoothfun[1];
+	}
+}
+
 bool node::connected(node* n, unsigned long long l){
 	bool ret = false;
 	for (unsigned long long i = 0; i < connections.size() && !ret; ++i){
