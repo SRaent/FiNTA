@@ -432,13 +432,19 @@ vector<double>* circlefun_hessian(Mat* img, double xpos, double ypos, double inn
 	unsigned long long ymax = min((unsigned long long)ceil(ypos + outer), (unsigned long long)s.height);
 	double rad = 0;
 	double radsqr = 0;
+	double dx;
+	double dy;
+	Vec3d vals;
 	for (unsigned long long x = xmin; x <= xmax ; ++x){
 		for (unsigned long long y = ymin; y <= ymax; ++y){
-			radsqr = pow((double)x-xpos,2) + pow((double)y-ypos,2);
+			dx = (double)x - xpos;
+			dy = (double)y - ypos;
+			radsqr = pow(dx,2) + pow(dy,2);
 			rad = sqrt(radsqr);
 			if (inner <= rad && rad <= outer && x != xpos && y != ypos){
-				(fun[0]).push_back(atan2((double)y-ypos,(double)x-xpos));
-				(fun[1]).push_back(img->at<double>(y,x));
+				vals = img.at<Vec3d>(y,x);
+				(fun[0]).push_back(atan2(dy,dx);
+				(fun[1]).push_back((pow(dy,2)*vals[0] - 2.0 * vals[1] * dx * dy + vals[2] * pow(dx,2))/radsqr);
 //				cout << (fun[0]).back() << " " << (fun[1]).back() << " " << x << " " << y << " " << rad << endl; //to test the function
 			}
 		}
