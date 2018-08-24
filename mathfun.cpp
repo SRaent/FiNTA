@@ -402,9 +402,9 @@ vector<double>* circlefun_hessian(Mat* img, double xpos, double ypos, double inn
 	vector<double>* fun = new vector<double>[2];
 	Size s = img->size();
 	unsigned long long xmin = max((unsigned long long)0,(unsigned long long)floor(xpos - outer));
-	unsigned long long xmax = min((unsigned long long)ceil(xpos + outer), (unsigned long long)s.width);
+	unsigned long long xmax = min((unsigned long long)ceil(xpos + outer), (unsigned long long)s.width - (unsigned long long)1);
 	unsigned long long ymin = max((unsigned long long)0,(unsigned long long)floor(ypos - outer));
-	unsigned long long ymax = min((unsigned long long)ceil(ypos + outer), (unsigned long long)s.height);
+	unsigned long long ymax = min((unsigned long long)ceil(ypos + outer), (unsigned long long)s.height - (unsigned long long)1);
 	double rad = 0;
 	double radsqr = 0;
 	double dx;

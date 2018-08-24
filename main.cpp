@@ -12,7 +12,7 @@
 #define RF RS // SQRT2  //forbidden radius
 #define RM 0 //minimum vision radius
 #define STEPS 100
-#define DEV 0.47 //deviation of gaussian smooth of circlefun
+#define DEV 0.55 //deviation of gaussian smooth of circlefun
 #define LT 2 // line thiccness for connectable test
 #define LD 0.2 //deviation of smoothing if line function for connectable test
 #define LS RS*LT // steps for averaging the line function
@@ -104,7 +104,7 @@ int main(){
 	new node(PX,PY,&list,&hessian);
 	
 	unsigned long long i = 1;
-	for (bool buisy = 1; buisy && i < 50 ;){
+	for (bool buisy = 1; buisy && i < 500 ;){
 		buisy = 0;
 		unsigned long long end = list.size();
 		for (unsigned long long it = 0; it < end; ++it){
