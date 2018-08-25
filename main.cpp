@@ -5,14 +5,14 @@
 
 #define PX 412
 #define PY 495
-#define RV 9 //vision radius
+#define RV 8 //vision radius
 #define RS 5 //step radius
 #define RT RV// vision for threshold
 #define RN RF * 2 //neighbor radius
 #define RF RS // SQRT2  //forbidden radius
 #define RM 0 //minimum vision radius
 #define STEPS 100
-#define DEV 0.55 //deviation of gaussian smooth of circlefun
+#define DEV 0.61 //deviation of gaussian smooth of circlefun
 #define LT 2 // line thiccness for connectable test
 #define LD 0.2 //deviation of smoothing if line function for connectable test
 #define LS RS*LT // steps for averaging the line function
