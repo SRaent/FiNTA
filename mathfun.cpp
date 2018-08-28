@@ -280,7 +280,8 @@ void hessian_weighted_angle_distribution(Mat hes, unsigned long long border){
 	int bins = 180;
 	double w;
 	double a;
-	double hist[bins] = {0.0};
+	double hist[bins];
+	memset(hist, 0.0, bins * sizeof(hist[0]));
 	Vec3d vals;
 	for (unsigned long long y = border; y < s.height - border; ++y){
 		for (unsigned long long x = border; x < s.width - border; ++x){
@@ -450,6 +451,7 @@ double** gaussavgcircle(vector<double>* fun,unsigned long long steps,double dev,
 			val = exp(-pow(fun[0][j] - avg[0][i],2)/pow(dev * SQRT2, 2)); //the 1.414... is the sqrt(2) and saves computing time.
 			val += exp(-pow(fun[0][j] - avg[0][i] - (2 * PI),2)/pow(dev * SQRT2, 2));
 			val += exp(-pow(fun[0][j] - avg[0][i] + (2 * PI),2)/pow(dev * SQRT2, 2));
+			val *= pow(abs(val * fun[1][j]),2);
 			acc_dense += val;
 			acc_val += val * fun[1][j];
 		}
