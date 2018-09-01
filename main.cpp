@@ -18,7 +18,7 @@
 #define LS RS*LT // steps for averaging the line function
 #define CT 3 // Connectabel threshhold. if the smoothed function goes below this, no new node will be spawned.
 #define ML 7 //minimum loop length
-#define TH 1.0 // threshold for findpks
+#define TH 2.0 // threshold for findpks
 
 
 #include <stdlib.h>
