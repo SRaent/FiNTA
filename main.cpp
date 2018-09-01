@@ -5,14 +5,14 @@
 
 #define PX 412
 #define PY 495
-#define RV 10 //vision radius
-#define RS 3 //step radius
+#define RV 6 //vision radius
+#define RS 5 //step radius
 #define RT RV// vision for threshold
 #define RN RF * 2 //neighbor radius
 #define RF RS // SQRT2  //forbidden radius
 #define RM 0 //minimum vision radius
 #define STEPS 100
-#define DEV 0.63 //deviation of gaussian smooth of circlefun
+#define DEV 0.7 //deviation of gaussian smooth of circlefun
 #define LT 2 // line thiccness for connectable test
 #define LD 0.2 //deviation of smoothing if line function for connectable test
 #define LS RS*LT // steps for averaging the line function
@@ -52,7 +52,7 @@ using namespace cv;
 
 
 int main(){
-	Mat I2 = imread("/home/moritz/Documents/Moritz_pics/Manu_Data/Pictures/M_Blebb_c3_Perifery.tif", CV_LOAD_IMAGE_GRAYSCALE);
+	Mat I2 = imread("/home/moritz/Documents/Moritz_pics_lap/Franzi_CPD_012.tif", CV_LOAD_IMAGE_GRAYSCALE);
 	if(!I2.data){
 		cout << "bild existiert NICHT" << endl;
 		return -1;
@@ -91,19 +91,19 @@ int main(){
 //	circle(I5,Point(s.width / 2,s.height),500,255,4);
 	
 	
-	Mat hessian = convolve_hessian(I5,15,3);
+	Mat hessian = convolve_hessian(I5,15,1.8);
 	Mat tubeness = tubeness_hessian(hessian);
-	Mat viz = visualize_hessian(hessian);
-	hessian_weighted_angle_distribution(hessian,10);
+//	Mat viz = visualize_hessian(hessian);
+//	hessian_weighted_angle_distribution(hessian,10);
 //	hessian_weighted_relative_angle_distribution(hessian, 10, 100);
 	normalize(tubeness,tubeness,255,0,32);
-	normalize(viz,viz,255,0,32);
-	/*
+//	normalize(viz,viz,255,0,32);
+//	/*
 	
 	vector<node*> list;
 	new node(PX,PY,&list,&hessian);
 	
-	unsigned long long i = 1;
+	unsigned long long i = 0;
 	for (bool buisy = 1; buisy && i < 500 ;){
 		buisy = 0;
 		unsigned long long end = list.size();
@@ -126,7 +126,7 @@ int main(){
 //	line(I5,Point(PX,PY),Point(499.64,413.84),255);
 //	line(I5,Point(PX,PY),Point(2,2),255);
 //	I2.convertTo(I2,CV_8U);
-	hessian.convertTo(hessian, CV_8UC3);*/
+	hessian.convertTo(hessian, CV_8UC3);//*/
 	imwrite("doubt.tif",I3);
 	imwrite("doubt2.tif",tubeness);
 //	imwrite("viz.tif",viz);

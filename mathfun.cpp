@@ -493,6 +493,25 @@ vector<unsigned long long> findpks(double* vals,unsigned long long length, bool 
 	return pks;
 }
 
+vector<unsigned long long> findpks_thresh(double* vals,unsigned long long length,double thresh = 0.0, bool free = 1){
+	vector<unsigned long long> pks;
+	
+	if (vals[1] < vals[0] && vals[0] > vals[length - 1] && vals[0] > thresh){
+		pks.push_back(0);
+	}
+	for (unsigned long long v = 1; v < length - 2; ++v){
+		if (vals[v - 1] < vals[v] && vals[v] > vals[v+1] && vals[v] > thresh){
+			pks.push_back(v);
+		}
+	}
+	
+	if (vals[length - 2] < vals[length - 1] && vals[length - 1] > vals[0] && vals[length - 1] > thresh){
+		pks.push_back(length - 1);
+	}
+	
+	return pks;
+}
+
 
 //function to get the intensity of a image along a loing with a certain thicness
 vector<double>* linefun(Mat* img, double xstart, double ystart, double xend, double yend, double thic){
