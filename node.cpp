@@ -122,7 +122,7 @@ void node::procreate_hessian(bool free = 1){
 		double ynew = y + (double)RS * sin(smoothfun[0][(*it)]);
 		if (xnew > 0 && xnew < s.width && ynew > 0 && ynew < s.height){
 			too_close = false;
-			for (unsigned long long j = 0; j < neighbors.size(); ++j){
+			for (unsigned long long j = 0; j < neighbors.size() && !too_close; ++j){
 				dist = pow(xnew - (neighbors[j])->x,2) + pow(ynew - (neighbors[j])->y,2);
 				if (dist < pow(RF,2)){
 					too_close = true;
