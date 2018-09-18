@@ -19,7 +19,7 @@ class node {
 	vector<node*> neighbors;
 	vector<node*> connections;
 	vector<node*>* list;
-	vector<node*>* closures;
+	vector<node**>* closures;
 	node* mother;
 	Mat* img;
 	Size s;
@@ -27,6 +27,7 @@ class node {
 	double x;
 	double y;
 	node(double, double,vector<node*>*,Mat*);
+	node(double, double,vector<node*>*,vector<node**>*,Mat*);
 	node(double, double, node*);
 	void procreate(bool);
 	void procreate_hessian(bool);

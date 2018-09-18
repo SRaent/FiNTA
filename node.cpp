@@ -19,7 +19,7 @@
 
 
 
-node::node(double xinit, double yinit,std::vector<node*>* listinit, cv::Mat* initimg){
+node::node(double xinit, double yinit, std::vector<node*>* listinit, cv::Mat* initimg){
 	list = listinit;
 	img = initimg;
 	s = img->size();
@@ -27,7 +27,20 @@ node::node(double xinit, double yinit,std::vector<node*>* listinit, cv::Mat* ini
 	x = xinit;
 	y = yinit;
 	list->push_back(this);
+	closures = NULL;
 }
+
+node::node(double xinit, double yinit, std::vector<node*>* listinit, std::vector<node**>* closuresinit, cv::Mat* initimg){
+	list = listinit;
+	img = initimg;
+	closures = closuresinit;
+	s = img->size();
+	procreated = 0;
+	x = xinit;
+	y = yinit;
+	list->push_back(this);
+}
+
 node::node(double xinit, double yinit,node* mother_init){
 	mother = mother_init;
 	procreated = 0;
@@ -35,22 +48,25 @@ node::node(double xinit, double yinit,node* mother_init){
 	y = yinit;
 	list = mother->list;
 	img = mother->img;
+	closures = mother->closures;
 	s = img->size();
-	neighbors.push_back(mother);
 	connections.push_back(mother);
 	
-	for (std::vector<node*>::iterator it = list->begin(); it != list->end(); ++it){
-//		if (sqrt(pow((*it)->x - x,2) + pow((*it)->y - y,2)) <= RN && *it != mother){
-		if (abs((*it)->x - x) <= RN && abs((*it)->y - y) <= RN && *it != mother){
-			neighbors.push_back(*it);			
-		}
-	}
+	
 	
 	list->push_back(this);
 }
 
 void node::procreate(bool free = 1){
 	procreated = 1;
+	
+	for (std::vector<node*>::iterator it = list->begin(); it != list->end(); ++it){
+//		if (sqrt(pow((*it)->x - x,2) + pow((*it)->y - y,2)) <= RN && *it != mother){
+		if (abs((*it)->x - x) <= RN && abs((*it)->y - y) <= RN){
+			neighbors.push_back(*it);			
+		}
+	}
+	
 	std::vector<double>* fun = circlefun(img, x, y, RM, RV);
 	double** smoothfun = gaussavgcircle(fun, STEPS, DEV, free);
 	std::vector<unsigned long long> pks = findpks(smoothfun[1], STEPS);
@@ -96,6 +112,9 @@ void node::procreate(bool free = 1){
 //						cout << "C" << flush;
 						connections.push_back(child);
 						child->connections.push_back(this);
+						closures->push_back(new node*[2]);
+						(closures->back())[0] = this;
+						(closures->back())[1] = child;
 					}
 				}
 			}
@@ -110,6 +129,14 @@ void node::procreate(bool free = 1){
 
 void node::procreate_hessian(bool free = 1){
 	procreated = 1;
+	
+	for (std::vector<node*>::iterator it = list->begin(); it != list->end(); ++it){
+//		if (sqrt(pow((*it)->x - x,2) + pow((*it)->y - y,2)) <= RN && *it != mother){
+		if (abs((*it)->x - x) <= RN && abs((*it)->y - y) <= RN){
+			neighbors.push_back(*it);			
+		}
+	}
+	
 	std::vector<double>* fun = circlefun_hessian(img, x, y, RM, RV);
 	double** smoothfun = gaussavgcircle(fun, STEPS, DEV, free);
 	std::vector<unsigned long long> pks = findpks_thresh(smoothfun[1], STEPS,TH);
@@ -147,6 +174,10 @@ void node::procreate_hessian(bool free = 1){
 				cout << "c" << flush;
 				connections.push_back(child);
 				child->connections.push_back(this);
+				node** closure = new node*[2];
+				closures->push_back(closure);
+				closure[0] = this;
+				closure[1] = child;
 			}
 		}
 	}

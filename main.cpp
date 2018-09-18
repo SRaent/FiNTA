@@ -9,7 +9,7 @@
 #define RS 3 //step radius
 #define RT RV// vision for threshold
 #define RN RF * 2 //neighbor radius
-#define RF RS // SQRT2  //forbidden radius
+#define RF RS / SQRT2  //forbidden radius
 #define RM 0 //minimum vision radius
 #define STEPS 100
 #define DEV 0.55 //deviation of gaussian smooth of circlefun
@@ -102,7 +102,8 @@ int main(){
 //	/*
 	
 	vector<node*> list;
-	new node(PX,PY,&list,&hessian);
+	vector<node**> closures;
+	new node(PX,PY,&list,&closures,&hessian);
 	
 	unsigned long long i = 0;
 	for (bool buisy = 1; buisy && i < 500 ;){
