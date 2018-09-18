@@ -53,7 +53,7 @@ using namespace cv;
 
 
 int main(){
-	Mat I2 = imread("/home/moritz/Documents/Moritz_pics_lap/Franzi_CPD_012.tif", CV_LOAD_IMAGE_GRAYSCALE);
+	Mat I2 = imread("/home/moritz/Documents/Moritz_pics/Franzi_CPD_012.tif", CV_LOAD_IMAGE_GRAYSCALE);
 	if(!I2.data){
 		cout << "bild existiert NICHT" << endl;
 		return -1;

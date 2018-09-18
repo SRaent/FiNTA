@@ -94,7 +94,6 @@ void node::procreate(bool free = 1){
 					}
 					else{
 //						cout << "C" << flush;
-						neighbors.push_back(child);
 						connections.push_back(child);
 						child->connections.push_back(this);
 					}
@@ -116,16 +115,25 @@ void node::procreate_hessian(bool free = 1){
 	std::vector<unsigned long long> pks = findpks_thresh(smoothfun[1], STEPS,TH);
 	node* child = NULL;
 	bool too_close = false;
+	bool closable = false;
 	double dist = 0;
+	double min_dist = numeric_limits<double>::infinity();
 	for (std::vector<unsigned long long>::iterator it = pks.begin(); it != pks.end(); ++it){
 		double xnew = x + (double)RS * cos(smoothfun[0][(*it)]);
 		double ynew = y + (double)RS * sin(smoothfun[0][(*it)]);
 		if (xnew > 0 && xnew < s.width && ynew > 0 && ynew < s.height){
 			too_close = false;
+			closable = false;
+			min_dist = numeric_limits<double>::infinity();
 			for (unsigned long long j = 0; j < neighbors.size() && !too_close; ++j){
 				dist = pow(xnew - (neighbors[j])->x,2) + pow(ynew - (neighbors[j])->y,2);
 				if (dist < pow(RF,2)){
 					too_close = true;
+					if(dist < min_dist && !connected(neighbors[j],ML)){
+						child = neighbors[j];
+						min_dist = dist;
+						closable = true;
+					}
 				}
 			}
 			if (!too_close){
@@ -135,6 +143,11 @@ void node::procreate_hessian(bool free = 1){
 				connections.push_back(child);
 //				std::cout << xnew << " " << ynew << std::endl;
 			}
+			else if(closable){
+				cout << "c" << flush;
+				connections.push_back(child);
+				child->connections.push_back(this);
+			}
 		}
 	}
 	if (free){
@@ -142,6 +155,8 @@ void node::procreate_hessian(bool free = 1){
 		delete[] smoothfun[1];
 	}
 }
+
+
 
 bool node::connected(node* n, unsigned long long l){
 	bool ret = false;
