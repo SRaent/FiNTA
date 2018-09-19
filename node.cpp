@@ -57,6 +57,12 @@ node::node(double xinit, double yinit,node* mother_init){
 	list->push_back(this);
 }
 
+node::~node(){
+//	delete neighbors;
+//	delete connections;
+//	delete s;
+}
+
 void node::procreate(bool free = 1){
 	procreated = 1;
 	

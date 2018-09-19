@@ -44,6 +44,7 @@ using namespace cv;
 #include "mathfun.cpp"
 #include "node.h"
 #include "node.cpp"
+#include "analyse.cpp"
 
 
 
@@ -106,7 +107,8 @@ int main(){
 	new node(PX,PY,&list,&closures,&hessian);
 	
 	unsigned long long i = 0;
-	for (bool buisy = 1; buisy && i < 500 ;){
+	
+	for (bool buisy = 1; buisy && i < 50 ;){
 		buisy = 0;
 		unsigned long long end = list.size();
 		for (unsigned long long it = 0; it < end; ++it){
@@ -119,11 +121,27 @@ int main(){
 		
 	}
 	
+	tubeness.convertTo(tubeness, CV_8U);
+	cv::cvtColor(tubeness, tubeness, cv::COLOR_GRAY2BGR);
+	
 	for (unsigned long long i = 0; i < list.size(); ++i){
 		for (unsigned long long j = 0; j < list[i]->connections.size(); ++j){
-			line(tubeness,Point(list[i]->x,list[i]->y),Point(list[i]->connections[j]->x,list[i]->connections[j]->y),255);
+			line(tubeness,Point(list[i]->x,list[i]->y),Point(list[i]->connections[j]->x,list[i]->connections[j]->y),Scalar(0, 255, 0));
 			
 		}
+	}
+	
+	only_loops(list);
+	
+	for (unsigned long long i = 0; i < list.size(); ++i){
+		for (unsigned long long j = 0; j < list[i]->connections.size(); ++j){
+			line(tubeness,Point(list[i]->x,list[i]->y),Point(list[i]->connections[j]->x,list[i]->connections[j]->y),Scalar(255, 0, 0));
+			
+		}
+	}
+	
+	for (unsigned long long i = 0; i < closures.size(); ++i){
+		line(tubeness,Point(closures[i][0]->x,closures[i][0]->y),Point(closures[i][1]->x,closures[i][1]->y),Scalar(0,0,255));
 	}
 //	line(I5,Point(PX,PY),Point(499.64,413.84),255);
 //	line(I5,Point(PX,PY),Point(2,2),255);

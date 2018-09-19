@@ -29,6 +29,7 @@ class node {
 	node(double, double,vector<node*>*,Mat*);
 	node(double, double,vector<node*>*,vector<node**>*,Mat*);
 	node(double, double, node*);
+	~node();
 	void procreate(bool);
 	void procreate_hessian(bool);
 	bool connected(node*, unsigned long long);
