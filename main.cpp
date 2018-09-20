@@ -64,33 +64,10 @@ int main(){
 	Mat I3 = I2(myROI);
 	Mat I5;
 	I3.convertTo(I5, CV_64F);
-
-//	fftw_complex* FI1 = fft_2d(I3);
-	
-//	cutouteroval_ft(FI1,1.6/8,s.width,s.height);
-//	cutinneroval_ft(FI1,0.4/8,s.width,s.height);
-//	cutinneroval_ft(FI1,0.035355,s.width,s.height);
-	
-//	Mat I4 = cv_ifft_2d_real(FI1,s.width,s.height);
-	
-	
-//	normalize(I5,I5,1,0,32);
-//	Scalar meanI5 = mean(I5);
-//	clamp(I5,meanI5[0] * 0.85,1);
 	
 	normalize(I5,I5,255,0,32);
-	/*
-	Mat kernel;
-	double delta = 0;
-	int kernel_size = 7;
-	Point anchor(kernel_size/2,kernel_size/2);
-	kernel = Mat::ones(kernel_size, kernel_size, CV_64F)/(float)(kernel_size * kernel_size);
 	
-	filter2D(I3, I5, -1 ,kernel, anchor, 0, BORDER_DEFAULT);
-	*/
 	
-//	circle(I5,Point(s.width / 2,s.height),500,0,10);
-//	circle(I5,Point(s.width / 2,s.height),500,255,4);
 	
 	
 	Mat hessian = convolve_hessian(I5,15,1.8);
@@ -108,7 +85,7 @@ int main(){
 	
 	unsigned long long i = 0;
 	
-	for (bool buisy = 1; buisy && i < 500 ;){
+	for (bool buisy = 1; buisy && i < 50 ;){
 		buisy = 0;
 		unsigned long long end = list.size();
 		for (unsigned long long it = 0; it < end; ++it){
@@ -143,10 +120,8 @@ int main(){
 	for (unsigned long long i = 0; i < closures.size(); ++i){
 		line(tubeness,Point(closures[i][0]->x,closures[i][0]->y),Point(closures[i][1]->x,closures[i][1]->y),Scalar(0,0,255));
 	}
-//	line(I5,Point(PX,PY),Point(499.64,413.84),255);
-//	line(I5,Point(PX,PY),Point(2,2),255);
-//	I2.convertTo(I2,CV_8U);
-	hessian.convertTo(hessian, CV_8UC3);//*/
+
+//	hessian.convertTo(hessian, CV_8UC3);//*/
 	imwrite("doubt.tif",I3);
 	imwrite("doubt2.tif",tubeness);
 //	imwrite("viz.tif",viz);

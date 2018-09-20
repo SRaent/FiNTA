@@ -32,6 +32,7 @@ unsigned long long find_connection_index(node* n, node* connection){
 			return i;
 		}
 	}
+	cout << "-------------------------- SOMTHING WENT  TERRIBLY WRONG --------------------------" << endl;
 	return 0 - 1; //this is supposed to cause some other error while running (gr8 error handeling i know, but i am a noob) when the 2 nodes are not connected.
 }
 
@@ -51,11 +52,8 @@ void only_loops(vector<node*> &list){
 		for (unsigned long long i = 0; i < list.size(); ++i){
 			if (list[i]->connections.size() <= 1){
 				bool unfinished = true;
-				for ( unsigned long long j = 0; j < list[i]->connections[0]->connections.size() && unfinished; ++j){
-					if(list[i]->connections[0]->connections[j] == list[i]){
-						list[i]->connections[0]->connections.erase(list[i]->connections[0]->connections.begin() + j);
-						unfinished = false;
-					}
+				if (list[i]->connections.size() == 1){
+					list[i]->connections[0]->connections.erase(list[i]->connections[0]->connections.begin() + find_connection_index(list[i]->connections[0], list[i]));
 				}
 				delete (list[i]);
 				list.erase(list.begin() + i);
