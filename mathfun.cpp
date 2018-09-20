@@ -448,7 +448,7 @@ double** gaussavgcircle(vector<double>* fun,unsigned long long steps,double dev,
 		val = 0;
 		
 		for ( unsigned long long j = 0; j < (fun[0]).size(); ++j){
-			val = exp(-pow(fun[0][j] - avg[0][i],2)/pow(dev * SQRT2, 2)); //the 1.414... is the sqrt(2) and saves computing time.
+			val = exp(-pow(fun[0][j] - avg[0][i],2)/pow(dev * SQRT2, 2)); 
 			val += exp(-pow(fun[0][j] - avg[0][i] - (2 * PI),2)/pow(dev * SQRT2, 2));
 			val += exp(-pow(fun[0][j] - avg[0][i] + (2 * PI),2)/pow(dev * SQRT2, 2));
 			val *= pow(abs(val * fun[1][j]),2);

@@ -85,7 +85,7 @@ int main(){
 	
 	unsigned long long i = 0;
 	
-	for (bool buisy = 1; buisy && i < 50 ;){
+	for (bool buisy = 1; buisy && i < 500 ;){
 		buisy = 0;
 		unsigned long long end = list.size();
 		for (unsigned long long it = 0; it < end; ++it){
@@ -110,6 +110,7 @@ int main(){
 	
 	only_loops(list);
 	
+	
 	for (unsigned long long i = 0; i < list.size(); ++i){
 		for (unsigned long long j = 0; j < list[i]->connections.size(); ++j){
 			line(tubeness,Point(list[i]->x,list[i]->y),Point(list[i]->connections[j]->x,list[i]->connections[j]->y),Scalar(255, 0, 0));
@@ -117,10 +118,19 @@ int main(){
 		}
 	}
 	
+	vector<node*> loop = find_loop(closures[1],-1);
+	
+	for (unsigned long long i = 0; i < loop.size() - 1; ++i){
+		for (unsigned long long j = 0; j < loop[i]->connections.size(); ++j){
+			line(tubeness,Point(loop[i]->x,loop[i]->y),Point(loop[i + 1]->x,loop[i + 1]->y),Scalar(255, 255 * i / loop.size(), 255));
+			
+		}
+	}
+	
 	for (unsigned long long i = 0; i < closures.size(); ++i){
 		line(tubeness,Point(closures[i][0]->x,closures[i][0]->y),Point(closures[i][1]->x,closures[i][1]->y),Scalar(0,0,255));
 	}
-
+	
 //	hessian.convertTo(hessian, CV_8UC3);//*/
 	imwrite("doubt.tif",I3);
 	imwrite("doubt2.tif",tubeness);
