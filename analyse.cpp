@@ -26,24 +26,19 @@
 	
 //}
 
-vector<node*> find_loop(node** closure, vector<node*>* list){
-	double x1 = (closure[0])->x;
-	double x2 = (closure[1])->x;
-	double y1 = (closure[0])->y;
-	double y2 = (closure[1])->y;
-	double x3r = ((closure[0])->connections.back())->x;
-	double x3l = ((closure[0])->connections[0])->x;
-	double y3r = ((closure[0])->connections.back())->y;
-	double y3l = ((closure[0])->connections[0])->y;
-	double xl = -(y2 - y1)/(2.0 * sqrt(pow(x2-x1,2)+pow(y2-y1,2))) - (y3l - y2)/(2.0 * sqrt(pow(x3l-x2,2)+pow(y3l-y2,2))) + x2;
-	double yl = (x2 - x1)/(2.0 * sqrt(pow(x2-x1,2)+pow(y2-y1,2))) + (x3l - x2)/(2.0 * sqrt(pow(x3l-x2,2)+pow(y3l-y2,2))) + y2;
-	double xr = (y2 - y1)/(2.0 * sqrt(pow(x2-x1,2)+pow(y2-y1,2))) + (y3r - y2)/(2.0 * sqrt(pow(x3r-x2,2)+pow(y3r-y2,2))) + x2;
-	double yr = -(x2 - x1)/(2.0 * sqrt(pow(x2-x1,2)+pow(y2-y1,2))) - (x3r - x2)/(2.0 * sqrt(pow(x3r-x2,2)+pow(y3r-y2,2))) + y2;
-	
-	
-	vector<node*> ret;
-	return ret;
+unsigned long long find_connection_index(node* n, node* connection){
+	for (unsigned long long i = 0; i < n->connections.size(); ++i){
+		if(n->connections[i] == connection){
+			return i;
+		}
+	}
+	return 0 - 1; //this is supposed to cause some other error while running (gr8 error handeling i know, but i am a noob) when the 2 nodes are not connected.
 }
+
+
+//vector<node*> find_loop(node** closure, vector<node*>* list){
+	
+//}
 
 
 
@@ -51,6 +46,7 @@ void only_loops(vector<node*> &list){
 	
 	bool buisy = true;
 	while (buisy){
+		
 		buisy = false;
 		for (unsigned long long i = 0; i < list.size(); ++i){
 			if (list[i]->connections.size() <= 1){
@@ -61,14 +57,16 @@ void only_loops(vector<node*> &list){
 						unfinished = false;
 					}
 				}
-//				delete list[i];
+				delete (list[i]);
 				list.erase(list.begin() + i);
-				cout << "r" << flush;
+//				cout << "r";
 				buisy = true;
 			}
 		}
 	}
 }
+
+
 
 
 

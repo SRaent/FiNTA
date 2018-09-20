@@ -108,7 +108,7 @@ int main(){
 	
 	unsigned long long i = 0;
 	
-	for (bool buisy = 1; buisy && i < 50 ;){
+	for (bool buisy = 1; buisy && i < 500 ;){
 		buisy = 0;
 		unsigned long long end = list.size();
 		for (unsigned long long it = 0; it < end; ++it){

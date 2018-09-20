@@ -51,16 +51,12 @@ node::node(double xinit, double yinit,node* mother_init){
 	closures = mother->closures;
 	s = img->size();
 	connections.push_back(mother);
-	
-	
-	
+	mother->neighbors.push_back(this);
+	mother->connections.push_back(this);
 	list->push_back(this);
 }
 
 node::~node(){
-//	delete neighbors;
-//	delete connections;
-//	delete s;
 }
 
 void node::procreate(bool free = 1){
@@ -108,10 +104,7 @@ void node::procreate(bool free = 1){
 				
 				if(gaussavgoverthresh(lfun, LT, LS, LD, CT, free)){
 					if (!too_close){
-						child = new node(xnew, ynew, this);
-						list->push_back(child);
-						neighbors.push_back(child);
-						connections.push_back(child);
+						new node(xnew, ynew, this);
 		//				std::cout << xnew << " " << ynew << std::endl;
 					}
 					else{
@@ -170,10 +163,7 @@ void node::procreate_hessian(bool free = 1){
 				}
 			}
 			if (!too_close){
-				child = new node(xnew, ynew, this);
-				list->push_back(child);
-				neighbors.push_back(child);
-				connections.push_back(child);
+				new node(xnew, ynew, this);
 //				std::cout << xnew << " " << ynew << std::endl;
 			}
 			else if(closable){
