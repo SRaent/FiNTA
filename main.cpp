@@ -129,11 +129,20 @@ int main(){
 	
 	//vector<node*> loop = find_loop(closures[1],-1);
 	
+	double total_area = 0;
+	double max_area = 0;
 	
-	/*
 	Mat loops_img;
 	for (unsigned long long l = 0; l < loops.size(); ++l){
 		tubeness.copyTo(loops_img);
+//		PRINT(loop_area(loops[l]))
+		char area[100];
+		sprintf(area,"area = %f; length = %f",loop_area(loops[l]),loop_length(loops[l]));
+		putText(loops_img,area, cvPoint(20,20), FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(0,255,255), 1, CV_AA);
+		
+		total_area += loop_area(loops[l]);
+		max_area = max(max_area, loop_area(loops[l]));
+		
 		for (unsigned long long i = 0; i < loops[l].size() - 1; ++i){
 			for (unsigned long long j = 0; j < loops[l][i]->connections.size(); ++j){
 				line(loops_img,Point(loops[l][i]->x,loops[l][i]->y),Point(loops[l][i + 1]->x,loops[l][i + 1]->y),Scalar(255, 255 * i / loops[l].size(), 255));
@@ -144,7 +153,9 @@ int main(){
 		sprintf(filename,"./loops/loop%d.tif",l);
 		imwrite(filename,loops_img);
 	}
-	*/
+	
+	cout << "total area: " << total_area/2.0 << " max area: " << max_area << endl;
+	
 	/*
 	for (unsigned long long i = 0; i < loop.size() - 1; ++i){
 		for (unsigned long long j = 0; j < loop[i]->connections.size(); ++j){

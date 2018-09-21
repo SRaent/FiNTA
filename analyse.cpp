@@ -94,7 +94,8 @@ vector<vector<node*>> find_loops(vector<node**> closures){
 	for (unsigned long long i = 0; i < ret.size() - 1; ++i){
 		check = loop_checksum(ret[i]);
 		for (unsigned long long j = i + 1; j < ret.size(); ++j){
-			if(abs(loop_checksum(ret[j]) - check) < 0.00001){
+			if(abs(loop_checksum(ret[j]) - check) < 0.000001){
+//				PRINT(abs(loop_checksum(ret[j]) - check))
 				ret.erase(ret.begin() + j);
 				--j;
 //				cout << "checksum match " << i + 1 << endl;
@@ -129,8 +130,33 @@ void only_loops(vector<node*> &list){
 }
 
 
+double loop_area(vector<node*> loop){
+	double area = 0.0;
+	unsigned long long j = 0;
+	for (unsigned long long i = 0; i < loop.size(); ++i){
+		j = (i + 1);
+		if (j >= loop.size()){
+			j -= loop.size();
+		}
+		area += (loop[i]->x) * (loop[j]->y);
+		area -= (loop[i]->y) * (loop[j]->x);
+	}
+	return abs(area/2.0);
+}
 
 
+double loop_length(vector<node*> loop){
+	double length = 0.0;
+	unsigned long long j = 0;
+	for (unsigned long long i = 0; i < loop.size(); ++i){
+		j = (i + 1);
+		if (j >= loop.size()){
+			j -= loop.size();
+		}
+		length += sqrt(pow(loop[i]->x - loop[j]->x,2) + pow(loop[i]->y - loop[j]->y,2));
+	}
+	return length;
+}
 
 
 /*
