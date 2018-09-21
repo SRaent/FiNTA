@@ -22,9 +22,6 @@
 #define PI (double)3.1415926535897932384626433832795
 
 
-//vector<vector<node*>*> find_loops(vector<node*>* list, vector<node**>* closures){
-	
-//}
 
 unsigned long long find_connection_index(node* n, node* connection){
 	for (unsigned long long i = 0; i < n->connections.size(); ++i){
@@ -71,9 +68,43 @@ vector<node*> find_loop(node* prev, node* n, node* start, long long sign){
 	return ret;
 }
 
-vector<node*> find_loop(node** closure, long long index_shift){
-	return find_loop(closure[0],closure[1],closure[0],index_shift);
+vector<node*> find_loop(node** closure, long long sign){
+	return find_loop(closure[0],closure[1],closure[0],sign);
 }
+
+double loop_checksum(vector<node*> loop){
+	double ret = 0;
+	for (unsigned long long i = 0; i < loop.size(); ++i){
+		ret += loop[i]->x + loop[i]->y;
+	}
+	return ret;
+}
+
+vector<vector<node*>> find_loops(vector<node**> closures){
+	
+	vector<vector<node*>> ret;
+	
+	for (unsigned long long i = 0; i < closures.size(); ++i){
+		ret.push_back(find_loop(closures[i], 1));
+		ret.push_back(find_loop(closures[i], -1));
+	}
+	
+	double check = 0;
+		
+	for (unsigned long long i = 0; i < ret.size() - 1; ++i){
+		check = loop_checksum(ret[i]);
+		for (unsigned long long j = i + 1; j < ret.size(); ++j){
+			if(abs(loop_checksum(ret[j]) - check) < 0.00001){
+				ret.erase(ret.begin() + j);
+				--j;
+//				cout << "checksum match " << i + 1 << endl;
+			}
+		}
+	}
+	
+	return ret;
+}
+
 
 
 void only_loops(vector<node*> &list){

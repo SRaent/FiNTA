@@ -118,14 +118,40 @@ int main(){
 		}
 	}
 	
-	vector<node*> loop = find_loop(closures[1],-1);
 	
+	vector<vector<node*>> loops = find_loops(closures);
+	
+	PRINT(loops.size())
+	PRINT(closures.size())/*
+	for  (unsigned long long i = 0; i < loops.size(); ++i){
+		PRINT(loop_checksum(loops[i]))
+	}*/
+	
+	//vector<node*> loop = find_loop(closures[1],-1);
+	
+	
+	/*
+	Mat loops_img;
+	for (unsigned long long l = 0; l < loops.size(); ++l){
+		tubeness.copyTo(loops_img);
+		for (unsigned long long i = 0; i < loops[l].size() - 1; ++i){
+			for (unsigned long long j = 0; j < loops[l][i]->connections.size(); ++j){
+				line(loops_img,Point(loops[l][i]->x,loops[l][i]->y),Point(loops[l][i + 1]->x,loops[l][i + 1]->y),Scalar(255, 255 * i / loops[l].size(), 255));
+				
+			}
+		}
+		char filename[50];
+		sprintf(filename,"./loops/loop%d.tif",l);
+		imwrite(filename,loops_img);
+	}
+	*/
+	/*
 	for (unsigned long long i = 0; i < loop.size() - 1; ++i){
 		for (unsigned long long j = 0; j < loop[i]->connections.size(); ++j){
 			line(tubeness,Point(loop[i]->x,loop[i]->y),Point(loop[i + 1]->x,loop[i + 1]->y),Scalar(255, 255 * i / loop.size(), 255));
 			
 		}
-	}
+	}*/
 	
 	for (unsigned long long i = 0; i < closures.size(); ++i){
 		line(tubeness,Point(closures[i][0]->x,closures[i][0]->y),Point(closures[i][1]->x,closures[i][1]->y),Scalar(0,0,255));
