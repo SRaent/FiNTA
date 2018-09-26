@@ -5,20 +5,20 @@
 
 #define PX 412
 #define PY 495
-#define RV 6 //vision radius
+#define RV 8 //vision radius
 #define RS 3 //step radius
 #define RT RV// vision for threshold
 #define RN RF * 2 //neighbor radius
 #define RF RS / SQRT2  //forbidden radius
 #define RM 0 //minimum vision radius
 #define STEPS 100
-#define DEV 0.55 //deviation of gaussian smooth of circlefun
+#define DEV 0.4 // 0.55 deviation of gaussian smooth of circlefun
 #define LT 2 // line thiccness for connectable test
 #define LD 0.2 //deviation of smoothing if line function for connectable test
 #define LS RS*LT // steps for averaging the line function
 #define CT 3 // Connectabel threshhold. if the smoothed function goes below this, no new node will be spawned.
 #define ML 7 //minimum loop length
-#define TH 2.0 // threshold for findpks
+#define TH 3 //2.3 threshold for findpks
 
 
 #include <stdlib.h>
@@ -134,7 +134,7 @@ int main(){
 	
 	Mat loops_img;
 	for (unsigned long long l = 0; l < loops.size(); ++l){
-		tubeness.copyTo(loops_img);
+		I3.copyTo(loops_img);
 //		PRINT(loop_area(loops[l]))
 		char area[100];
 		sprintf(area,"area = %f; length = %f",loop_area(loops[l]),loop_length(loops[l]));

@@ -43,19 +43,19 @@ vector<node*> find_loop(node* prev, node* n, node* start, long long sign){
 	}
 	else{
 		double prevang = atan2(n->x - prev->x, n->y - prev->y);
-		double minang = 2 * PI;
+		double minang = numeric_limits<double>::infinity();
 		double ang = 0;
 		unsigned long long index = 0;
 		
 		for (unsigned long long i = 0; i < n->connections.size(); ++i){
-			ang = sign * (atan2(n->x - n->connections[i]->x, n->y - n->connections[i]->y) - prevang);
+			ang = ((double)sign) * (atan2(n->x - n->connections[i]->x, n->y - n->connections[i]->y) - prevang);
 			while (ang < 0){
-				ang += 2 * PI;
+				ang += 2.0 * PI;
 			}
-			while (ang > 2 * PI){
-				ang -= 2 * PI;
+			while (ang >= 2.0 * PI){
+				ang -= 2.0 * PI;
 			}
-			if (ang < minang && ang != 0.0){
+			if (ang < minang && ang > 0.0){
 				minang = ang;
 				index = i;
 			}
