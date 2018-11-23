@@ -4,6 +4,7 @@
 #include <iostream>
 #include <math.h>
 #include <stdio.h>
+#include <fstream>
 #include <stdlib.h>
 #include <string.h>
 #include <vector>
@@ -158,6 +159,56 @@ double loop_length(vector<node*> loop){
 	return length;
 }
 
+
+vector<double> con_angles(vector<node*> list){
+	vector<double> angles;
+	double angle;
+	double dx;
+	double dy;
+	for(unsigned long long i = 0; i < list.size(); ++i){
+		vector<node*> conns = list[i]->connections;
+		double x = list[i]->x;
+		double y = list[i]->y;
+		for(unsigned long long j = 0; j < conns.size(); ++j){
+			dx = conns[j]->x - x;
+			dy = conns[j]->y - y;
+			angle = atan2(dx,dy);
+			while (angle < 0) {
+				angle = angle + PI;
+			}
+			while (angle >= PI){
+				angle = angle - PI;
+			}
+			angles.push_back(angle);
+		}
+	}
+	return angles;
+}
+
+void double_vector_to_file(string filename, vector<double> list){
+	ofstream f;
+	f.open(filename);
+	for(unsigned long long i = 0; i < list.size(); ++i){
+		f << list[i] << "\n";
+	}
+	f.close();
+}
+
+double max_loop_area(vector<vector<node*>> loops){
+	double max_a = 0;
+	for (unsigned long long l = 0; l < loops.size(); ++l){
+		max_a = max(max_a,loop_area(loops[l]));
+	}
+	return max_a;
+}
+
+double total_loop_area(vector<vector<node*>> loops){
+	double tot_a = 0;
+	for (unsigned long long l = 0; l < loops.size(); ++l){
+		tot_a += loop_area(loops[l]);
+	}
+	return tot_a/2.0;
+}
 
 /*
 vector<node*> find_loop(node** closure, vector<node*>* list){

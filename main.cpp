@@ -8,17 +8,17 @@
 #define RV 8 //vision radius
 #define RS 3 //step radius
 #define RT RV// vision for threshold
-#define RN RF * 2 //neighbor radius
-#define RF RS / SQRT2  //forbidden radius
+#define RN RF+RS //neighbor radius
+#define RF RS/SQRT2  //forbidden radius
 #define RM 0 //minimum vision radius
 #define STEPS 100
-#define DEV 0.4 // 0.55 deviation of gaussian smooth of circlefun
+#define DEV 0.55 // 0.55 deviation of gaussian smooth of circlefun
 #define LT 2 // line thiccness for connectable test
 #define LD 0.2 //deviation of smoothing if line function for connectable test
 #define LS RS*LT // steps for averaging the line function
 #define CT 3 // Connectabel threshhold. if the smoothed function goes below this, no new node will be spawned.
 #define ML 7 //minimum loop length
-#define TH 3 //2.3 threshold for findpks
+#define TH 2.3 //2.3 threshold for findpks
 
 
 #include <stdlib.h>
@@ -27,6 +27,7 @@
 #include <string.h>
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <complex.h>
 #include <fftw3.h>
 
@@ -45,7 +46,7 @@ using namespace cv;
 #include "node.h"
 #include "node.cpp"
 #include "analyse.cpp"
-
+#include "visualise.cpp"
 
 
 
@@ -98,40 +99,28 @@ int main(){
 		
 	}
 	
+	vector<double> angles = con_angles(list);
+	
+	double_vector_to_file("angles.dat",angles);
+	
 	tubeness.convertTo(tubeness, CV_8U);
 	cv::cvtColor(tubeness, tubeness, cv::COLOR_GRAY2BGR);
 	
-	for (unsigned long long i = 0; i < list.size(); ++i){
-		for (unsigned long long j = 0; j < list[i]->connections.size(); ++j){
-			line(tubeness,Point(list[i]->x,list[i]->y),Point(list[i]->connections[j]->x,list[i]->connections[j]->y),Scalar(0, 255, 0));
-			
-		}
-	}
+	tubeness = draw_list(tubeness,list);
 	
 	only_loops(list);
 	
-	
-	for (unsigned long long i = 0; i < list.size(); ++i){
-		for (unsigned long long j = 0; j < list[i]->connections.size(); ++j){
-			line(tubeness,Point(list[i]->x,list[i]->y),Point(list[i]->connections[j]->x,list[i]->connections[j]->y),Scalar(255, 0, 0));
-			
-		}
-	}
-	
+	tubeness = draw_list(tubeness,list,Scalar(255,0,0));
 	
 	vector<vector<node*>> loops = find_loops(closures);
 	
 	PRINT(loops.size())
-	PRINT(closures.size())/*
-	for  (unsigned long long i = 0; i < loops.size(); ++i){
-		PRINT(loop_checksum(loops[i]))
-	}*/
+	PRINT(closures.size())
 	
-	//vector<node*> loop = find_loop(closures[1],-1);
 	
 	double total_area = 0;
 	double max_area = 0;
-	
+	/*
 	Mat loops_img;
 	for (unsigned long long l = 0; l < loops.size(); ++l){
 		I3.copyTo(loops_img);
@@ -153,9 +142,9 @@ int main(){
 		sprintf(filename,"./loops/loop%d.tif",l);
 		imwrite(filename,loops_img);
 	}
-	
-	cout << "total area: " << total_area/2.0 << " max area: " << max_area << endl;
-	
+	*/
+	draw_loops("./loops/", loops, I3, true);
+	cout << "total area: " << total_loop_area(loops) << " max area: " << max_loop_area(loops) << endl;
 	/*
 	for (unsigned long long i = 0; i < loop.size() - 1; ++i){
 		for (unsigned long long j = 0; j < loop[i]->connections.size(); ++j){
@@ -163,11 +152,11 @@ int main(){
 			
 		}
 	}*/
-	
+	/*
 	for (unsigned long long i = 0; i < closures.size(); ++i){
 		line(tubeness,Point(closures[i][0]->x,closures[i][0]->y),Point(closures[i][1]->x,closures[i][1]->y),Scalar(0,0,255));
-	}
-	
+	}*/
+	tubeness = draw_closures(tubeness,closures);
 //	hessian.convertTo(hessian, CV_8UC3);//*/
 	imwrite("doubt.tif",I3);
 	imwrite("doubt2.tif",tubeness);
