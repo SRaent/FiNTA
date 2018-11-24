@@ -50,7 +50,6 @@ using namespace cv;
 
 
 
-//images are saved in 2 dimensional arrays and the pixels are to be adressed by img[x][y] this has the effect, that any loops acessing all pixels have to loop x first and then y so y is the faster changin index(for performance reasons). but when actually writing image data to a file, doing this will result in x and y being swapped, unless the loop order is swiched(sacreficing some performance).
 
 
 
@@ -73,12 +72,10 @@ int main(){
 	
 	Mat hessian = convolve_hessian(I5,15,1.8);
 	Mat tubeness = tubeness_hessian(hessian);
-//	Mat viz = visualize_hessian(hessian);
-//	hessian_weighted_angle_distribution(hessian,10);
-//	hessian_weighted_relative_angle_distribution(hessian, 10, 100);
+	
+	
 	normalize(tubeness,tubeness,255,0,32);
-//	normalize(viz,viz,255,0,32);
-//	/*
+	
 	
 	vector<node*> list;
 	vector<node**> closures;
@@ -120,46 +117,14 @@ int main(){
 	
 	double total_area = 0;
 	double max_area = 0;
-	/*
-	Mat loops_img;
-	for (unsigned long long l = 0; l < loops.size(); ++l){
-		I3.copyTo(loops_img);
-//		PRINT(loop_area(loops[l]))
-		char area[100];
-		sprintf(area,"area = %f; length = %f",loop_area(loops[l]),loop_length(loops[l]));
-		putText(loops_img,area, cvPoint(20,20), FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(0,255,255), 1, CV_AA);
-		
-		total_area += loop_area(loops[l]);
-		max_area = max(max_area, loop_area(loops[l]));
-		
-		for (unsigned long long i = 0; i < loops[l].size() - 1; ++i){
-			for (unsigned long long j = 0; j < loops[l][i]->connections.size(); ++j){
-				line(loops_img,Point(loops[l][i]->x,loops[l][i]->y),Point(loops[l][i + 1]->x,loops[l][i + 1]->y),Scalar(255, 255 * i / loops[l].size(), 255));
-				
-			}
-		}
-		char filename[50];
-		sprintf(filename,"./loops/loop%d.tif",l);
-		imwrite(filename,loops_img);
-	}
-	*/
+	
+	
 	draw_loops("./loops/", loops, I3, true);
 	cout << "total area: " << total_loop_area(loops) << " max area: " << max_loop_area(loops) << endl;
-	/*
-	for (unsigned long long i = 0; i < loop.size() - 1; ++i){
-		for (unsigned long long j = 0; j < loop[i]->connections.size(); ++j){
-			line(tubeness,Point(loop[i]->x,loop[i]->y),Point(loop[i + 1]->x,loop[i + 1]->y),Scalar(255, 255 * i / loop.size(), 255));
-			
-		}
-	}*/
-	/*
-	for (unsigned long long i = 0; i < closures.size(); ++i){
-		line(tubeness,Point(closures[i][0]->x,closures[i][0]->y),Point(closures[i][1]->x,closures[i][1]->y),Scalar(0,0,255));
-	}*/
+	
+	
 	tubeness = draw_closures(tubeness,closures);
-//	hessian.convertTo(hessian, CV_8UC3);//*/
 	imwrite("doubt.tif",I3);
 	imwrite("doubt2.tif",tubeness);
-//	imwrite("viz.tif",viz);
 	return 0;
 }
