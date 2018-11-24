@@ -54,11 +54,11 @@ void draw_loops(char* folder, vector<vector<node*>> loops, Mat image,bool print_
 	}
 }
 
-Mat draw_closures(Mat input_image, vector<node**> closures){
+Mat draw_closures(Mat input_image, vector<node**> closures,Scalar color = Scalar(0,0,255)){
 	Mat image;
 	input_image.copyTo(image);
 	for (unsigned long long i = 0; i < closures.size(); ++i){
-		line(image,Point(closures[i][0]->x,closures[i][0]->y),Point(closures[i][1]->x,closures[i][1]->y),Scalar(0,0,255));
+		line(image,Point(closures[i][0]->x,closures[i][0]->y),Point(closures[i][1]->x,closures[i][1]->y),color);
 	}
 	return image;
 }

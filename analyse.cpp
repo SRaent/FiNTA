@@ -35,42 +35,49 @@ unsigned long long find_connection_index(node* n, node* connection){
 }
 
 // sign = 1: right way turn. sign  = -1 left way turn
-vector<node*> find_loop(node* prev, node* n, node* start, long long sign){
+
+node* find_next_loop_node(node* prev, node* n, long long sign){
+	double prevang = atan2(n->x - prev->x, n->y - prev->y);
+	double minang = numeric_limits<double>::infinity();
+	double ang = 0;
+	unsigned long long index = 0;
+	
+	for (unsigned long long i = 0; i < n->connections.size(); ++i){
+		ang = ((double)sign) * (atan2(n->x - n->connections[i]->x, n->y - n->connections[i]->y) - prevang);
+		while (ang < 0){
+			ang += 2.0 * PI;
+		}
+		while (ang >= 2.0 * PI){
+			ang -= 2.0 * PI;
+		}
+		if (ang < minang && ang > 0.0){
+			minang = ang;
+			index = i;
+		}
+	}
+	return n->connections[index];
+}
+//end is a misleading variable name
+vector<node*> find_loop(node* prev, node* n, node* start, node* end, long long sign){
 	vector<node*> ret;
+	node* next_loop_node;
 //	cout << n->x << " " << n->y << " " << n << " " << prev << " " << start << " ";
-	if (n == start){
+	if (n == start && find_next_loop_node(prev, n, sign) == end){
 		ret.push_back(n);
 		return ret;
 	}
 	else{
-		double prevang = atan2(n->x - prev->x, n->y - prev->y);
-		double minang = numeric_limits<double>::infinity();
-		double ang = 0;
-		unsigned long long index = 0;
+		next_loop_node = find_next_loop_node(prev, n, sign);
 		
-		for (unsigned long long i = 0; i < n->connections.size(); ++i){
-			ang = ((double)sign) * (atan2(n->x - n->connections[i]->x, n->y - n->connections[i]->y) - prevang);
-			while (ang < 0){
-				ang += 2.0 * PI;
-			}
-			while (ang >= 2.0 * PI){
-				ang -= 2.0 * PI;
-			}
-			if (ang < minang && ang > 0.0){
-				minang = ang;
-				index = i;
-			}
-			
-		}
 //		cout << find_connection_index(n, prev) << " " << index << " " << n->connections.size() << endl;
-		ret = find_loop(n, n->connections[index], start, sign);
+		ret = find_loop(n, next_loop_node, start, end, sign);
 		ret.push_back(n);
 	}
 	return ret;
 }
 
 vector<node*> find_loop(node** closure, long long sign){
-	return find_loop(closure[0],closure[1],closure[0],sign);
+	return find_loop(closure[0],closure[1],closure[0],closure[1],sign);
 }
 
 double loop_checksum(vector<node*> loop){
@@ -163,23 +170,32 @@ double loop_length(vector<node*> loop){
 vector<double> con_angles(vector<node*> list){
 	vector<double> angles;
 	double angle;
-	double dx;
-	double dy;
+	double dx1;
+	double dy1;
+	double dx2;
+	double dy2;
 	for(unsigned long long i = 0; i < list.size(); ++i){
 		vector<node*> conns = list[i]->connections;
 		double x = list[i]->x;
 		double y = list[i]->y;
 		for(unsigned long long j = 0; j < conns.size(); ++j){
-			dx = conns[j]->x - x;
-			dy = conns[j]->y - y;
-			angle = atan2(dx,dy);
-			while (angle < 0) {
-				angle = angle + PI;
+			for (unsigned long long k = j + 1; k < conns.size(); ++k){
+				dx1 = conns[j]->x - x;
+				dy1 = conns[j]->y - y;
+				dx2 = conns[k]->x - x;
+				dy2 = conns[k]->y - y;
+				angle = atan2(dx2,dy2) - atan2(dx1,dy1);
+				while (angle < 0) {
+						angle = angle +  (2.0 * PI);
+				}
+				while (angle >= (2.0 * PI)){
+					angle = angle - (2.0 * PI);
+				}
+				if ( angle > PI){
+					angle = abs(angle - (2 * PI));
+				}
+				angles.push_back(angle);
 			}
-			while (angle >= PI){
-				angle = angle - PI;
-			}
-			angles.push_back(angle);
 		}
 	}
 	return angles;
@@ -210,21 +226,23 @@ double total_loop_area(vector<vector<node*>> loops){
 	return tot_a/2.0;
 }
 
-/*
-vector<node*> find_loop(node** closure, vector<node*>* list){
-	vector<node> ret;
-	for (auto i = (closure[0])->connections.begin(); i != (closure[0])->connections.back(); ++i){
-		if (*i != closure[1]){
-			ret = find_loop(closure, list, *i);
-			ret.push_back(closure[0])
-			return ret;
+vector<double> find_loop_areas(vector<vector<node*>> loops){
+	vector<double> areas;
+	for (unsigned long long l = 0; l < loops.size(); ++l){
+		areas.push_back(loop_area(loops[l]));
+	}
+	return areas;
+}
+
+vector<node*> find_junctions(vector<node*> list){
+	vector<node*> junctions;
+	for (unsigned long long i = 0; i < list.size(); ++i){
+		if (list[i]->connections.size() > 2) {
+			junctions.push_back(list[i]);
 		}
 	}
-	
+	return junctions;
 }
 
-vector<node*> find_loop(node** closure, vector<node*>* list, node* n, node* p){
 
-}
-*/
 #endif

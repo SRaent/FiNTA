@@ -18,7 +18,7 @@
 #define LS RS*LT // steps for averaging the line function
 #define CT 3 // Connectabel threshhold. if the smoothed function goes below this, no new node will be spawned.
 #define ML 7 //minimum loop length
-#define TH 2.3 //2.3 threshold for findpks
+#define TH 2.5 //2.3 threshold for findpks
 
 
 #include <stdlib.h>
@@ -96,34 +96,45 @@ int main(){
 		
 	}
 	
-	vector<double> angles = con_angles(list);
 	
+	vector<double> angles = con_angles(list);
 	double_vector_to_file("angles.dat",angles);
 	
-	tubeness.convertTo(tubeness, CV_8U);
-	cv::cvtColor(tubeness, tubeness, cv::COLOR_GRAY2BGR);
+	I3.convertTo(I3, CV_8U);
+	cv::cvtColor(I3, I3, cv::COLOR_GRAY2BGR);
 	
-	tubeness = draw_list(tubeness,list);
+	I3 = draw_list(I3,list);
 	
 	only_loops(list);
 	
-	tubeness = draw_list(tubeness,list,Scalar(255,0,0));
+	vector<node*> junctions = find_junctions(list);
 	
+	I3 = draw_list(I3,list,Scalar(255,0,0));
+	
+	I3 = draw_list(I3,junctions,Scalar(0,0,0));
+	
+	//vector<double> angles = con_angles(junctions);
+	//double_vector_to_file("angles.dat",angles);
 	vector<vector<node*>> loops = find_loops(closures);
+	
+	vector<double> areas = find_loop_areas(loops);
+	double_vector_to_file("areas.dat",areas);
 	
 	PRINT(loops.size())
 	PRINT(closures.size())
-	
-	
-	double total_area = 0;
-	double max_area = 0;
-	
+	/*
+	for (int i = 0; i < loops.size(); ++i){
+		for (int j = 0; j < loops[i].size(); ++j){
+			cout << loops[i][j] << " " ;
+		}
+		cout << endl;
+	}*/
+	I3 = draw_closures(I3,closures,Scalar(128,0,128));
 	
 	draw_loops("./loops/", loops, I3, true);
 	cout << "total area: " << total_loop_area(loops) << " max area: " << max_loop_area(loops) << endl;
 	
 	
-	tubeness = draw_closures(tubeness,closures);
 	imwrite("doubt.tif",I3);
 	imwrite("doubt2.tif",tubeness);
 	return 0;

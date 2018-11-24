@@ -51,7 +51,7 @@ node::node(double xinit, double yinit,node* mother_init){
 	closures = mother->closures;
 	s = img->size();
 	connections.push_back(mother);
-	mother->neighbors.push_back(this);
+	//mother->neighbors.push_back(this);
 	mother->connections.push_back(this);
 	list->push_back(this);
 }
