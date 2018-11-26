@@ -244,5 +244,60 @@ vector<node*> find_junctions(vector<node*> list){
 	return junctions;
 }
 
+bool node_is_in(vector<node*> list, node* element){
+	for (unsigned long long i = 0; i < list.size(); ++i){
+		if (list[i] == element){
+			return true;
+		}
+	}
+	return false;
+}
+
+bool part_of_line(node* n1, node* n2, node* next_n, double angle, unsigned long long rec_steps){
+	return true;
+}
+
+vector<node*> find_line(node* n1, node* n2, double angle, unsigned long long rec_steps){
+	vector<node*> line;
+	return line;
+}
+
+vector<node*> find_line_naive(node* n1, node* n2, double curve_angle, unsigned long long unnessesary = 0){
+	
+	vector<node*> conns = n2->connections;
+	double dx1 = n2->x - n1->x;
+	double dy1 = n2->y - n1->y;
+	
+	double max_angle = 0;
+	unsigned long long max_angle_index = 0;
+	
+	for(unsigned long long j = 0; j < conns.size(); ++j){
+		if (conns[j] != n1){
+			dx2 = conns[j]->x - n1->x;
+			dy2 = conns[j]->y - n1->y;
+			angle = atan2(dx2,dy2) - atan2(dx1,dy1);
+			while (angle < 0) {
+					angle = angle +  (2.0 * PI);
+			}
+			while (angle >= (2.0 * PI)){
+				angle = angle - (2.0 * PI);
+			}
+			if ( angle > PI){
+				angle = abs(angle - (2 * PI));
+			}
+			if (angle > max_angle){
+				max_angle = angle;
+			}
+		}
+	}
+	if PI - max_angle < curve_angle
+}
+
+vector<vector<node*>> find_lines(vector<node*> list, double angle, unsigned long long rec_steps){
+	vector<node*> junctions = find_junctions(list);
+	vector<vector<node*>> lines;
+	vector<node*> work_list = list;
+	return lines;
+}
 
 #endif

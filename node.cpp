@@ -215,4 +215,41 @@ bool node::connected(node* n, node* origin, unsigned long long l){
 	return ret;
 }
 
+vector<node*> node::get_distant_connected(node* origin, unsigned long long dist){
+	vector<node*> dc;
+	if (dist == 1){
+		for (unsigned long long i = 0; i < connections.size(); ++i){
+			if (connections[i] != origin){
+				dc.push_back(connections[i]);
+			}
+		}
+	}
+	else {
+		vector<node*> dcr;
+		for (unsigned long long i = 0; i < connections.size(); ++i){
+			if (connections[i] != origin){
+				 dcr = connections[i]->get_distant_connected(this, dist - 1);
+				 dc.insert(dc.end(),dcr.begin(),dcr.end());
+			}
+		}
+	}
+	return dc;
+	
+}
+
+vector<node*> node::get_distant_connected(unsigned long long dist){
+	vector<node*> dc;
+	if (dist == 1){
+		dc = connections;
+	}
+	else {
+		vector<node*> dcr;
+		for (unsigned long long i = 0; i < connections.size(); ++i){
+			 dcr = connections[i]->get_distant_connected(this, dist - 1);
+			 dc.insert(dc.end(),dcr.begin(),dcr.end());
+		}
+	}
+	return dc;
+}
+
 #endif

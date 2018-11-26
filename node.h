@@ -34,6 +34,8 @@ class node {
 	void procreate_hessian(bool);
 	bool connected(node*, unsigned long long);
 	bool connected(node*, node*, unsigned long long);
+	vector<node*> get_distant_connected(unsigned long long);
+	vector<node*> get_distant_connected(node*, unsigned long long);
 };
 
 #endif

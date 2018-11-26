@@ -5,7 +5,7 @@
 
 #define PX 412
 #define PY 495
-#define RV 8 //vision radius
+#define RV 8 // 8 vision radius
 #define RS 3 //step radius
 #define RT RV// vision for threshold
 #define RN RF+RS //neighbor radius
@@ -18,7 +18,7 @@
 #define LS RS*LT // steps for averaging the line function
 #define CT 3 // Connectabel threshhold. if the smoothed function goes below this, no new node will be spawned.
 #define ML 7 //minimum loop length
-#define TH 2.5 //2.3 threshold for findpks
+#define TH 2.6 //2.3 threshold for findpks
 
 
 #include <stdlib.h>
@@ -79,7 +79,7 @@ int main(){
 	
 	vector<node*> list;
 	vector<node**> closures;
-	new node(PX,PY,&list,&closures,&hessian);
+	node* origin = new node(PX,PY,&list,&closures,&hessian);
 	
 	unsigned long long i = 0;
 	
@@ -92,19 +92,23 @@ int main(){
 				buisy = 1;
 			}
 		}
+		
+		//for (unsigned long long i = 0; i < list.size(); ++i){
+		//	PRINT(list[i])
+		//}
 		cout << i++ << endl;
 		
 	}
 	
 	
-	vector<double> angles = con_angles(list);
-	double_vector_to_file("angles.dat",angles);
+	//vector<double> angles = con_angles(list);
+	//double_vector_to_file("angles.dat",angles);
 	
 	I3.convertTo(I3, CV_8U);
 	cv::cvtColor(I3, I3, cv::COLOR_GRAY2BGR);
 	
 	I3 = draw_list(I3,list);
-	
+	PRINT(list.size())
 	only_loops(list);
 	
 	vector<node*> junctions = find_junctions(list);
@@ -115,13 +119,13 @@ int main(){
 	
 	//vector<double> angles = con_angles(junctions);
 	//double_vector_to_file("angles.dat",angles);
-	vector<vector<node*>> loops = find_loops(closures);
+	//vector<vector<node*>> loops = find_loops(closures);
 	
-	vector<double> areas = find_loop_areas(loops);
-	double_vector_to_file("areas.dat",areas);
-	
-	PRINT(loops.size())
-	PRINT(closures.size())
+	//vector<double> areas = find_loop_areas(loops);
+	//double_vector_to_file("areas.dat",areas);
+	PRINT(list.size())
+	//PRINT(loops.size())
+	//PRINT(closures.size())
 	/*
 	for (int i = 0; i < loops.size(); ++i){
 		for (int j = 0; j < loops[i].size(); ++j){
@@ -131,8 +135,8 @@ int main(){
 	}*/
 	I3 = draw_closures(I3,closures,Scalar(128,0,128));
 	
-	draw_loops("./loops/", loops, I3, true);
-	cout << "total area: " << total_loop_area(loops) << " max area: " << max_loop_area(loops) << endl;
+	//draw_loops("./loops/", loops, I3, true);
+	//cout << "total area: " << total_loop_area(loops) << " max area: " << max_loop_area(loops) << endl;
 	
 	
 	imwrite("doubt.tif",I3);
