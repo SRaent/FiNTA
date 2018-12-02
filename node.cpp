@@ -137,7 +137,7 @@ void node::procreate_hessian(bool free = 1){
 	}
 	
 	std::vector<double>* fun = circlefun_hessian(img, x, y, RM, RV);
-	double** smoothfun = gaussavgcircle(fun, STEPS, DEV, free);
+	double** smoothfun = gaussavgcircle_MT(fun, STEPS, DEV, free);
 	std::vector<unsigned long long> pks = findpks_thresh(smoothfun[1], STEPS,TH);
 	node* child = NULL;
 	bool too_close = false;
@@ -265,9 +265,10 @@ node* node::get_straight_distant_connected(node* origin, unsigned long long dist
 			if (connections[0] == origin){
 				dc = connections[1]->get_straight_distant_connected(this, dist - 1);
 			}
-			else {
+			else if(connections[1] == origin){
 				dc = connections[0]->get_straight_distant_connected(this, dist - 1);
 			}
+			else {cout << "something fucky goin on, you try to find the streightest connection between 2 non connected nodes" << endl;}
 		}
 		else {
 			double max_angle = 0;
@@ -277,22 +278,16 @@ node* node::get_straight_distant_connected(node* origin, unsigned long long dist
 			double dx2 = 0;
 			double dy2 = 0;
 			for (unsigned long long i = 0; i < connections.size(); ++i){
-				dx2 = connections[i]->x - x;
-				dy2 = connections[i]->y - y;
-				
-				angle = atan2(dx2,dy2) - atan2(dx1,dy1);
-				while (angle < 0) {
-						angle = angle +  (2.0 * PI);
-				}
-				while (angle >= (2.0 * PI)){
-					angle = angle - (2.0 * PI);
-				}
-				if ( angle > PI){
-					angle = abs(angle - (2 * PI));
-				}
-				if (angle > max_angle){
-					max_angle = angle;
-					dc = connections[i];
+				if (connections[i] != origin){
+					dx2 = connections[i]->x - x;
+					dy2 = connections[i]->y - y;
+					
+					angle = rel_half_angle(dx1,dy1,dx2,dy2);
+					
+					if (angle > max_angle){
+						max_angle = angle;
+						dc = connections[i];
+					}
 				}
 			}
 			dc = dc->get_straight_distant_connected(this, dist - 1);

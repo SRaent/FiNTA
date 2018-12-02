@@ -471,6 +471,90 @@ double** gaussavgcircle(vector<double>* fun,unsigned long long steps,double dev,
 	return avg;
 }
 
+void calc_avgs(double** avg, vector<double>* fun, double dev, unsigned long long i_start, unsigned long long i_end){
+	double acc_val;
+	double acc_dense;
+	double val;
+	
+	for (unsigned long long i = i_start; i < i_end; ++i){
+		acc_val = 0;
+		acc_dense = 0;
+		val = 0;
+		
+		for ( unsigned long long j = 0; j < (fun[0]).size(); ++j){
+			val = exp(-pow(fun[0][j] - avg[0][i],2)/pow(dev * SQRT2, 2)); 
+			val += exp(-pow(fun[0][j] - avg[0][i] - (2 * PI),2)/pow(dev * SQRT2, 2));
+			val += exp(-pow(fun[0][j] - avg[0][i] + (2 * PI),2)/pow(dev * SQRT2, 2));
+			acc_dense += val;
+			acc_val += val * fun[1][j];
+		}
+		if (acc_val == 0){
+			avg[1][i] = 0;
+		}
+		else {
+			avg[1][i] = acc_val/acc_dense;
+		}
+	}
+}
+
+double** gaussavgcircle_MT(vector<double>* fun,unsigned long long steps,double dev, bool free = 1){
+	double** avg = new double*[2];
+	avg[0] = new double[steps];
+	avg[1] = new double[steps];
+	double acc_val;
+	double acc_dense;
+	double val;
+	for ( unsigned long long i = 0; i < steps; ++i){
+		avg[0][i] = ((double)i * 2.0 * PI / (double)steps) - PI;
+	}
+	
+	unsigned long long thread_borders[THREADS + 1];
+	double thread_steps = (double)steps/(double)THREADS;
+	for (unsigned long long i = 0; i < THREADS; ++i){
+		thread_borders[i] =(unsigned long long)((double)i * (double)thread_steps);
+	}
+	thread_borders[THREADS] = steps;
+	
+	thread t[THREADS];
+	
+	for (unsigned long long i = 0; i < THREADS; ++i){
+		t[i] = thread(calc_avgs,avg, fun, dev, thread_borders[i], thread_borders[i+1]);
+	}
+	
+	for (unsigned long long i = 0; i < THREADS; ++i){
+		t[i].join();
+	}
+	
+	/*
+	for ( unsigned long long i = 0; i < steps; ++i){
+		acc_val = 0;
+		acc_dense = 0;
+		val = 0;
+		
+		for ( unsigned long long j = 0; j < (fun[0]).size(); ++j){
+			val = exp(-pow(fun[0][j] - avg[0][i],2)/pow(dev * SQRT2, 2)); 
+			val += exp(-pow(fun[0][j] - avg[0][i] - (2 * PI),2)/pow(dev * SQRT2, 2));
+			val += exp(-pow(fun[0][j] - avg[0][i] + (2 * PI),2)/pow(dev * SQRT2, 2));
+			acc_dense += val;
+			acc_val += val * fun[1][j];
+		}
+		if (acc_val == 0){
+			avg[1][i] = 0;
+		}
+		else {
+			avg[1][i] = acc_val/acc_dense;
+		}
+//		cout << avg[0][i] << " " << avg[1][i] << endl; //to test the function
+		
+	}
+	*/
+	if (free) {
+		delete[] fun;
+	}
+	
+	return avg;
+}
+
 
 //this function is specificaly designed to take the output of gaussavgcircle. it looks for local maxima in the input vector and outputs their locations in a vector. it also needs the length of the array, since in c++ it can not be determined during runtime. usually the length would be the number of steps in the gaussavgcircle function.
 vector<unsigned long long> findpks(double* vals,unsigned long long length, bool free = 1){

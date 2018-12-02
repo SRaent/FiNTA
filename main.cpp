@@ -3,6 +3,8 @@
 
 #define SQRT2 (double)1.4142135623730950488016
 
+#define THREADS 16
+
 #define PX 412
 #define PY 495
 #define RV 8 // 8 vision radius
@@ -11,7 +13,7 @@
 #define RN RF+RS //neighbor radius
 #define RF RS/SQRT2  //forbidden radius
 #define RM 0 //minimum vision radius
-#define STEPS 100
+#define STEPS 1000
 #define DEV 0.5 // 0.55 deviation of gaussian smooth of circlefun
 #define LT 2 // line thiccness for connectable test
 #define LD 0.2 //deviation of smoothing if line function for connectable test
@@ -30,6 +32,7 @@
 #include <fstream>
 #include <complex.h>
 #include <fftw3.h>
+#include <thread>
 
 #include "tiffio.h"
 #include <opencv2/core/core.hpp>
@@ -103,6 +106,8 @@ int main(){
 	vector<node*> junctions = find_junctions(list);
 	vector<double> angles = con_angles_long(junctions,1);
 	double_vector_to_file("angles.dat",angles);
+	vector<double> angles_naive = con_angles(junctions);
+	double_vector_to_file("angles_naive.dat",angles_naive);
 
 	vector<vector<node*>> lines = find_lines(list,0.3*PI);
 	
