@@ -129,7 +129,7 @@ int main(){
 
 	vector<vector<node*>> loops = find_loops(closures);
 	
-	vector<double> areas = find_loop_areas(loops);
+	vector<double> areas = find_loop_areas_wo_max(loops);
 	double_vector_to_file("areas.dat",areas);
 	//PRINT(list.size())
 	//PRINT(loops.size())

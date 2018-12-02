@@ -253,6 +253,26 @@ vector<double> find_loop_areas(vector<vector<node*>> loops){
 	return areas;
 }
 
+vector<double> find_loop_areas_wo_max(vector<vector<node*>> loops){
+	vector<double> areas;
+	double area = 0;
+	double max_area = 0;
+	for (unsigned long long l = 0; l < loops.size(); ++l){
+		area = loop_area(loops[l]);
+		if (area > max_area){
+			if (max_area != 0){
+				areas.push_back(max_area);
+			}
+			max_area = area;
+		}
+		else{
+			areas.push_back(area);
+		}
+	}
+	return areas;
+}
+
+
 vector<node*> find_junctions(vector<node*> list){
 	vector<node*> junctions;
 	for (unsigned long long i = 0; i < list.size(); ++i){
