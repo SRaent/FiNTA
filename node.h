@@ -36,6 +36,7 @@ class node {
 	bool connected(node*, node*, unsigned long long);
 	vector<node*> get_distant_connected(unsigned long long);
 	vector<node*> get_distant_connected(node*, unsigned long long);
+	node* get_straight_distant_connected(node*, unsigned long long);
 };
 
 #endif

@@ -184,17 +184,36 @@ vector<double> con_angles(vector<node*> list){
 				dy1 = conns[j]->y - y;
 				dx2 = conns[k]->x - x;
 				dy2 = conns[k]->y - y;
-				angle = atan2(dx2,dy2) - atan2(dx1,dy1);
-				while (angle < 0) {
-						angle = angle +  (2.0 * PI);
-				}
-				while (angle >= (2.0 * PI)){
-					angle = angle - (2.0 * PI);
-				}
-				if ( angle > PI){
-					angle = abs(angle - (2 * PI));
-				}
+				angle = rel_half_angle(dx1,dy1,dx2,dy2);
 				angles.push_back(angle);
+			}
+		}
+	}
+	return angles;
+}
+
+vector<double> con_angles_long(vector<node*> list, unsigned long long dist = 1){
+	vector<double> angles;
+	double angle;
+	double dx1;
+	double dy1;
+	double dx2;
+	double dy2;
+	for(unsigned long long i = 0; i < list.size(); ++i){
+		vector<node*> conns = list[i]->connections;
+		double x = list[i]->x;
+		double y = list[i]->y;
+		for(unsigned long long j = 0; j < conns.size(); ++j){
+			for (unsigned long long k = j + 1; k < conns.size(); ++k){
+				conns[j]->get_straight_distant_connected(list[i],dist)->x;
+				dx1 = conns[j]->get_straight_distant_connected(list[i],dist)->x - conns[j]->x;
+				dy1 = conns[j]->get_straight_distant_connected(list[i],dist)->y - conns[j]->y;
+				dx2 = conns[k]->get_straight_distant_connected(list[i],dist)->x - conns[k]->x;
+				dy2 = conns[k]->get_straight_distant_connected(list[i],dist)->y - conns[k]->y;
+				if( dx1 != 0 && dy1 != 0 && dx2 != 0 && dy2 != 0){
+					angle = rel_half_angle(dx1,dy1,dx2,dy2);
+					angles.push_back(angle);
+				}
 			}
 		}
 	}
@@ -281,16 +300,8 @@ vector<node*> find_line_naive(node* n1, node* n2, double curve_angle, vector<nod
 			if (conns[j] != n1){
 				dx2 = conns[j]->x - n2->x;
 				dy2 = conns[j]->y - n2->y;
-				angle = atan2(dx2,dy2) - atan2(dx1,dy1);
-				while (angle < 0) {
-						angle = angle +  (2.0 * PI);
-				}
-				while (angle >= (2.0 * PI)){
-					angle = angle - (2.0 * PI);
-				}
-				if ( angle > PI){
-					angle = abs(angle - (2 * PI));
-				}
+				angle = rel_half_angle(dx1,dy1,dx2,dy2);
+				
 				if (angle > max_angle){
 					max_angle = angle;
 					max_angle_index = j;

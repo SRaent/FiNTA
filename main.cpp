@@ -12,13 +12,13 @@
 #define RF RS/SQRT2  //forbidden radius
 #define RM 0 //minimum vision radius
 #define STEPS 100
-#define DEV 0.55 // 0.55 deviation of gaussian smooth of circlefun
+#define DEV 0.5 // 0.55 deviation of gaussian smooth of circlefun
 #define LT 2 // line thiccness for connectable test
 #define LD 0.2 //deviation of smoothing if line function for connectable test
 #define LS RS*LT // steps for averaging the line function
 #define CT 3 // Connectabel threshhold. if the smoothed function goes below this, no new node will be spawned.
 #define ML 7 //minimum loop length
-#define TH 2.6 //2.3 threshold for findpks
+#define TH 0.8 //0.5 threshold for findpks
 
 
 #include <stdlib.h>
@@ -101,7 +101,9 @@ int main(){
 	}
 	vector<node*> work_list;
 	vector<node*> junctions = find_junctions(list);
-	
+	vector<double> angles = con_angles_long(junctions,1);
+	double_vector_to_file("angles.dat",angles);
+
 	vector<vector<node*>> lines = find_lines(list,0.3*PI);
 	
 	//vector<double> angles = con_angles(list);
@@ -112,35 +114,28 @@ int main(){
 	
 	I3 = draw_list(I3,list);
 	PRINT(list.size())
-//	only_loops(list);
+	only_loops(list);
 	
 	
-//	I3 = draw_list(I3,list,Scalar(255,0,0));
+	I3 = draw_list(I3,list,Scalar(255,0,0));
 	
 //	I3 = draw_list(I3,junctions,Scalar(0,0,0));
 	
-	//vector<double> angles = con_angles(junctions);
-	//double_vector_to_file("angles.dat",angles);
-	//vector<vector<node*>> loops = find_loops(closures);
+
+	vector<vector<node*>> loops = find_loops(closures);
 	
-	//vector<double> areas = find_loop_areas(loops);
-	//double_vector_to_file("areas.dat",areas);
+	vector<double> areas = find_loop_areas(loops);
+	double_vector_to_file("areas.dat",areas);
 	//PRINT(list.size())
 	//PRINT(loops.size())
 	//PRINT(closures.size())
-	/*
-	for (int i = 0; i < loops.size(); ++i){
-		for (int j = 0; j < loops[i].size(); ++j){
-			cout << loops[i][j] << " " ;
-		}
-		cout << endl;
-	}*/
+
 	
 	
 //	I3 = draw_closures(I3,closures,Scalar(128,0,128));
 	
-	draw_loops("./lines/", lines, I3, true);
-	//cout << "total area: " << total_loop_area(loops) << " max area: " << max_loop_area(loops) << endl;
+	//draw_loops("./lines/", lines, I3, true);
+	cout << "total area: " << total_loop_area(loops) << " max area: " << max_loop_area(loops) << " difference: " << max_loop_area(loops) - total_loop_area(loops)  << endl;
 	
 	
 	imwrite("doubt.tif",I3);

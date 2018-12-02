@@ -451,7 +451,6 @@ double** gaussavgcircle(vector<double>* fun,unsigned long long steps,double dev,
 			val = exp(-pow(fun[0][j] - avg[0][i],2)/pow(dev * SQRT2, 2)); 
 			val += exp(-pow(fun[0][j] - avg[0][i] - (2 * PI),2)/pow(dev * SQRT2, 2));
 			val += exp(-pow(fun[0][j] - avg[0][i] + (2 * PI),2)/pow(dev * SQRT2, 2));
-			val *= pow(abs(val * fun[1][j]),2);
 			acc_dense += val;
 			acc_val += val * fun[1][j];
 		}
@@ -586,6 +585,25 @@ bool gaussavgoverthresh(vector<double>* fun,double length,unsigned long long ste
 	}
 	
 	return overthresh;
+}
+
+double rel_angle(double dx1, double dy1, double dx2, double dy2){
+	double angle = atan2(dx2,dy2) - atan2(dx1,dy1);
+	while (angle < 0) {
+			angle = angle +  (2.0 * PI);
+	}
+	while (angle >= (2.0 * PI)){
+		angle = angle - (2.0 * PI);
+	}
+	return angle;
+}
+
+double rel_half_angle(double dx1, double dy1, double dx2, double dy2){
+	double angle = rel_angle(dx1, dy1, dx2, dy2);
+	if (angle > PI){
+		angle = abs(angle - (2 * PI));
+	}
+	return angle;
 }
 
 #endif

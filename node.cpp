@@ -252,4 +252,53 @@ vector<node*> node::get_distant_connected(unsigned long long dist){
 	return dc;
 }
 
+node* node::get_straight_distant_connected(node* origin, unsigned long long dist){
+	node* dc;
+	if (dist == 0){
+		dc = this;
+	}
+	else {
+		if (connections.size() < 2){
+			dc = this;
+		}
+		else if (connections.size() == 2){
+			if (connections[0] == origin){
+				dc = connections[1]->get_straight_distant_connected(this, dist - 1);
+			}
+			else {
+				dc = connections[0]->get_straight_distant_connected(this, dist - 1);
+			}
+		}
+		else {
+			double max_angle = 0;
+			double angle = 0;
+			double dx1 = origin->x - x;
+			double dy1 = origin->y - y;
+			double dx2 = 0;
+			double dy2 = 0;
+			for (unsigned long long i = 0; i < connections.size(); ++i){
+				dx2 = connections[i]->x - x;
+				dy2 = connections[i]->y - y;
+				
+				angle = atan2(dx2,dy2) - atan2(dx1,dy1);
+				while (angle < 0) {
+						angle = angle +  (2.0 * PI);
+				}
+				while (angle >= (2.0 * PI)){
+					angle = angle - (2.0 * PI);
+				}
+				if ( angle > PI){
+					angle = abs(angle - (2 * PI));
+				}
+				if (angle > max_angle){
+					max_angle = angle;
+					dc = connections[i];
+				}
+			}
+			dc = dc->get_straight_distant_connected(this, dist - 1);
+		}
+	}
+	return dc;
+	
+}
 #endif
