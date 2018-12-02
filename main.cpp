@@ -99,7 +99,10 @@ int main(){
 		cout << i++ << endl;
 		
 	}
+	vector<node*> work_list;
+	vector<node*> junctions = find_junctions(list);
 	
+	vector<vector<node*>> lines = find_lines(list,0.3*PI);
 	
 	//vector<double> angles = con_angles(list);
 	//double_vector_to_file("angles.dat",angles);
@@ -109,13 +112,12 @@ int main(){
 	
 	I3 = draw_list(I3,list);
 	PRINT(list.size())
-	only_loops(list);
+//	only_loops(list);
 	
-	vector<node*> junctions = find_junctions(list);
 	
-	I3 = draw_list(I3,list,Scalar(255,0,0));
+//	I3 = draw_list(I3,list,Scalar(255,0,0));
 	
-	I3 = draw_list(I3,junctions,Scalar(0,0,0));
+//	I3 = draw_list(I3,junctions,Scalar(0,0,0));
 	
 	//vector<double> angles = con_angles(junctions);
 	//double_vector_to_file("angles.dat",angles);
@@ -123,7 +125,7 @@ int main(){
 	
 	//vector<double> areas = find_loop_areas(loops);
 	//double_vector_to_file("areas.dat",areas);
-	PRINT(list.size())
+	//PRINT(list.size())
 	//PRINT(loops.size())
 	//PRINT(closures.size())
 	/*
@@ -133,9 +135,11 @@ int main(){
 		}
 		cout << endl;
 	}*/
-	I3 = draw_closures(I3,closures,Scalar(128,0,128));
 	
-	//draw_loops("./loops/", loops, I3, true);
+	
+//	I3 = draw_closures(I3,closures,Scalar(128,0,128));
+	
+	draw_loops("./lines/", lines, I3, true);
 	//cout << "total area: " << total_loop_area(loops) << " max area: " << max_loop_area(loops) << endl;
 	
 	
