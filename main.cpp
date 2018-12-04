@@ -5,22 +5,22 @@
 
 #define THREADS 16
 
-#define PX 412
-#define PY 495
-#define RV 8 // 8 vision radius
-#define RS 3 //step radius
+#define PX 396 //412
+#define PY 238 //495
+#define RV 80 // 8 vision radius (~2 times fibre thickness)
+#define RS 20 //step radius
 #define RT RV// vision for threshold
 #define RN RF+RS //neighbor radius
 #define RF RS/SQRT2  //forbidden radius
 #define RM 0 //minimum vision radius
-#define STEPS 1000
+#define STEPS 360
 #define DEV 0.5 // 0.55 deviation of gaussian smooth of circlefun
 #define LT 2 // line thiccness for connectable test
 #define LD 0.2 //deviation of smoothing if line function for connectable test
 #define LS RS*LT // steps for averaging the line function
 #define CT 3 // Connectabel threshhold. if the smoothed function goes below this, no new node will be spawned.
 #define ML 7 //minimum loop length
-#define TH 0.8 //0.5 threshold for findpks
+#define TH 0.07 //0.5 threshold for findpks
 
 
 #include <stdlib.h>
@@ -57,14 +57,15 @@ using namespace cv;
 
 
 int main(){
-	Mat I2 = imread("/home/moritz/Documents/Moritz_pics/Franzi_CPD_012.tif", CV_LOAD_IMAGE_GRAYSCALE);
+	Mat I2 = imread("/home/moritz/Documents/1-s2.0-S2352340915001316-mmc1/Data Folder 3/Tiffs/53g_m08.tif");
 	if(!I2.data){
 		cout << "bild existiert NICHT" << endl;
 		return -1;
 	}
 	Size s = I2.size();
 	Rect myROI(0,0,1024,884);
-	Mat I3 = I2(myROI);
+	Mat I3;
+	cv::cvtColor(I2, I3, cv::COLOR_BGR2GRAY);//(myROI);
 	Mat I5;
 	I3.convertTo(I5, CV_64F);
 	
@@ -73,7 +74,7 @@ int main(){
 	
 	
 	
-	Mat hessian = convolve_hessian(I5,15,1.8);
+	Mat hessian = convolve_hessian(I5,50,18); //1.8 (a bit less than half fibre thickness)
 	Mat tubeness = tubeness_hessian(hessian);
 	
 	
@@ -83,6 +84,10 @@ int main(){
 	vector<node*> list;
 	vector<node**> closures;
 	node* origin = new node(PX,PY,&list,&closures,&hessian);
+	//node* origin2 = new node(268,191,&list,&closures,&hessian);
+	//node* origin3 = new node(354,254,&list,&closures,&hessian);
+	//node* origin4 = new node(356,860,&list,&closures,&hessian);
+	//node* origin5 = new node(98,371,&list,&closures,&hessian);
 	
 	unsigned long long i = 0;
 	
@@ -102,9 +107,8 @@ int main(){
 		cout << i++ << endl;
 		
 	}
-	vector<node*> work_list;
 	vector<node*> junctions = find_junctions(list);
-	vector<double> angles = con_angles_long(junctions,1);
+	vector<double> angles = con_angles_long(junctions,3);
 	double_vector_to_file("angles.dat",angles);
 	vector<double> angles_naive = con_angles(junctions);
 	double_vector_to_file("angles_naive.dat",angles_naive);
@@ -119,8 +123,8 @@ int main(){
 	
 	I3 = draw_list(I3,list);
 	PRINT(list.size())
-	only_loops(list);
 	
+	only_loops(list);
 	
 	I3 = draw_list(I3,list,Scalar(255,0,0));
 	

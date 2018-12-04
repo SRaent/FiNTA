@@ -41,7 +41,7 @@ void draw_loops(char* folder, vector<vector<node*>> loops, Mat image,bool print_
 		if (print_loop_params){
 			char area[100];
 			sprintf(area,"area = %f; length = %f",loop_area(loops[l]),loop_length(loops[l]));
-			putText(loops_img,area, cvPoint(20,20), FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(0,255,127), 1, CV_AA);
+			putText(loops_img,area, Point(20,20), FONT_HERSHEY_COMPLEX_SMALL, 0.8, Scalar(0,255,127));
 		}
 		
 		for (unsigned long long i = 0; i < loops[l].size() - 1; ++i){
