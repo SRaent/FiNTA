@@ -690,4 +690,24 @@ double rel_half_angle(double dx1, double dy1, double dx2, double dy2){
 	return angle;
 }
 
+bool find_intersect(double* crosspar, double x11,double y11,double x12,double y12,double x21,double y21,double x22,double y22){
+	bool parallel = false;
+	double det = (x11-x12)*(y21-y22)-(y11-y12)*(x21-x22);
+	if (det == 0.0){ // lines are parallel
+		crosspar[0] = numeric_limits<double>::infinity();
+		crosspar[1] = numeric_limits<double>::infinity();
+		crosspar[2] = numeric_limits<double>::infinity();
+		crosspar[3] = numeric_limits<double>::infinity();
+		parallel = true;
+	}
+	else {
+		crosspar[2] = ((x11-x21)*(y21-y22) - (y11-y21)*(x21-x22))/det;
+		crosspar[3] = ((y11-y12)*(x11-x21) - (x11-x12)*(y11-y21))/det;
+		crosspar[0] = x11 + crosspar[2]*(x12-x11);
+		crosspar[1] = y21 + crosspar[3]*(y22-y21);
+		//crosspar[1] = y11 + crosspar[2]*(y12-y11);
+	}
+	return parallel;
+}
+
 #endif

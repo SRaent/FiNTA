@@ -50,12 +50,27 @@ using namespace cv;
 #include "node.cpp"
 #include "analyse.cpp"
 #include "visualise.cpp"
+#include "generate.cpp"
 
 
+int main(){
+	
+	Mat img(1000, 1000, CV_8UC(1), Scalar::all(0));
+	
+	gen_streight_lines(img,10,45 * PI / 180.0, 3);
+	gen_streight_lines(img,10,-45 * PI / 180, 3);
+	namedWindow( "Display window", WINDOW_AUTOSIZE );// Create a window for display.
+    imshow( "Display window", img);                   // Show our image inside it.
+
+    waitKey(0);
+    waitKey(0);
+    waitKey(0);
+    waitKey(0);
+    return 0;
+}
 
 
-
-
+/*
 int main(){
 	Mat I2 = imread("/home/moritz/Documents/1-s2.0-S2352340915001316-mmc1/Data Folder 3/Tiffs/53g_m08.tif");
 	if(!I2.data){
@@ -151,3 +166,4 @@ int main(){
 	imwrite("doubt2.tif",tubeness);
 	return 0;
 }
+*/
