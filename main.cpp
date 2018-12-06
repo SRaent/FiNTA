@@ -7,20 +7,24 @@
 
 #define PX 396 //412
 #define PY 238 //495
-#define RV 80 // 8 vision radius (~2 times fibre thickness)
-#define RS 20 //step radius
+#define RV 8 // 8 vision radius (~2 times fibre thickness)
+#define RS 3 //step radius
 #define RT RV// vision for threshold
 #define RN RF+RS //neighbor radius
 #define RF RS/SQRT2  //forbidden radius
 #define RM 0 //minimum vision radius
 #define STEPS 360
-#define DEV 0.5 // 0.55 deviation of gaussian smooth of circlefun
+#define DEV 0.55 // 0.55 deviation of gaussian smooth of circlefun
+#define TH 0.5 //0.5 threshold for findpks
+#define ML 7 //minimum loop length
+
+
+//nolonger used
 #define LT 2 // line thiccness for connectable test
 #define LD 0.2 //deviation of smoothing if line function for connectable test
 #define LS RS*LT // steps for averaging the line function
 #define CT 3 // Connectabel threshhold. if the smoothed function goes below this, no new node will be spawned.
-#define ML 7 //minimum loop length
-#define TH 0.07 //0.5 threshold for findpks
+#define FA 0.125*PI //forbidden angle for already connected nodes to spawn new ones
 
 
 #include <stdlib.h>
@@ -55,28 +59,37 @@ using namespace cv;
 
 int main(){
 	
-	Mat img(1000, 1000, CV_8UC(1), Scalar::all(0));
+	Mat img(1000, 1000, CV_8UC3, Scalar::all(0));
+	unsigned long long line_ct = 5;
+	for (unsigned long long i = 0; i < line_ct; ++i){ 
+		draw_infinite_line(img,500.0,500.0,500.0 + cos(PI*(double)i/(double)line_ct),500.0 + sin(PI*(double)i/(double)line_ct), Scalar::all(255), 3);
+	}
+	circle(img, Point(500, 500), 80, Scalar::all(255), 3);
+	circle(img, Point(500, 500), 160, Scalar::all(255), 3);
+	circle(img, Point(500, 500), 240, Scalar::all(255), 3);
+	circle(img, Point(500, 500), 320, Scalar::all(255), 3);
+	circle(img, Point(500, 500), 400, Scalar::all(255), 3);
+	//gen_streight_lines(img,11,20.0 * PI / 360.0, 3, Scalar::all(255));
+	//gen_streight_lines(img,11,-20.0 * PI / 360, 3, Scalar::all(255));
+	/*
+	namedWindow( "Display window", WINDOW_AUTOSIZE );	// Create a window for display.
+	imshow( "Display window", img);	// Show our image inside it.
 	
-	gen_streight_lines(img,10,45 * PI / 180.0, 3);
-	gen_streight_lines(img,10,-45 * PI / 180, 3);
-	namedWindow( "Display window", WINDOW_AUTOSIZE );// Create a window for display.
-    imshow( "Display window", img);                   // Show our image inside it.
-
-    waitKey(0);
-    waitKey(0);
-    waitKey(0);
-    waitKey(0);
-    return 0;
-}
-
-
-/*
-int main(){
+	waitKey(0);
+	waitKey(0);
+	waitKey(0);
+	waitKey(0);
+	waitKey(0);
+	waitKey(0);
+	return 0;*/
+	/*
 	Mat I2 = imread("/home/moritz/Documents/1-s2.0-S2352340915001316-mmc1/Data Folder 3/Tiffs/53g_m08.tif");
 	if(!I2.data){
 		cout << "bild existiert NICHT" << endl;
 		return -1;
 	}
+	*/
+	Mat I2(img);
 	Size s = I2.size();
 	Rect myROI(0,0,1024,884);
 	Mat I3;
@@ -89,7 +102,7 @@ int main(){
 	
 	
 	
-	Mat hessian = convolve_hessian(I5,50,18); //1.8 (a bit less than half fibre thickness)
+	Mat hessian = convolve_hessian(I5,50,1.8); //1.8 (a bit less than half fibre thickness)
 	Mat tubeness = tubeness_hessian(hessian);
 	
 	
@@ -98,8 +111,8 @@ int main(){
 	
 	vector<node*> list;
 	vector<node**> closures;
-	node* origin = new node(PX,PY,&list,&closures,&hessian);
-	//node* origin2 = new node(268,191,&list,&closures,&hessian);
+	//node* origin = new node(PX,PY,&list,&closures,&hessian);
+	node* origin2 = new node(500,500,&list,&closures,&hessian);
 	//node* origin3 = new node(354,254,&list,&closures,&hessian);
 	//node* origin4 = new node(356,860,&list,&closures,&hessian);
 	//node* origin5 = new node(98,371,&list,&closures,&hessian);
@@ -119,9 +132,10 @@ int main(){
 		//for (unsigned long long i = 0; i < list.size(); ++i){
 		//	PRINT(list[i])
 		//}
-		cout << i++ << endl;
+		cout << i++ << " " << list.size() << endl;
 		
 	}
+	
 	vector<node*> junctions = find_junctions(list);
 	vector<double> angles = con_angles_long(junctions,3);
 	double_vector_to_file("angles.dat",angles);
@@ -130,8 +144,6 @@ int main(){
 
 	vector<vector<node*>> lines = find_lines(list,0.3*PI);
 	
-	//vector<double> angles = con_angles(list);
-	//double_vector_to_file("angles.dat",angles);
 	
 	I3.convertTo(I3, CV_8U);
 	cv::cvtColor(I3, I3, cv::COLOR_GRAY2BGR);
@@ -161,9 +173,7 @@ int main(){
 	//draw_loops("./lines/", lines, I3, true);
 	cout << "total area: " << total_loop_area(loops) << " max area: " << max_loop_area(loops) << " difference: " << max_loop_area(loops) - total_loop_area(loops)  << endl;
 	
-	
 	imwrite("doubt.tif",I3);
 	imwrite("doubt2.tif",tubeness);
 	return 0;
 }
-*/

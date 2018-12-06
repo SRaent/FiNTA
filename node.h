@@ -32,6 +32,7 @@ class node {
 	~node();
 	void procreate(bool);
 	void procreate_hessian(bool);
+	void procreate_hessian_intersect(bool);
 	bool connected(node*, unsigned long long);
 	bool connected(node*, node*, unsigned long long);
 	vector<node*> get_distant_connected(unsigned long long);

@@ -15,6 +15,7 @@
 #include <opencv2/imgproc.hpp>
 
 #include "node.h"
+#include "analyse.cpp"
 
 
 
@@ -151,7 +152,7 @@ void node::procreate_hessian(bool free = 1){
 			too_close = false;
 			closable = false;
 			min_dist = numeric_limits<double>::infinity();
-			for (unsigned long long j = 0; j < neighbors.size() && !too_close; ++j){
+			for (unsigned long long j = 0; j < neighbors.size(); ++j){
 				dist = pow(xnew - (neighbors[j])->x,2) + pow(ynew - (neighbors[j])->y,2);
 				if (dist < pow(RF,2)){
 					too_close = true;
@@ -174,6 +175,95 @@ void node::procreate_hessian(bool free = 1){
 				closures->push_back(closure);
 				closure[0] = this;
 				closure[1] = child;
+			}
+		}
+	}
+	if (free){
+		delete[] smoothfun[0];
+		delete[] smoothfun[1];
+	}
+}
+
+
+
+//this function is a piece of shit and does not work at all, do not use it without extensive debugging!!!!
+void node::procreate_hessian_intersect(bool free = 1){
+	procreated = 1;
+	
+	for (std::vector<node*>::iterator it = list->begin(); it != list->end(); ++it){
+//		if (sqrt(pow((*it)->x - x,2) + pow((*it)->y - y,2)) <= RN && *it != mother){
+		if (abs((*it)->x - x) <= RN && abs((*it)->y - y) <= RN){
+			neighbors.push_back(*it);			
+		}
+	}
+	
+	std::vector<double>* fun = circlefun_hessian(img, x, y, RM, RV);
+	double** smoothfun = gaussavgcircle_MT(fun, STEPS, DEV, free);
+	std::vector<unsigned long long> pks = findpks_thresh(smoothfun[1], STEPS,TH);
+	
+	//check weather already existing connections are angularly to close to the planned new ones. 2 new connections can be closer togehter.
+	for (unsigned long long i = 0; i < pks.size(); ++i){
+		for (unsigned long long j = 0; j < connections.size(); ++j){
+			if (rel_half_angle(connections[j]->y- x,connections[j]->y - y, smoothfun[0][pks[i]]) < FA ){
+				pks.erase(pks.begin() + i);
+				--i;
+			}
+		}
+	}
+	
+	bool clipping = false;
+	bool closable = false;
+	double alpha = 0;
+	double min_alpha = 1.0;
+	double crosspar[4];
+	node* nconn;
+	node* closest_clip1;
+	node* closest_clip2;
+	double xclip;
+	double yclip;
+	node* new_clip_node;
+	for (std::vector<unsigned long long>::iterator it = pks.begin(); it != pks.end(); ++it){
+		double xnew = x + (double)RS * cos(smoothfun[0][(*it)]);
+		double ynew = y + (double)RS * sin(smoothfun[0][(*it)]);
+		if (xnew > 0 && xnew < s.width && ynew > 0 && ynew < s.height){
+			clipping = false;
+			closable = false;
+			min_alpha = 1.0;
+			for (unsigned long long j = 0; j < neighbors.size(); ++j){
+				for (unsigned long long k = 0; k < neighbors[j]->connections.size(); ++k){
+					nconn = neighbors[j]->connections[k];
+					find_intersect(crosspar,x,y,xnew,ynew,neighbors[j]->x,neighbors[j]->y,nconn->x, nconn->y);
+					if (crosspar[2] < min_alpha && crosspar[2] > 0.0){
+						clipping = true;
+						min_alpha = crosspar[2];
+						//PRINT(min_alpha);
+						if (!connected(neighbors[j],ML) && !connected(nconn,ML)){
+							closable = true;
+							xclip = crosspar[0];
+							yclip = crosspar[1];
+							closest_clip1 = neighbors[j];
+							closest_clip2 = nconn;
+						}
+					}
+				}
+			}
+			if (!clipping){
+				new node(xnew, ynew, this);
+//				std::cout << xnew << " " << ynew << std::endl;
+			}
+			else if(closable){
+				cout << "c" << flush;
+				new_clip_node = new node(xclip, yclip, this);
+				new_clip_node->connections.push_back(closest_clip1);
+				new_clip_node->connections.push_back(closest_clip2);
+				closest_clip1->connections.erase(closest_clip1->connections.begin() + find_connection_index(closest_clip1,closest_clip2));
+				closest_clip2->connections.erase(closest_clip2->connections.begin() + find_connection_index(closest_clip2,closest_clip1));
+				closest_clip1->connections.push_back(new_clip_node);
+				closest_clip2->connections.push_back(new_clip_node);
+				node** closure = new node*[2];
+				closures->push_back(closure);
+				closure[0] = this;
+				closure[1] = new_clip_node;
 			}
 		}
 	}
