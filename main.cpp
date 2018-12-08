@@ -60,17 +60,8 @@ using namespace cv;
 int main(){
 	
 	Mat img(1000, 1000, CV_8UC3, Scalar::all(0));
-	unsigned long long line_ct = 5;
-	for (unsigned long long i = 0; i < line_ct; ++i){ 
-		draw_infinite_line(img,500.0,500.0,500.0 + cos(PI*(double)i/(double)line_ct),500.0 + sin(PI*(double)i/(double)line_ct), Scalar::all(255), 3);
-	}
-	circle(img, Point(500, 500), 80, Scalar::all(255), 3);
-	circle(img, Point(500, 500), 160, Scalar::all(255), 3);
-	circle(img, Point(500, 500), 240, Scalar::all(255), 3);
-	circle(img, Point(500, 500), 320, Scalar::all(255), 3);
-	circle(img, Point(500, 500), 400, Scalar::all(255), 3);
-	//gen_streight_lines(img,11,20.0 * PI / 360.0, 3, Scalar::all(255));
-	//gen_streight_lines(img,11,-20.0 * PI / 360, 3, Scalar::all(255));
+	gen_streight_lines(img,21,20.0 * PI / 360.0, 3, Scalar::all(255));
+	gen_streight_lines(img,21,-20.0 * PI / 360.0, 3, Scalar::all(255));
 	/*
 	namedWindow( "Display window", WINDOW_AUTOSIZE );	// Create a window for display.
 	imshow( "Display window", img);	// Show our image inside it.
@@ -105,14 +96,15 @@ int main(){
 	Mat hessian = convolve_hessian(I5,50,1.8); //1.8 (a bit less than half fibre thickness)
 	Mat tubeness = tubeness_hessian(hessian);
 	
+	vector<node*> list;
+	vector<node**> closures;
+	gen_startpoints(list, closures, hessian, tubeness);
 	
 	normalize(tubeness,tubeness,255,0,32);
 	
 	
-	vector<node*> list;
-	vector<node**> closures;
 	//node* origin = new node(PX,PY,&list,&closures,&hessian);
-	node* origin2 = new node(500,500,&list,&closures,&hessian);
+	//node* origin2 = new node(500,500,&list,&closures,&hessian);
 	//node* origin3 = new node(354,254,&list,&closures,&hessian);
 	//node* origin4 = new node(356,860,&list,&closures,&hessian);
 	//node* origin5 = new node(98,371,&list,&closures,&hessian);
@@ -137,9 +129,9 @@ int main(){
 	}
 	
 	vector<node*> junctions = find_junctions(list);
-	vector<double> angles = con_angles_long(junctions,3);
+	vector<double> angles = all_con_angles_long_curvature(junctions,5);
 	double_vector_to_file("angles.dat",angles);
-	vector<double> angles_naive = con_angles(junctions);
+	vector<double> angles_naive = con_angles_long(junctions,5);
 	double_vector_to_file("angles_naive.dat",angles_naive);
 
 	vector<vector<node*>> lines = find_lines(list,0.3*PI);
@@ -151,13 +143,14 @@ int main(){
 	I3 = draw_list(I3,list);
 	PRINT(list.size())
 	
-	only_loops(list);
+	only_loops(list, closures);
 	
+	PRINT(list.size())
 	I3 = draw_list(I3,list,Scalar(255,0,0));
 	
 //	I3 = draw_list(I3,junctions,Scalar(0,0,0));
 	
-
+	
 	vector<vector<node*>> loops = find_loops(closures);
 	
 	vector<double> areas = find_loop_areas_wo_max(loops);

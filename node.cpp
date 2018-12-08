@@ -187,6 +187,7 @@ void node::procreate_hessian(bool free = 1){
 
 
 //this function is a piece of shit and does not work at all, do not use it without extensive debugging!!!!
+//i know why it does not work! there is no check, weather the intersection is in the 2nd line, one would have to check weather crosspar[3] is between 0 and 1 before saying the 2 lines intersect. not gonna fix it tho, coz this function is a POS!!!
 void node::procreate_hessian_intersect(bool free = 1){
 	procreated = 1;
 	

@@ -116,7 +116,7 @@ vector<vector<node*>> find_loops(vector<node**> closures){
 
 
 
-void only_loops(vector<node*> &list){
+void only_loops(vector<node*> &list, vector<node**> &closures){
 	
 	bool buisy = true;
 	while (buisy){
@@ -125,11 +125,21 @@ void only_loops(vector<node*> &list){
 		for (unsigned long long i = 0; i < list.size(); ++i){
 			if (list[i]->connections.size() <= 1){
 				bool unfinished = true;
+				//njow all trajces mjust bj delijtjed!!! just ljke staljns opponjents!!
 				if (list[i]->connections.size() == 1){
 					list[i]->connections[0]->connections.erase(list[i]->connections[0]->connections.begin() + find_connection_index(list[i]->connections[0], list[i]));
 				}
+				
+				for (unsigned long long j = 0; j < closures.size(); ++j){
+					if (list[i] == closures[j][0] || list[i] == closures[j][1]){
+						closures.erase(closures.begin() + j);
+						--j;
+					}
+				}
+				
 				delete (list[i]);
 				list.erase(list.begin() + i);
+				
 //				cout << "r";
 				buisy = true;
 			}
@@ -194,26 +204,99 @@ vector<double> con_angles(vector<node*> list){
 
 vector<double> con_angles_long(vector<node*> list, unsigned long long dist = 1){
 	vector<double> angles;
-	double angle;
 	double dx1;
 	double dy1;
 	double dx2;
 	double dy2;
 	for(unsigned long long i = 0; i < list.size(); ++i){
 		vector<node*> conns = list[i]->connections;
-		double x = list[i]->x;
-		double y = list[i]->y;
 		for(unsigned long long j = 0; j < conns.size(); ++j){
 			for (unsigned long long k = j + 1; k < conns.size(); ++k){
-				conns[j]->get_straight_distant_connected(list[i],dist)->x;
 				dx1 = conns[j]->get_straight_distant_connected(list[i],dist)->x - conns[j]->x;
 				dy1 = conns[j]->get_straight_distant_connected(list[i],dist)->y - conns[j]->y;
 				dx2 = conns[k]->get_straight_distant_connected(list[i],dist)->x - conns[k]->x;
 				dy2 = conns[k]->get_straight_distant_connected(list[i],dist)->y - conns[k]->y;
-				if( dx1 != 0 && dy1 != 0 && dx2 != 0 && dy2 != 0){
-					angle = rel_half_angle(dx1,dy1,dx2,dy2);
-					angles.push_back(angle);
+				if( (dx1 != 0 || dy1 != 0) && (dx2 != 0 || dy2 != 0)){
+					angles.push_back(rel_half_angle(dx1,dy1,dx2,dy2));
 				}
+			}
+		}
+	}
+	return angles;
+}
+
+vector<double> con_angles_long_curvature(vector<node*> list, unsigned long long dist = 1){
+	vector<double> angles;
+	double dx1;
+	double dy1;
+	double dx2;
+	double dy2;
+	double a;
+	double b;
+	double c;
+	double x;
+	double y;
+	Vec3d vals;
+	for(unsigned long long i = 0; i < list.size(); ++i){
+		vector<node*> conns = list[i]->connections;
+		for(unsigned long long j = 0; j < conns.size(); ++j){
+			for (unsigned long long k = j + 1; k < conns.size(); ++k){
+				x = conns[j]->get_straight_distant_connected(list[i],dist)->x;
+				y = conns[j]->get_straight_distant_connected(list[i],dist)->y;
+				vals = list[i]->img->at<Vec3d>((unsigned long long)y,(unsigned long long)x);
+				dx1 = vals[0] - vals[2] - sqrt(pow(vals[0]-vals[2],2) + pow(2.0*vals[1],2));
+				dy1 = 2.0 * vals[1];
+				x = conns[k]->get_straight_distant_connected(list[i],dist)->x;
+				y = conns[k]->get_straight_distant_connected(list[i],dist)->y;
+				vals = list[i]->img->at<Vec3d>((unsigned long long)y,(unsigned long long)x);
+				dx2 = vals[0] - vals[2] - sqrt(pow(vals[0]-vals[2],2) + pow(2.0*vals[1],2));
+				dy2 = 2.0 * vals[1];
+				if( (dx1 != 0 || dy1 != 0) && (dx2 != 0 || dy2 != 0)){
+					angles.push_back(rel_quater_angle(dx1,dy1,dx2,dy2));
+				}
+				//never observed
+				//else{
+					//cout << "einer der vektoren = (0,0) " << endl;
+				//}
+			}
+		}
+	}
+	return angles;
+}
+
+
+vector<double> all_con_angles_long_curvature(vector<node*> list, unsigned long long dist = 1){
+	vector<double> angles;
+	double dx1;
+	double dy1;
+	double dx2;
+	double dy2;
+	double a;
+	double b;
+	double c;
+	double x;
+	double y;
+	Vec3d vals;
+	for(unsigned long long i = 0; i < list.size(); ++i){
+		vector<node*> conns = list[i]->get_distant_connected(dist);
+		for(unsigned long long j = 0; j < conns.size(); ++j){
+			for (unsigned long long k = j + 1; k < conns.size(); ++k){
+				x = conns[j]->x;
+				y = conns[j]->y;
+				vals = list[i]->img->at<Vec3d>((unsigned long long)y,(unsigned long long)x);
+				dx1 = vals[0] - vals[2] - sqrt(pow(vals[0]-vals[2],2) + pow(2.0*vals[1],2));
+				dy1 = 2.0 * vals[1];
+				x = conns[k]->x;
+				y = conns[k]->y;
+				vals = list[i]->img->at<Vec3d>((unsigned long long)y,(unsigned long long)x);
+				dx2 = vals[0] - vals[2] - sqrt(pow(vals[0]-vals[2],2) + pow(2.0*vals[1],2));
+				dy2 = 2.0 * vals[1];
+				if( (dx1 != 0 || dy1 != 0) && (dx2 != 0 || dy2 != 0)){
+					angles.push_back(rel_quater_angle(dx1,dy1,dx2,dy2));
+				}
+				//else{
+				//	cout << "einer der vektoren = (0,0) " << endl;
+				//}
 			}
 		}
 	}

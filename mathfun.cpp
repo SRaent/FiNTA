@@ -709,6 +709,15 @@ double rel_half_angle(double dx1, double dy1, double a2){
 	return angle;
 }
 
+
+double rel_quater_angle(double dx1, double dy1, double dx2, double dy2){
+	double angle = rel_half_angle(dx1, dy1, dx2, dy2);
+	if (angle > PI * 0.5){
+		angle = abs(angle - PI);
+	}
+	return angle;
+}
+
 bool find_intersect(double* crosspar, double x11,double y11,double x12,double y12,double x21,double y21,double x22,double y22){
 	bool parallel = false;
 	double det = (x11-x12)*(y21-y22)-(y11-y12)*(x21-x22);
