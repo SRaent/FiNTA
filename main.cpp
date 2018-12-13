@@ -93,7 +93,7 @@ int main(){
 	
 	
 	
-	Mat hessian = convolve_hessian(I5,50,1.8); //1.8 (a bit less than half fibre thickness)
+	Mat hessian = convolve_modified_hessian(I5,50,1.8); //1.8 (a bit less than half fibre thickness)
 	Mat tubeness = tubeness_hessian(hessian);
 	
 	vector<node*> list;
