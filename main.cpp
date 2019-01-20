@@ -14,8 +14,8 @@
 #define RF RS/SQRT2  //forbidden radius
 #define RM 0 //minimum vision radius
 #define STEPS 360
-#define DEV 0.55 // 0.55 deviation of gaussian smooth of circlefun
-#define TH 0.5 //0.5 threshold for findpks
+#define DEV 0.02 // 0.55 deviation of gaussian smooth of circlefun
+#define TH 0 //0.2 threshold for findpks
 #define ML 7 //minimum loop length
 
 
@@ -55,14 +55,18 @@ using namespace cv;
 #include "analyse.cpp"
 #include "visualise.cpp"
 #include "generate.cpp"
-
+/*
+int main(){
+	polar_coordinate_illustration();
+}
+*/
 
 int main(){
-	
+	/*
 	Mat img(1000, 1000, CV_8UC3, Scalar::all(0));
 	gen_streight_lines(img,21,20.0 * PI / 360.0, 3, Scalar::all(255));
 	gen_streight_lines(img,21,-20.0 * PI / 360.0, 3, Scalar::all(255));
-	/*
+	
 	namedWindow( "Display window", WINDOW_AUTOSIZE );	// Create a window for display.
 	imshow( "Display window", img);	// Show our image inside it.
 	
@@ -72,19 +76,19 @@ int main(){
 	waitKey(0);
 	waitKey(0);
 	waitKey(0);
-	return 0;*/
-	/*
-	Mat I2 = imread("/home/moritz/Documents/1-s2.0-S2352340915001316-mmc1/Data Folder 3/Tiffs/53g_m08.tif");
+	return 0;
+	*/
+	Mat I2 = imread("/home/moritz/Documents/Moritz_pics_lap/Franzi_CPD_012.tif");
 	if(!I2.data){
 		cout << "bild existiert NICHT" << endl;
 		return -1;
 	}
-	*/
-	Mat I2(img);
-	Size s = I2.size();
+	
+	//Mat I2(img);
 	Rect myROI(0,0,1024,884);
-	Mat I3;
-	cv::cvtColor(I2, I3, cv::COLOR_BGR2GRAY);//(myROI);
+	Mat I3 = I2(myROI);
+	cv::cvtColor(I3, I3, cv::COLOR_BGR2GRAY);
+	Size s = I2.size();
 	Mat I5;
 	I3.convertTo(I5, CV_64F);
 	
@@ -93,7 +97,7 @@ int main(){
 	
 	
 	
-	Mat hessian = convolve_modified_hessian(I5,50,1.8); //1.8 (a bit less than half fibre thickness)
+	Mat hessian = convolve_hessian_plus_derivative(I5,50,2.3); //1.8 (a bit less than half fibre thickness)
 	Mat tubeness = tubeness_hessian(hessian);
 	
 	vector<node*> list;

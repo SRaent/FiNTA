@@ -86,7 +86,7 @@ intersects_found:
 }
 
 
-void gen_streight_lines(Mat &img, unsigned long long linenumber1, double angle1, unsigned long long linethickness = 1, Scalar linecolor = 255){
+void gen_streight_lines(Mat &img, unsigned long long linenumber1, double angle1, unsigned long long linethickness = 1, Scalar linecolor = Scalar::all(255)){
 	
 	Size s = img.size();
 	
@@ -125,6 +125,9 @@ void gen_streight_lines(Mat &img, unsigned long long linenumber1, double angle1,
 	
 }
 
+
+//dont judge me for functions below this point, they are only quick and dirty visualisations
+
 Mat gen_spiderweb(){
 	
 	Mat img(1000, 1000, CV_8UC3, Scalar::all(0));
@@ -148,6 +151,7 @@ void gen_startpoints(vector<node*> &list, vector<node**> &closures, Mat &hessian
 	max = numeric_limits<double>::infinity();
 	for (unsigned long long i = 0; i < n && max > thresh; ++i){
 		minMaxLoc(temp, &min, &max, &min_loc, &max_loc);
+		PRINT(max)
 		new node(max_loc.x,max_loc.y,&list,&closures,&hessian);
 		//PRINT(max_loc.x)
 		//PRINT(max_loc.y)
@@ -164,5 +168,34 @@ void gen_startpoints(vector<node*> &list, vector<node**> &closures, Mat &hessian
 	
 }
 
+void polar_coordinate_illustration(){
+	Mat img(100,100,CV_64F,Scalar::all(0));
+	gen_streight_lines(img,1,-PI/4,3);
+	Mat ret(290,360,CV_8UC3,Scalar::all(0));
+	Size s = img.size();
+	Point m = Point(s.width/2.0, s.height/2.0);
+	m = Point(50,50);
+	for (unsigned long long y = 0; y < s.height; ++y){
+		for (unsigned long long x = 0; x < s.width; ++x){
+			double dx = (double)x - (double)m.x;
+			double dy = (double)y - (double)m.y;
+			double ang = (atan2(dx,dy) + PI) * 180.0 / PI;
+			double rad = sqrt(sqr(dx) + sqr(dy)) * 4;
+			double vals = img.at<double>(y,x);
+			if (vals > 0){
+				PRINT(vals)
+				PRINT(x)
+				PRINT(y)
+				PRINT(ang)
+				PRINT(dx)
+				PRINT(dy)
+				Scalar color = Scalar(vals,vals,vals);
+				circle(ret,Point(ang,rad),2,color,-1);
+			}
+		}
+	}
+	imwrite("test.png",img);
+	imwrite("polar.png",ret);
+}
 
 #endif
