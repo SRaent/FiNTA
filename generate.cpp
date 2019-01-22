@@ -115,7 +115,7 @@ void gen_streight_lines(Mat &img, unsigned long long linenumber1, double angle1,
 	//spawnpar1[2] = xsize - spawnpar1[0];
 	//spawnpar1[3] = ysize - spawnpar1[1];
 	//now spawnpar1 containes all the fucking endpoints, where the last possible visible line can be spawned in the direction of angle1
-	
+	//those next two lines calculate the steps that need to be taken from those endpoints in order to evenly distribute the lines
 	double dxs1 = (xsize - 2.0 * spawnpar1[0])/(linenumber1 + 1);
 	double dys1 = (ysize - 2.0 * spawnpar1[1])/(linenumber1 + 1);
 	

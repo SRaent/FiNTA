@@ -14,7 +14,7 @@
 #define RF RS/SQRT2  //forbidden radius
 #define RM 0 //minimum vision radius
 #define STEPS 360
-#define DEV 0.55 // 0.55 deviation of gaussian smooth of circlefun
+#define DEV 0.48 // 0.55 deviation of gaussian smooth of circlefun
 #define TH 0 //0.2 threshold for findpks
 #define ML 7 //minimum loop length
 
@@ -63,11 +63,11 @@ int main2(){
 */
 
 int main(){
-	
+	/*
 	Mat img(1000, 1000, CV_8UC3, Scalar::all(0));
-	gen_streight_lines(img,49,0, 3, Scalar::all(255));
-	gen_streight_lines(img,49,-90.0 * PI / 180.0, 3, Scalar::all(255));
-	
+	gen_streight_lines(img,9,0, 3, Scalar::all(255));
+	gen_streight_lines(img,9,-90.0 * PI / 180.0, 3, Scalar::all(255));
+	*/
 	//namedWindow( "Display window", WINDOW_AUTOSIZE );	// Create a window for display.
 	//imshow( "Display window", img);	// Show our image inside it.
 	/*
@@ -94,6 +94,7 @@ int main(){
 	Mat I5;
 	I3.convertTo(I5, CV_64F);
 	*/
+	Mat img = imread("/home/moritz/Documents/Moritz_pics_lap/DiaJ_reference/Dis-003-3.tif");
 	Mat I3;
 	cv::cvtColor(img, I3, cv::COLOR_BGR2GRAY);
 	Mat I5;
@@ -141,7 +142,7 @@ int main(){
 		cout << i++ << " " << list.size() << endl;
 		
 	}
-	
+	/*
 	vector<node*> junctions = find_junctions(list);
 	vector<double> angles = all_con_angles_long_curvature(junctions,5);
 	double_vector_to_file("angles.dat",angles);
@@ -149,7 +150,7 @@ int main(){
 	double_vector_to_file("angles_naive.dat",angles_naive);
 
 	vector<vector<node*>> lines = find_lines(list,0.3*PI);
-	
+	*/
 	
 	I3.convertTo(I3, CV_8U);
 	cv::cvtColor(I3, I3, cv::COLOR_GRAY2BGR);
@@ -167,11 +168,11 @@ int main(){
 	
 	vector<vector<node*>> loops = find_loops(closures);
 	
-	vector<double> areas = find_loop_areas_wo_max(loops);
+	vector<double> areas = find_loop_areas_wo_max_w_diam(loops,4.0);
 	double_vector_to_file("areas.dat",areas);
 	//PRINT(list.size())
-	//PRINT(loops.size())
-	//PRINT(closures.size())
+	PRINT(loops.size())
+	PRINT(closures.size())
 
 	
 	

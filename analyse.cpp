@@ -178,7 +178,7 @@ double loop_length(vector<node*> loop){
 
 
 double inside_loop_area(vector<node*> loop, double thickness){
-	return max(0.0,loop_area(loop) - loop_length(loop)*thickness);
+	return loop_area(loop) - loop_length(loop)*thickness/2.0;
 }
 
 
@@ -359,6 +359,29 @@ vector<double> find_loop_areas_wo_max(vector<vector<node*>> loops){
 	}
 	return areas;
 }
+
+vector<double> find_loop_areas_wo_max_w_diam(vector<vector<node*>> loops,double thickness){
+	vector<double> areas;
+	double area = 0;
+	double max_area = 0;
+	for (unsigned long long l = 0; l < loops.size(); ++l){
+		area = inside_loop_area(loops[l],thickness);
+		if (area > max_area){
+			if (max_area != 0){
+				areas.push_back(max_area);
+			}
+			max_area = area;
+		}
+		else if (area >= 0.0){
+			areas.push_back(area);
+		}
+		else{
+		 areas.push_back(0.0);
+		}
+	}
+	return areas;
+}
+
 
 
 vector<node*> find_junctions(vector<node*> list){
