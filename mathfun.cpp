@@ -8,7 +8,7 @@
 #include <string.h>
 #include <vector>
 
-
+#include <fftw3.h>
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui.hpp>
@@ -136,12 +136,12 @@ Mat cv_ifft_2d_real(fftw_complex* in, unsigned long long w, unsigned long long h
 
 
 Mat convolve_hessian(Mat img, unsigned long long ksize, double dev){
-	Mat kernel[5];
+	Mat kernel[3];
 	kernel[0] = Mat(ksize,ksize, CV_64F);
 	kernel[1] = Mat(ksize,ksize, CV_64F);
 	kernel[2] = Mat(ksize,ksize, CV_64F);
 	Point m(ksize/2,ksize/2);
-	
+	//PRINT(img.channels())
 	Vec3d vals;
 	for( unsigned long long y = 0; y < ksize; ++y){
 		for (unsigned long long x = 0; x < ksize; ++x){
@@ -161,6 +161,7 @@ Mat convolve_hessian(Mat img, unsigned long long ksize, double dev){
 	filter2D(img, res[0], -1 ,kernel[0], m, 0, BORDER_DEFAULT);
 	filter2D(img, res[1], -1 ,kernel[1], m, 0, BORDER_DEFAULT);
 	filter2D(img, res[2], -1 ,kernel[2], m, 0, BORDER_DEFAULT);
+	//PRINT(res[0].channels())
 	Mat ret;
 	cv::merge(res,ret);
 	return ret;
@@ -242,6 +243,32 @@ void save_hessian(unsigned long long ksize, double dev){
 	imwrite("a_kernel.png",kernel[0]);
 	imwrite("b_kernel.png",kernel[1]);
 	imwrite("c_kernel.png",kernel[2]);
+}
+
+
+
+void save_hessian_colors(unsigned long long ksize, double dev){
+	vector<Mat> kernel;
+	kernel.push_back(Mat(ksize,ksize, CV_64F));
+	kernel.push_back(Mat(ksize,ksize, CV_64F));
+	kernel.push_back(Mat(ksize,ksize, CV_64F));
+	Point m(ksize/2,ksize/2);
+	
+	Vec3d vals;
+	for( unsigned long long y = 0; y < ksize; ++y){
+		for (unsigned long long x = 0; x < ksize; ++x){
+			(kernel[0]).at<double>(y,x) = exp(-(pow(((double)x - m.x),2) + pow(((double)y - m.y),2))/(2.0*dev*dev))*(pow(((double)x - m.x)/dev,2) - 1.0)/(pow(dev,3)*sqrt(PI*2.0));
+			(kernel[1]).at<double>(y,x) = exp(-(pow(((double)x - m.x),2) + pow(((double)y - m.y),2))/(2.0*dev*dev)) * ((double)x - m.x) * ((double)y - m.y)/(pow(dev,5) * sqrt(PI*2.0));
+			(kernel[2]).at<double>(y,x) = exp(-(pow(((double)x - m.x),2) + pow(((double)y - m.y),2))/(2.0*dev*dev))*(pow(((double)y - m.y)/dev,2) - 1.0)/(pow(dev,3)*sqrt(PI*2.0));
+		}
+	}
+	PRINT((kernel[0]).at<double>(ksize/2,ksize/2))
+	PRINT((kernel[1]).at<double>(ksize/2 - dev,ksize/2 - dev))
+	PRINT((kernel[2]).at<double>(ksize/2,ksize/2))
+	Mat ret;
+	cv::merge(kernel,ret);
+	normalize(ret,ret,255,0,32);
+	imwrite("color_kernel.png",ret);
 }
 
 

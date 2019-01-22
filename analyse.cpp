@@ -177,6 +177,11 @@ double loop_length(vector<node*> loop){
 }
 
 
+double inside_loop_area(vector<node*> loop, double thickness){
+	return max(0.0,loop_area(loop) - loop_length(loop)*thickness);
+}
+
+
 vector<double> con_angles(vector<node*> list){
 	vector<double> angles;
 	double angle;
