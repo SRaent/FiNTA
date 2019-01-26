@@ -560,7 +560,7 @@ vector<double>* circlefun_hessian(Mat* img, double xpos, double ypos, double inn
 				vals = img->at<Vec3d>(y,x);
 				(fun[0]).push_back(atan2(dy,dx));
 				(fun[1]).push_back(-(pow(dy,2)*vals[0] - 2.0 * vals[1] * dx * dy + vals[2] * pow(dx,2))/radsqr);
-//				cout << (fun[0]).back() << " " << (fun[1]).back() << " " << x << " " << y << " " << rad << endl; //to test the function
+				cout << (fun[0]).back() << " " << (fun[1]).back() << endl;// << " " << x << " " << y << " " << rad << endl; //to test the function
 			}
 		}
 	}

@@ -375,9 +375,9 @@ vector<double> find_loop_areas_wo_max_w_diam(vector<vector<node*>> loops,double 
 		else if (area >= 0.0){
 			areas.push_back(area);
 		}
-		else{
-		 areas.push_back(0.0);
-		}
+//		else{
+//		 areas.push_back(0.0);
+//		}
 	}
 	return areas;
 }

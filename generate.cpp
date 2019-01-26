@@ -152,6 +152,8 @@ void gen_startpoints(vector<node*> &list, vector<node**> &closures, Mat &hessian
 	for (unsigned long long i = 0; i < n && max > thresh; ++i){
 		minMaxLoc(temp, &min, &max, &min_loc, &max_loc);
 		PRINT(max)
+		PRINT(max_loc.x)
+		PRINT(max_loc.y)
 		new node(max_loc.x,max_loc.y,&list,&closures,&hessian);
 		//PRINT(max_loc.x)
 		//PRINT(max_loc.y)

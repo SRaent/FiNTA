@@ -138,7 +138,7 @@ void node::procreate_hessian(bool free = 1){
 	}
 	
 	std::vector<double>* fun = circlefun_hessian(img, x, y, RM, RV);
-	double** smoothfun = gaussavgcircle_MT(fun, STEPS, DEV, free);
+	double** smoothfun = gaussavgcircle(fun, STEPS, DEV, free);
 	std::vector<unsigned long long> pks = findpks_thresh(smoothfun[1], STEPS,TH);
 	node* child = NULL;
 	bool too_close = false;
