@@ -126,23 +126,6 @@ void gen_streight_lines(Mat &img, unsigned long long linenumber1, double angle1,
 }
 
 
-//dont judge me for functions below this point, they are only quick and dirty visualisations
-
-Mat gen_spiderweb(){
-	
-	Mat img(1000, 1000, CV_8UC3, Scalar::all(0));
-	unsigned long long line_ct = 5;
-	for (unsigned long long i = 0; i < line_ct; ++i){ 
-		draw_infinite_line(img,500.0,500.0,500.0 + cos(PI*(double)i/(double)line_ct),500.0 + sin(PI*(double)i/(double)line_ct), Scalar::all(255), 3);
-	}
-	circle(img, Point(500, 500), 80, Scalar::all(255), 3);
-	circle(img, Point(500, 500), 160, Scalar::all(255), 3);
-	circle(img, Point(500, 500), 240, Scalar::all(255), 3);
-	circle(img, Point(500, 500), 320, Scalar::all(255), 3);
-	circle(img, Point(500, 500), 400, Scalar::all(255), 3);
-	return img;
-}
-
 
 void gen_startpoints(vector<node*> &list, vector<node**> &closures, Mat &hessian, Mat tubeness, unsigned long long n = 100, double rad = 20.0 * RS, double thresh = 0){
 	Point min_loc, max_loc;	
@@ -169,6 +152,26 @@ void gen_startpoints(vector<node*> &list, vector<node**> &closures, Mat &hessian
 	}
 	
 }
+
+
+
+//dont judge me for functions below this point, they are only quick and dirty visualisations
+
+Mat gen_spiderweb(){
+	
+	Mat img(1000, 1000, CV_8UC3, Scalar::all(0));
+	unsigned long long line_ct = 5;
+	for (unsigned long long i = 0; i < line_ct; ++i){ 
+		draw_infinite_line(img,500.0,500.0,500.0 + cos(PI*(double)i/(double)line_ct),500.0 + sin(PI*(double)i/(double)line_ct), Scalar::all(255), 3);
+	}
+	circle(img, Point(500, 500), 80, Scalar::all(255), 3);
+	circle(img, Point(500, 500), 160, Scalar::all(255), 3);
+	circle(img, Point(500, 500), 240, Scalar::all(255), 3);
+	circle(img, Point(500, 500), 320, Scalar::all(255), 3);
+	circle(img, Point(500, 500), 400, Scalar::all(255), 3);
+	return img;
+}
+
 
 void polar_coordinate_illustration(){
 	Mat img(100,100,CV_64F,Scalar::all(0));

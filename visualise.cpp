@@ -21,12 +21,12 @@
 
 #define PI (double)3.1415926535897932384626433832795
 
-Mat draw_list(Mat input_image, vector<node*>list,Scalar color = Scalar(0,255,0)){
+Mat draw_list(Mat input_image, vector<node*>list,Scalar color = Scalar(0,255,0),double thickness = 1){
 	Mat image;
 	input_image.copyTo(image);
 	for (unsigned long long i = 0; i < list.size(); ++i){
 		for (unsigned long long j = 0; j < list[i]->connections.size(); ++j){
-			line(image,Point(list[i]->x,list[i]->y),Point(list[i]->connections[j]->x,list[i]->connections[j]->y),color);
+			line(image,Point(list[i]->x,list[i]->y),Point(list[i]->connections[j]->x,list[i]->connections[j]->y),color, thickness);
 			
 		}
 	}

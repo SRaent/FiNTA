@@ -57,6 +57,30 @@ node* find_next_loop_node(node* prev, node* n, long long sign){
 	}
 	return n->connections[index];
 }
+
+
+bool node_is_in(vector<node*> list, node* element){
+	for (unsigned long long i = 0; i < list.size(); ++i){
+		if (list[i] == element){
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+bool node_list_eql(vector<node*> loop1, vector<node*> loop2){
+	bool eql = true;
+	for(auto it = loop1.begin(); it != loop1.end() && eql; ++it){
+		eql = node_is_in(loop2,*it);
+	}
+	for(auto it = loop2.begin(); it != loop2.end() && eql; ++it){
+		eql = node_is_in(loop2,*it);
+	}
+	return eql;
+}
+
 //end is a misleading variable name
 vector<node*> find_loop(node* prev, node* n, node* start, node* end, long long sign){
 	vector<node*> ret;
@@ -97,12 +121,13 @@ vector<vector<node*>> find_loops(vector<node**> closures){
 		ret.push_back(find_loop(closures[i], -1));
 	}
 	
-	double check = 0;
+	//double check = 0;
 		
 	for (unsigned long long i = 0; i < ret.size() - 1; ++i){
-		check = loop_checksum(ret[i]);
+		//check = loop_checksum(ret[i]);
 		for (unsigned long long j = i + 1; j < ret.size(); ++j){
-			if(abs(loop_checksum(ret[j]) - check) < 0.000001){
+			//if(abs(loop_checksum(ret[j]) - check) < 0.000001){
+			if(node_list_eql(ret[i],ret[j])){
 //				PRINT(abs(loop_checksum(ret[j]) - check))
 				ret.erase(ret.begin() + j);
 				--j;
@@ -392,15 +417,6 @@ vector<node*> find_junctions(vector<node*> list){
 		}
 	}
 	return junctions;
-}
-
-bool node_is_in(vector<node*> list, node* element){
-	for (unsigned long long i = 0; i < list.size(); ++i){
-		if (list[i] == element){
-			return true;
-		}
-	}
-	return false;
 }
 
 

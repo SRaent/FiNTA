@@ -7,7 +7,7 @@
 
 #define PX 396 //412
 #define PY 238 //495
-#define RV 8 // 8 vision radius (~2 times fibre thickness)
+#define RV 10 // 8 vision radius (~2 times fibre thickness)
 #define RS 3 //step radius
 #define RT RV// vision for threshold
 #define RN RF+RS //neighbor radius
@@ -15,7 +15,7 @@
 #define RM 0 //minimum vision radius
 #define STEPS 360
 #define DEV 0.55 // 0.55 deviation of gaussian smooth of circlefun
-#define TH 0 //0.2 threshold for findpks
+#define TH 0.1 //0.5 threshold for findpks
 #define ML 7 //minimum loop length
 
 
@@ -56,8 +56,11 @@ using namespace cv;
 #include "visualise.cpp"
 #include "generate.cpp"
 /*
-int main2(){
-	save_hessian_colors(200,30.0);
+int main(){
+	Mat img(1000, 1000, CV_8UC3, Scalar::all(0));
+	gen_streight_lines(img,109,0, 3, Scalar::all(255));
+	gen_streight_lines(img,109,-90.0 * PI / 180.0, 3, Scalar::all(255));
+	imwrite("example.png",img);
 	return 0;
 }
 */
@@ -67,6 +70,7 @@ int main(){
 	Mat img(1000, 1000, CV_8UC3, Scalar::all(0));
 	gen_streight_lines(img,9,0, 3, Scalar::all(255));
 	gen_streight_lines(img,9,-90.0 * PI / 180.0, 3, Scalar::all(255));
+	imwrite("example.png",img)
 	*/
 	//namedWindow( "Display window", WINDOW_AUTOSIZE );	// Create a window for display.
 	//imshow( "Display window", img);	// Show our image inside it.
@@ -79,8 +83,9 @@ int main(){
 	waitKey(0);
 	return 0;
 	*/
-	/*
-	Mat I2 = imread("/home/moritz/Documents/Moritz_pics_lap/Franzi_CPD_012.tif");
+	
+	//Mat I2 = imread("/home/moritz/Documents/Moritz_pics_lap/Franzi_CPD_012.tif");
+	Mat I2 = imread("/home/moritz/Documents/Moritz_pics_lap/analysable images/C1_p_hmds_044.tif");
 	if(!I2.data){
 		cout << "bild existiert NICHT" << endl;
 		return -1;
@@ -93,20 +98,22 @@ int main(){
 	Size s = I2.size();
 	Mat I5;
 	I3.convertTo(I5, CV_64F);
-	*/
-	Mat img = imread("/home/moritz/Documents/Moritz_pics_lap/DiaJ_reference/Dis-003-1.tif");
+	
+	
+	/*
+	Mat img = imread("/home/moritz/Documents/Moritz_pics_lap/analysable images/Cx_hmds_4-37_058.tif");
 	Mat I3;
 	cv::cvtColor(img, I3, cv::COLOR_BGR2GRAY);
 	Mat I5;
 	I3.convertTo(I5, CV_64F);
-	
+	*/
 	normalize(I5,I5,255,0,32);
 	
 	
 	PRINT(I5.channels());
 	
 	
-	Mat hessian = convolve_hessian(I5,50,2.3); //1.8 (a bit less than half fibre thickness)
+	Mat hessian = convolve_hessian(I5,50,2.3); //1.8 ; 2.3 (a bit less than half fibre thickness)
 	Mat tubeness = tubeness_hessian(hessian);
 	
 	
@@ -155,13 +162,13 @@ int main(){
 	I3.convertTo(I3, CV_8U);
 	cv::cvtColor(I3, I3, cv::COLOR_GRAY2BGR);
 	
-	I3 = draw_list(I3,list);
+	I3 = draw_list(I3,list,Scalar(0,0,255),2);
 	PRINT(list.size())
 	
 	only_loops(list, closures);
 	
 	PRINT(list.size())
-	I3 = draw_list(I3,list,Scalar(255,0,0));
+	//I3 = draw_list(I3,list,Scalar(255,0,0));
 	
 //	I3 = draw_list(I3,junctions,Scalar(0,0,0));
 	
@@ -181,7 +188,7 @@ int main(){
 	//draw_loops("./lines/", lines, I3, true);
 	cout << "total area: " << total_loop_area(loops) << " max area: " << max_loop_area(loops) << " difference: " << max_loop_area(loops) - total_loop_area(loops)  << endl;
 	
-	imwrite("doubt.tif",I3);
+	imwrite("doubt.png",I3);
 	imwrite("doubt2.tif",tubeness);
 	return 0;
 }

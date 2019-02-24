@@ -147,5 +147,15 @@ int main(){
 	
 	imwrite("doubt.tif",I3);
 	imwrite("doubt2.tif",tubeness);
+	
+	
+	circle(I2, Point(548,439), 1, Scalar(0,0,255), -1);
+	circle(I2, Point(548,439), 8, Scalar(0,0,255), 1);
+	
+	Rect examp(534,423,31,27);
+	Mat I6 = I2(examp);
+	Mat I7 = I3(examp);
+	imwrite("ill3.png",I6);
+	imwrite("ill2.png",I7);
 	return 0;
 }

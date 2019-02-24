@@ -246,6 +246,46 @@ void save_hessian(unsigned long long ksize, double dev){
 }
 
 
+void save_gaussian(unsigned long long ksize, double dev){
+	Mat kernel;
+	kernel = Mat(ksize,ksize, CV_64F);
+	Point m(ksize/2,ksize/2);
+	
+	Vec3d vals;
+	for( unsigned long long y = 0; y < ksize; ++y){
+		for (unsigned long long x = 0; x < ksize; ++x){
+			(kernel).at<double>(y,x) = exp(-(pow(((double)x - m.x),2) + pow(((double)y - m.y),2))/(2.0*dev*dev))/(pow(dev,2)*PI*2.0);
+		}
+	}
+	
+	normalize(kernel,kernel,255,0,32);
+	//PRINT((kernel[0]).at<double>((int)m.y,(int)m.x))
+	//PRINT((kernel[0]).at<double>(1,1))
+	imwrite("gaussian_kernel.png",kernel);
+}
+
+void save_gaussian_derivatives(unsigned long long ksize, double dev){
+	Mat kernel[2];
+	kernel[0] = Mat(ksize,ksize, CV_64F);
+	kernel[1] = Mat(ksize,ksize, CV_64F);
+	Point m(ksize/2,ksize/2);
+	
+	Vec3d vals;
+	for( unsigned long long y = 0; y < ksize; ++y){
+		for (unsigned long long x = 0; x < ksize; ++x){
+			(kernel[0]).at<double>(y,x) = exp(-(pow(((double)x - m.x),2) + pow(((double)y - m.y),2))/(2.0*dev*dev))*((double)x - m.x);
+			(kernel[1]).at<double>(y,x) = exp(-(pow(((double)x - m.x),2) + pow(((double)y - m.y),2))/(2.0*dev*dev))*((double)y - m.y);
+		}
+	}
+	
+	normalize(kernel[0],kernel[0],255,0,32);
+	normalize(kernel[1],kernel[1],255,0,32);
+	//PRINT((kernel[0]).at<double>((int)m.y,(int)m.x))
+	//PRINT((kernel[0]).at<double>(1,1))
+	imwrite("ddx_kernel.png",kernel[0]);
+	imwrite("ddy_kernel.png",kernel[1]);
+}
+
 
 void save_hessian_colors(unsigned long long ksize, double dev){
 	vector<Mat> kernel;
@@ -560,7 +600,7 @@ vector<double>* circlefun_hessian(Mat* img, double xpos, double ypos, double inn
 				vals = img->at<Vec3d>(y,x);
 				(fun[0]).push_back(atan2(dy,dx));
 				(fun[1]).push_back(-(pow(dy,2)*vals[0] - 2.0 * vals[1] * dx * dy + vals[2] * pow(dx,2))/radsqr);
-				cout << (fun[0]).back() << " " << (fun[1]).back() << endl;// << " " << x << " " << y << " " << rad << endl; //to test the function
+				//cout << (fun[0]).back() << " " << (fun[1]).back() << endl;// << " " << x << " " << y << " " << rad << endl; //to test the function
 			}
 		}
 	}
