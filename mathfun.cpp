@@ -145,9 +145,10 @@ Mat convolve_hessian(Mat img, unsigned long long ksize, double dev){
 	Vec3d vals;
 	for( unsigned long long y = 0; y < ksize; ++y){
 		for (unsigned long long x = 0; x < ksize; ++x){
-			(kernel[0]).at<double>(y,x) = exp(-(pow(((double)x - m.x),2) + pow(((double)y - m.y),2))/(2.0*dev*dev))*(pow(((double)x - m.x)/dev,2) - 1.0)/(pow(dev,3)*sqrt(PI*2.0));
-			(kernel[1]).at<double>(y,x) = exp(-(pow(((double)x - m.x),2) + pow(((double)y - m.y),2))/(2.0*dev*dev)) * ((double)x - m.x) * ((double)y - m.y)/(pow(dev,5) * sqrt(PI*2.0));
-			(kernel[2]).at<double>(y,x) = exp(-(pow(((double)x - m.x),2) + pow(((double)y - m.y),2))/(2.0*dev*dev))*(pow(((double)y - m.y)/dev,2) - 1.0)/(pow(dev,3)*sqrt(PI*2.0));
+			//checked for scaling, of by a factor of dev from the true second order derivative
+			(kernel[0]).at<double>(y,x) = exp(-(pow(((double)x - m.x),2) + pow(((double)y - m.y),2))/(2.0*dev*dev))*(pow(((double)x - m.x)/dev,2) - 1.0)/(pow(dev,2)*sqrt(PI*2.0));
+			(kernel[1]).at<double>(y,x) = exp(-(pow(((double)x - m.x),2) + pow(((double)y - m.y),2))/(2.0*dev*dev)) * ((double)x - m.x) * ((double)y - m.y)/(pow(dev,4) * sqrt(PI*2.0));
+			(kernel[2]).at<double>(y,x) = exp(-(pow(((double)x - m.x),2) + pow(((double)y - m.y),2))/(2.0*dev*dev))*(pow(((double)y - m.y)/dev,2) - 1.0)/(pow(dev,2)*sqrt(PI*2.0));
 		}
 	}
 	vector<Mat> res;

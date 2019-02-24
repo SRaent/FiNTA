@@ -507,4 +507,70 @@ vector<vector<node*>> find_lines(vector<node*> list, double angle, unsigned long
 	return lines;
 }
 
+
+vector<node*> junc_line(node* junc, node* dir){
+	vector<node*> line;
+	
+	line.push_back(junc);
+	line.push_back(dir);
+	
+	node* pre = junc;
+	node* cur = dir;
+	
+	while (cur->connections.size() == 2){
+		if (cur->connections[0] == pre){
+			pre = cur;
+			cur = cur->connections[1];
+			line.push_back(cur);
+		}
+		else if(cur->connections[1] == pre){
+			pre = cur;
+			cur = cur->connections[0];
+			line.push_back(cur);
+		}
+		else{
+			cout << "Oh shit, somethings fucked!" << endl;
+			line[-1];
+		}
+	}
+	
+	return line;
+}
+
+double line_length(vector<node*> line){
+	double l = 0;
+	for(unsigned long long i = 0; i < line.size() - 1; ++i){
+		l += sqrt(sqr(line[i]->x - line[i+1]->x) + sqr(line[i]->y - line[i+1]->y));
+	}
+	return l;
+}
+
+vector<double> junction_distances(vector<node*> junc){
+	vector<double> jd;
+	vector<vector<node*>> jc;
+	
+	
+	for(auto it = junc.begin(); it != junc.end(); ++it){
+		for(auto jt = (*it)->connections.begin(); jt != (*it)->connections.end(); ++jt){
+			jc.push_back(junc_line(*it,*jt));
+		}
+	}
+	
+	for (unsigned long long i = 0; i < jc.size() - 1; ++i){
+		for (unsigned long long j = i + 1; j < jc.size(); ++j){
+			if(node_list_eql(jc[i],jc[j])){
+				jc.erase(jc.begin() + j);
+				--j;
+			}
+		}
+	}
+	
+	for (unsigned long long i = 0; i < jc.size(); ++i){
+		jd.push_back(line_length(jc[i]));
+	}
+	
+	
+	return jd;
+}
+
 #endif
