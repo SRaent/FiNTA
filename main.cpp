@@ -7,19 +7,23 @@
 
 #define PX 396 //412
 #define PY 238 //495
+
 #define RV 8 // 8 vision radius (~2 times fibre thickness)
-#define RS 3 //step radius
-#define RT RV// vision for threshold
-#define RN RF+RS //neighbor radius
-#define RF RS/SQRT2  //forbidden radius
 #define RM 0 //minimum vision radius
+#define RS 3 //step radius
 #define STEPS 360
 #define DEV 0.45 // 0.55 deviation of gaussian smooth of circlefun
 #define TH 0.4 //0.5 threshold for findpks
 #define ML 5 //minimum loop length
+#define SG 1.8 //1.8 ; 2.3 (a bit less than half fibre thickness)
+
+//computed
+#define RN RF+RS //neighbor radius
+#define RF RS/SQRT2  //forbidden radius
 
 
 //nolonger used
+#define RT RV// vision for threshold
 #define LT 2 // line thiccness for connectable test
 #define LD 0.2 //deviation of smoothing if line function for connectable test
 #define LS RS*LT // steps for averaging the line function
@@ -132,7 +136,7 @@ int main(){
 	PRINT(I5.channels());
 	
 	
-	Mat hessian = convolve_hessian(I5,50,1.8); //1.8 ; 2.3 (a bit less than half fibre thickness)
+	Mat hessian = convolve_hessian(I5,50,SG); //1.8 ; 2.3 (a bit less than half fibre thickness)
 	Mat tubeness = tubeness_hessian(hessian);
 	
 	
