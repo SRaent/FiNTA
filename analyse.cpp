@@ -203,7 +203,7 @@ double loop_length(vector<node*> loop){
 
 
 double inside_loop_area(vector<node*> loop, double thickness){
-	return loop_area(loop) - loop_length(loop)*thickness/2.0;
+	return loop_area(loop) - (loop_length(loop)*thickness/2.0);
 }
 
 
@@ -365,7 +365,7 @@ vector<double> find_loop_areas(vector<vector<node*>> loops){
 	}
 	return areas;
 }
-
+// the loop with the biggest area encompasses all other loops because of the way the loops are found. not considering the biggest area is not manipulating data
 vector<double> find_loop_areas_wo_max(vector<vector<node*>> loops){
 	vector<double> areas;
 	double area = 0;
@@ -397,7 +397,7 @@ vector<double> find_loop_areas_wo_max_w_diam(vector<vector<node*>> loops,double 
 			}
 			max_area = area;
 		}
-		else if (area >= 0.0){
+		else if (area > 0.0){
 			areas.push_back(area);
 		}
 //		else{

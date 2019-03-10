@@ -8,14 +8,14 @@
 #define PX 396 //412
 #define PY 238 //495
 
-#define RV 10 // 8 vision radius (~2 times fibre thickness)
+#define RV 8 // 8 vision radius (~2 times fibre thickness)
 #define RM 0 //minimum vision radius
 #define RS 3 //step radius
 #define STEPS 360
-#define DEV 0.55 // 0.55 deviation of gaussian smooth of circlefun
-#define TH 0.5 //0.5 threshold for findpks
+#define DEV 0.45 // 0.55 deviation of gaussian smooth of circlefun
+#define TH 0.4 //0.5 threshold for findpks
 #define ML 7 //minimum loop length
-#define SG 1.5 //1.8 ; 2.3 (a bit less than half fibre thickness)
+#define SG 1.8 //1.8 ; 2.3 (a bit less than half fibre thickness)
 
 //computed
 #define RN RF+RS //neighbor radius
@@ -60,112 +60,19 @@ using namespace cv;
 #include "visualise.cpp"
 #include "generate.cpp"
 
-
-
-int main_func(int angle){
-	Mat img(1000, 1000, CV_8UC3, Scalar::all(0));
-	gen_streight_lines(img,19,(double)angle * PI / 360.0, 4, Scalar::all(255));
-	gen_streight_lines(img,19,-(double)angle * PI / 360.0, 4, Scalar::all(255));
-	
-	
-	Mat I3;
-	img.copyTo(I3);
-	
-	
-	Mat I5;
-	cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
-	img.convertTo(I5, CV_64F);
-	
-	
-	Mat hessian = convolve_hessian(I5,1000,5);
-	Mat tubeness = tubeness_hessian(hessian);
-	
-	vector<node*> list;
-	vector<node**> closures;
-	//gen_startpoints(list, closures, hessian, tubeness, 1);
-	node* origin = new node(500,500,&list,&closures,&hessian);
-	
-	string file = to_string(angle) + "_deg";
-	string write_folder = "./results_angles/";
-	
-	
-	
-	
-	unsigned long long i = 0;
-	
-	for (bool buisy = 1; buisy && i < 500 ;){
-		buisy = 0;
-		unsigned long long end = list.size();
-		for (unsigned long long it = 0; it < end; ++it){
-			if (!(list[it]->procreated)){
-				list[it]->procreate_hessian();
-				buisy = 1;
-			}
-		}
-		
-		//for (unsigned long long i = 0; i < list.size(); ++i){
-		//	PRINT(list[i])
-		//}
-		cout << i++ << " " << list.size() << endl;
-		
-	}
-	
-	vector<node*> junctions = find_junctions(list);
-	for (int n = 1; n <= 7; ++n){
-		vector<double> angles_curv = all_con_angles_long_curvature(junctions,n);
-		double_vector_to_file(write_folder+file+to_string(n)+"ang_curv.dat",angles_curv);
-		vector<double> angles_long = con_angles_long(junctions,n);
-		double_vector_to_file(write_folder+file+to_string(n)+"ang_long.dat",angles_long);
-	}
-	vector<double> angles_naive = con_angles(junctions);
-	double_vector_to_file(write_folder+file+"ang_naive.dat",angles_naive);
-	
-	
-	
-	I3 = draw_list(I3,list,Scalar(0,0,255),1);
-	
-	
-	imwrite(write_folder+file+"_tracing.tif",I3);
-	imwrite(write_folder+file+"_orig.tif",img);
-	return 0;
-	
-}
+int main_func(string);
 
 int main(){
-	main_func(90);
-	main_func(80);
-	main_func(70);
-	main_func(60);
-	main_func(50);
-	main_func(40);
-	main_func(30);
-	main_func(20);
-	main_func(10);
+	main_func("10T_2GA_2PFA_RPE1_wt_susp_024");
+	//main_func("10T_2GA_2PFA_RPE1_wt_susp_011");
 }
 
 
-int main2(){
-	/*
-	Mat img(1000, 1000, CV_8UC3, Scalar::all(0));
-	gen_streight_lines(img,9,0, 3, Scalar::all(255));
-	gen_streight_lines(img,9,-90.0 * PI / 180.0, 3, Scalar::all(255));
-	imwrite("example.png",img)
-	*/
-	//namedWindow( "Display window", WINDOW_AUTOSIZE );	// Create a window for display.
-	//imshow( "Display window", img);	// Show our image inside it.
-	/*
-	waitKey(0);
-	waitKey(0);
-	waitKey(0);
-	waitKey(0);
-	waitKey(0);
-	waitKey(0);
-	return 0;
-	*/
+int main_func(string file){
 	
 	//Mat I2 = imread("/home/moritz/Documents/Moritz_pics_lap/Franzi_CPD_012.tif");
 	string folder = "/home/moritz/Documents/Moritz_pics_lap/analysable images/";
-	string file = "10T_2GA_2PFA_RPE1_wt_susp_011";
+	//string file = "10T_2GA_2PFA_RPE1_wt_susp_011";
 	string write_folder = "./results/";
 	Mat I2 = imread(folder+file+".tif");
 	if(!I2.data){
@@ -183,13 +90,6 @@ int main2(){
 	I3.convertTo(I5, CV_64F);
 	
 	
-	/*
-	Mat img = imread("/home/moritz/Documents/Moritz_pics_lap/analysable images/Cx_hmds_4-37_058.tif");
-	Mat I3;
-	cv::cvtColor(img, I3, cv::COLOR_BGR2GRAY);
-	Mat I5;
-	I3.convertTo(I5, CV_64F);
-	*/
 	normalize(I5,I5,255,0,32);
 	
 	
@@ -208,15 +108,10 @@ int main2(){
 	normalize(tubeness,tubeness,255,0,32);
 	
 	
-	//node* origin = new node(PX,PY,&list,&closures,&hessian);
-	//node* origin2 = new node(500,500,&list,&closures,&hessian);
-	//node* origin3 = new node(354,254,&list,&closures,&hessian);
-	//node* origin4 = new node(356,860,&list,&closures,&hessian);
-	//node* origin5 = new node(98,371,&list,&closures,&hessian);
 	
 	unsigned long long i = 0;
 	
-	cout << write_folder+file+"_junction_dist.dat" << endl;
+	//cout << write_folder+file+"_junction_dist.dat" << endl;
 	for (bool buisy = 1; buisy && i < 500 ;){
 		buisy = 0;
 		unsigned long long end = list.size();
@@ -233,15 +128,7 @@ int main2(){
 		cout << i++ << " " << list.size() << endl;
 		
 	}
-	/*
-	vector<node*> junctions = find_junctions(list);
-	vector<double> angles = all_con_angles_long_curvature(junctions,5);
-	double_vector_to_file("angles.dat",angles);
-	vector<double> angles_naive = con_angles_long(junctions,5);
-	double_vector_to_file("angles_naive.dat",angles_naive);
 
-	vector<vector<node*>> lines = find_lines(list,0.3*PI);
-	*/
 	
 	vector<node*> junctions = find_junctions(list);
 	cout<< "analysing Junctions" << endl;
@@ -254,13 +141,13 @@ int main2(){
 	I3.convertTo(I3, CV_8U);
 	cv::cvtColor(I3, I3, cv::COLOR_GRAY2BGR);
 	
-	I3 = draw_list(I3,list,Scalar(0,0,255),2);
 	PRINT(list.size())
 	
 	only_loops(list, closures);
 	
+	I3 = draw_list(I3,list,Scalar(0,0,255),4);
+	
 	PRINT(list.size())
-	//I3 = draw_list(I3,list,Scalar(255,0,0));
 	
 //	I3 = draw_list(I3,junctions,Scalar(0,0,0));
 	
