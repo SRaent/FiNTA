@@ -12,8 +12,8 @@
 #define RM 0 //minimum vision radius
 #define RS 3 //step radius
 #define STEPS 360
-#define DEV 0.45 // 0.55 deviation of gaussian smooth of circlefun
-#define TH 0.4 //0.5 threshold for findpks
+#define DEV 0.5 // 0.55 deviation of gaussian smooth of circlefun
+#define TH 2 //0.5 threshold for findpks
 #define ML 7 //minimum loop length
 #define SG 1.8 //1.8 ; 2.3 (a bit less than half fibre thickness)
 
@@ -60,19 +60,20 @@ using namespace cv;
 #include "visualise.cpp"
 #include "generate.cpp"
 
-int main_func(string);
+
+
 
 int main(){
-	main_func("10T_2GA_2PFA_RPE1_wt_susp_024");
-	//main_func("10T_2GA_2PFA_RPE1_wt_susp_011");
-}
-
-
-int main_func(string file){
 	
 	//Mat I2 = imread("/home/moritz/Documents/Moritz_pics_lap/Franzi_CPD_012.tif");
 	string folder = "/home/moritz/Documents/Moritz_pics_lap/analysable images/";
-	//string file = "10T_2GA_2PFA_RPE1_wt_susp_011";
+//	string file = "10T_2GA_2PFA_RPE1_wt_susp_011";
+//	string file = "10T_2GA_2PFA_RPE1_wt_susp_024";
+	string file = "Cx_hmds_4-37_058";
+//	string file = "C2_p_hmds_048";
+//	string file = "C1_p_hmds_045";
+//	string file = "C1_p_hmds_044";
+//	string file = "C1_p_LatA_hmds_041";
 	string write_folder = "./results/";
 	Mat I2 = imread(folder+file+".tif");
 	if(!I2.data){
@@ -130,6 +131,8 @@ int main_func(string file){
 	}
 
 	
+	
+	
 	vector<node*> junctions = find_junctions(list);
 	cout<< "analysing Junctions" << endl;
 	vector<double> jd =  junction_distances(junctions);
@@ -140,12 +143,14 @@ int main_func(string file){
 	
 	I3.convertTo(I3, CV_8U);
 	cv::cvtColor(I3, I3, cv::COLOR_GRAY2BGR);
+	int line_thickness = 4;
+	I3 = draw_list(I3,list,Scalar(255,0,0),line_thickness);
 	
 	PRINT(list.size())
 	
 	only_loops(list, closures);
 	
-	I3 = draw_list(I3,list,Scalar(0,0,255),4);
+	I3 = draw_list(I3,list,Scalar(0,0,255),line_thickness);
 	
 	PRINT(list.size())
 	
