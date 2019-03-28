@@ -69,11 +69,21 @@ int main(){
 	string folder = "/home/moritz/Documents/Moritz_pics_lap/analysable images/";
 //	string file = "10T_2GA_2PFA_RPE1_wt_susp_011";
 //	string file = "10T_2GA_2PFA_RPE1_wt_susp_024";
-	string file = "Cx_hmds_4-37_058";
+//	string file = "Cx_hmds_4-37_058";
 //	string file = "C2_p_hmds_048";
 //	string file = "C1_p_hmds_045";
 //	string file = "C1_p_hmds_044";
 //	string file = "C1_p_LatA_hmds_041";
+
+//	string file = "1T_002";
+//	string file = "1T_004";
+//	string file = "1T_005";
+//	string file = "Blebbistatin_20muM_0.5h_010";
+//	string file = "Blebbistatin_20muM_0.5h_011";
+//	string file = "Blebbistatin_20muM_0.5h_012";
+//	string file = "LatA_adh_100nM_0.25h_005";
+	string file = "LatA_adh_100nM_0.25h_006";
+
 	string write_folder = "./results/";
 	Mat I2 = imread(folder+file+".tif");
 	if(!I2.data){
@@ -132,7 +142,7 @@ int main(){
 
 	
 	
-	
+	/*
 	vector<node*> junctions = find_junctions(list);
 	cout<< "analysing Junctions" << endl;
 	vector<double> jd =  junction_distances(junctions);
@@ -140,10 +150,10 @@ int main(){
 	double_vector_to_file(write_folder+file+"_junction_dist.dat",jd);
 	
 	cout<< "done analysing Junctions" << endl;
-	
+	*/
 	I3.convertTo(I3, CV_8U);
 	cv::cvtColor(I3, I3, cv::COLOR_GRAY2BGR);
-	int line_thickness = 4;
+	double line_thickness = 2.4;
 	I3 = draw_list(I3,list,Scalar(255,0,0),line_thickness);
 	
 	PRINT(list.size())
@@ -159,7 +169,7 @@ int main(){
 	
 	vector<vector<node*>> loops = find_loops(closures);
 	
-	vector<double> areas = find_loop_areas_wo_max_w_diam(loops,4.0);
+	vector<double> areas = find_loop_areas_wo_max_w_diam(loops,2.4);
 	double_vector_to_file(write_folder+file+"_areas.dat",areas);
 	//PRINT(list.size())
 	PRINT(loops.size())

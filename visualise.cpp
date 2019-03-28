@@ -26,7 +26,7 @@ Mat draw_list(Mat input_image, vector<node*>list,Scalar color = Scalar(0,255,0),
 	input_image.copyTo(image);
 	for (unsigned long long i = 0; i < list.size(); ++i){
 		for (unsigned long long j = 0; j < list[i]->connections.size(); ++j){
-			line(image,Point(list[i]->x,list[i]->y),Point(list[i]->connections[j]->x,list[i]->connections[j]->y),color, thickness);
+			line(image,Point(list[i]->x,list[i]->y),Point(list[i]->connections[j]->x,list[i]->connections[j]->y),color, thickness, LINE_AA);
 			
 		}
 	}
