@@ -688,14 +688,19 @@ double** gaussavgcircle_MT(vector<double>* fun,unsigned long long steps,double d
 		avg[0][i] = ((double)i * 2.0 * PI / (double)steps) - PI;
 	}
 	
-	unsigned long long thread_borders[THREADS + 1];
+//	unsigned long long thread_borders[THREADS + 1];
+	
+	unsigned long long* thread_borders = new unsigned long long[THREADS + 1];
+	
 	double thread_steps = (double)steps/(double)THREADS;
 	for (unsigned long long i = 0; i < THREADS; ++i){
 		thread_borders[i] =(unsigned long long)((double)i * (double)thread_steps);
 	}
 	thread_borders[THREADS] = steps;
 	
-	thread t[THREADS];
+//	thread t[THREADS];
+	
+	thread* t = new thread[THREADS];
 	
 	for (unsigned long long i = 0; i < THREADS; ++i){
 		t[i] = thread(calc_avgs,avg, fun, dev, thread_borders[i], thread_borders[i+1]);
@@ -728,6 +733,10 @@ double** gaussavgcircle_MT(vector<double>* fun,unsigned long long steps,double d
 		
 	}
 	*/
+	
+	delete t;
+	delete thread_borders;
+	
 	if (free) {
 		delete[] fun;
 	}

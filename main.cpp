@@ -3,19 +3,35 @@
 
 #define SQRT2 (double)1.4142135623730950488016
 
-#define THREADS 16
+
 
 #define PX 396 //412
 #define PY 238 //495
 
-#define RV 8 // 8 vision radius (~2 times fibre thickness)
-#define RM 0 //minimum vision radius
-#define RS 3 //step radius
-#define STEPS 360
-#define DEV 0.5 // 0.55 deviation of gaussian smooth of circlefun
-#define TH 2 //0.5 threshold for findpks
-#define ML 7 //minimum loop length
-#define SG 1.8 //1.8 ; 2.3 (a bit less than half fibre thickness)
+
+
+//#define THREADS 16
+
+unsigned long long THREADS = 16;
+
+//#define RV 8 // 8 vision radius (~2 times fibre thickness)
+//#define RM 0 //minimum vision radius
+//#define RS 3 //step radius
+//#define STEPS 360
+//#define DEV 0.5 // 0.55 deviation of gaussian smooth of circlefun
+//#define TH 2 //0.5 threshold for findpks
+//#define ML 7 //minimum loop length
+//#define SG 1.8 //1.8 ; 2.3 (a bit less than half fibre thickness)
+
+double RV = 8;						// 8 vision radius (~2 times fibre thickness)
+double RM = 0;						//minimum vision radius
+double RS = 3;						//step radius (~ 0.5 - 1 x fiber thickness)
+unsigned long long STEPS = 360;		//number of steps the smoothing function is computed for
+double DEV = 0.5;					// 0.55 deviation of gaussian smooth of circlefun
+double TH = 2;						//0.5 threshold for findpks
+unsigned long long ML = 7;			//minimum loop length
+double SG = 1.8;					//1.8 ; 2.3 (a bit less than half fibre thickness)
+
 
 //computed
 #define RN RF+RS //neighbor radius
@@ -63,10 +79,75 @@ using namespace cv;
 
 
 
-int main(){
+
+void read_settings(char* filename){
+	string l; //line
+	ifstream f(filename); //file
+	if (f.is_open()){
+		while (getline(f,l)){
+			l = l.substr(0,l.find("#"));
+			cout << l << endl;
+		}
+		f.close();
+	}
+	else{
+		cout << "settings file not found" << endl;
+	}
+}
+
+bool file_specified = false;
+
+
+string folder = "";
+string file = "";
+string ending = "";
+
+int main(int n, char** args){
+	
+	for(int i = 0; i < n; ++i){
+		cout << args[i] << " " << i << endl;
+		if(strcmp(args[i],"-s") == 0 && ++i < n){
+			read_settings(args[i]);
+		}
+		else if(strcmp(args[i],"-f") == 0 && ++i < n){
+			string full_path(args[i]);
+			long long lastslash = full_path.find_last_of("/");
+			long long lastdot = full_path.find_last_of(".");
+			//PRINT(lastslash)
+			//PRINT(full_path.length())
+			//PRINT(lastdot)
+			if (lastslash == full_path.length() - 1){
+				cout << "Path to image: " + full_path + " appers to be a directory" << endl;
+			}
+			else if (lastdot < lastslash && lastdot != -1){
+					cout << "Path to image: " + full_path + " contains a / in the file ending and is therefore not supportet" << endl;
+			}
+			else if(lastdot != -1){
+				//cout << "folder: " + full_path.substr(0,lastslash + 1) + "\nfile: " + full_path.substr(lastslash + 1,lastdot) + "\nending: " << full_path.substr(lastdot) << endl;
+				folder = full_path.substr(0,lastslash + 1);
+				file = full_path.substr(lastslash + 1,lastdot - lastslash - 1);
+				ending = full_path.substr(lastdot);
+				//cout << "folder: " + full_path.substr(0,lastslash + 1) + "\nfile: " +file + " " + full_path.substr(lastslash + 1,lastslash + 3) << endl;
+				//cout << "ending: " << full_path.substr(lastdot,-1) << endl;
+			}
+			else {
+				folder = full_path.substr(0,lastslash + 1);
+				file = full_path.substr(lastslash + 1,lastdot);
+				//cout << "folder: " + full_path.substr(0,lastslash + 1) + "\nfile: " + full_path.substr(lastslash + 1) << endl;
+				//cout << "no dot" << endl;
+			}
+			//cout << "\nfolder: " + folder + "\nfile: " + file + "\nending: " + ending << endl;
+		}
+	}
+	return 0;
+}
+
+
+
+int main2(){
 	
 	//Mat I2 = imread("/home/moritz/Documents/Moritz_pics_lap/Franzi_CPD_012.tif");
-	string folder = "/home/moritz/Documents/Moritz_pics_lap/analysable images/";
+	folder = "/home/moritz/Documents/Moritz_pics_lap/analysable images/";
 //	string file = "10T_2GA_2PFA_RPE1_wt_susp_011";
 //	string file = "10T_2GA_2PFA_RPE1_wt_susp_024";
 //	string file = "Cx_hmds_4-37_058";
@@ -82,12 +163,15 @@ int main(){
 //	string file = "Blebbistatin_20muM_0.5h_011";
 //	string file = "Blebbistatin_20muM_0.5h_012";
 //	string file = "LatA_adh_100nM_0.25h_005";
-	string file = "LatA_adh_100nM_0.25h_006";
+//	string file = "LatA_adh_100nM_0.25h_006";
+//	string file = "01_CalycA_RPE1_wt_adh_2GA_2PFA027_001";
+//	string file = "02_CalycA_RPE1_wt_adh_2GA_2PFA027_002";
+	file = "03_CalycA_RPE1_wt_adh_2GA_2PFA027_004";
 
 	string write_folder = "./results/";
 	Mat I2 = imread(folder+file+".tif");
 	if(!I2.data){
-		cout << "bild existiert NICHT" << endl;
+		cout << "Image could not be importet" << endl;
 		return -1;
 	}
 	//Mat I2(img);
