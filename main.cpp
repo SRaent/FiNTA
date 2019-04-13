@@ -77,15 +77,25 @@ using namespace cv;
 #include "generate.cpp"
 
 
+vector<string> split_string(string s, char t){
+	vector<string> res;
+	while(s.find_first_of(t)
+	return res;
+}
 
 
+bool read_settings_line(string l){
+	bool sucsessful = true;
+	
+	return sucsessful;
+}
 
 void read_settings(char* filename){
 	string l; //line
 	ifstream f(filename); //file
 	if (f.is_open()){
 		while (getline(f,l)){
-			l = l.substr(0,l.find("#"));
+			l = l.substr(0,l.find_first_of("#"));
 			cout << l << endl;
 		}
 		f.close();
