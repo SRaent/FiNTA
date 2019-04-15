@@ -33,6 +33,19 @@ unsigned long long ML = 7;			//minimum loop length
 double SG = 1.8;					//1.8 ; 2.3 (a bit less than half fibre thickness)
 
 
+bool RV_set = false;
+bool RM_set = false;
+bool RS_set = false;
+bool STEPS_set = false;
+bool DEV_set = false;
+bool TH_set = false;
+bool ML_set = false;
+bool SG_set = false;
+
+
+bool starting_points_exist = false;
+
+
 //computed
 #define RN RF+RS //neighbor radius
 #define RF RS/SQRT2  //forbidden radius
@@ -77,33 +90,200 @@ using namespace cv;
 #include "generate.cpp"
 
 
-vector<string> split_string(string s, char t){
+vector<string> split_string_exclude(string s, string t){
 	vector<string> res;
-	while(s.find_first_of(t)
+	long long spacepos = 0;
+	while((spacepos = s.find_first_of(t)) != -1){
+		if (spacepos != 0){
+			res.push_back(s.substr(0,spacepos));
+		}
+		s = s.substr(spacepos + 1);
+	}
+	if (s != ""){
+		res.push_back(s);
+	}
 	return res;
 }
+/*
+int main(){
+	vector<string> test = split_string_exclude("   zhis  is  a  test    masafaka"," ");
+	for(unsigned long long i = 0; i < test.size(); ++i){
+		cout << ":" << test[i] << ":" << endl;
+	}
+}
+*/
+
 
 
 bool read_settings_line(string l){
-	bool sucsessful = true;
-	
-	return sucsessful;
+	bool successful = true;
+	vector<string> w = split_string_exclude(l," "); // w for words (i know i can't code)
+	if (w.size() != 0){
+		
+		cout << endl << "Interpreting: \""+ l + "\"" << endl;
+		
+		if (w[0] == "sigma_conv"){
+			if (!SG_set){
+				try{
+					SG = abs(stod(w[1]));
+					cout << "sigma_conv set to: " << SG << " pixel" << endl;
+					SG_set = true;
+				}
+				catch(const std::invalid_argument& ia){
+					cout << "ERROR: value intended for sigma_conv: \"" << w[1] << "\" could not be interpreted as a number" << endl;
+					successful = false;
+				}
+			}
+			else{
+				cout << "ERROR: sigma_conv was already set to: " << SG << " pixel" << endl;
+				successful = false;
+			}
+		}
+		else if (w[0] == "r_min"){
+			if (!RM_set){
+				try{
+					RM = abs(stod(w[1]));
+					cout << "r_min set to: " << RM << " pixel" << endl;
+					RM_set = true;
+				}
+				catch(const std::invalid_argument& ia){
+					cout << "ERROR: value intended for r_min: \"" << w[1] << "\" could not be interpreted as a number" << endl;
+					successful = false;
+				}
+			}
+			else{
+				cout << "ERROR: r_min was already set to: " << RM << " pixel" << endl;
+				successful = false;
+			}
+		}
+		else if (w[0] == "r_max"){
+			if (!RV_set){
+				try{
+					RV = abs(stod(w[1]));
+					cout << "r_max set to: " << RV << " pixel" << endl;
+					RV_set = true;
+				}
+				catch(const std::invalid_argument& ia){
+					cout << "ERROR: value intended for r_max: \"" << w[1] << "\" could not be interpreted as a number" << endl;
+					successful = false;
+				}
+			}
+			else{
+				cout << "ERROR: r_max was already set to: " << RV << " pixel" << endl;
+				successful = false;
+			}
+		}
+		else if (w[0] == "sigma_smooth"){
+			if (!DEV_set){
+				try{
+					DEV = abs(stod(w[1]));
+					cout << "sigma_smooth set to: " << DEV << " radians" << endl;
+					DEV_set = true;
+				}
+				catch(const std::invalid_argument& ia){
+					cout << "ERROR: value intended for sigma_smooth: \"" << w[1] << "\" could not be interpreted as a number" << endl;
+					successful = false;
+				}
+			}
+			else{
+				cout << "ERROR: sigma_smooth was already set to: " << DEV << " radians" << endl;
+				successful = false;
+			}
+		}
+		else if (w[0] == "steps"){
+			if (!STEPS_set){
+				try{
+					STEPS = abs(stoi(w[1]));
+					cout << "steps set to: " << STEPS << endl;
+					STEPS_set = true;
+				}
+				catch(const std::invalid_argument& ia){
+					cout << "ERROR: value intended for steps: \"" << w[1] << "\" could not be interpreted as a number" << endl;
+					successful = false;
+				}
+			}
+			else{
+				cout << "ERROR: steps was already set to: " << STEPS << endl;
+				successful = false;
+			}
+		}
+		else if (w[0] == "thresh"){
+			if (!TH_set){
+				try{
+					TH = stod(w[1]);
+					cout << "thresh set to: " << TH << endl;
+					TH_set = true;
+				}
+				catch(const std::invalid_argument& ia){
+					cout << "ERROR: value intended for thresh: \"" << w[1] << "\" could not be interpreted as a number" << endl;
+					successful = false;
+				}
+			}
+			else{
+				cout << "ERROR: thresh was already set to: " << TH << endl;
+				successful = false;
+			}
+		}
+		else if (w[0] == "r_step"){
+			if (!RS_set){
+				try{
+					RS = abs(stod(w[1]));
+					cout << "r_step set to: " << RS << " pixel" << endl;
+					RS_set = true;
+				}
+				catch(const std::invalid_argument& ia){
+					cout << "ERROR: value intended for r_step: \"" << w[1] << "\" could not be interpreted as a number" << endl;
+					successful = false;
+				}
+			}
+			else{
+				cout << "ERROR: r_step was already set to: " << RS << " pixel" << endl;
+				successful = false;
+			}
+		}
+		else if (w[0] == "min_loop_length"){
+			if (!ML_set){
+				try{
+					ML = abs(stoi(w[1]));
+					cout << "min_loop_length set to: " << ML << endl;
+					ML_set = true;
+				}
+				catch(const std::invalid_argument& ia){
+					cout << "ERROR: value intended for min_loop_length: \"" << w[1] << "\" could not be interpreted as a number" << endl;
+					successful = false;
+				}
+			}
+			else{
+				cout << "ERROR: min_loop_length was already set to: " << ML << endl;
+				successful = false;
+			}
+		}
+		else {
+			cout << "ERROR: settings line:\"" + l + "\" could not be interpreted" << endl;
+			successful = false;
+		}
+	}
+	return successful;
 }
 
-void read_settings(char* filename){
+bool read_settings(char* filename){
+	bool successful = true;
 	string l; //line
 	ifstream f(filename); //file
 	if (f.is_open()){
-		while (getline(f,l)){
+		while (getline(f,l) && successful){
 			l = l.substr(0,l.find_first_of("#"));
-			cout << l << endl;
+			successful = read_settings_line(l);
 		}
 		f.close();
 	}
 	else{
-		cout << "settings file not found" << endl;
+		cout << "ERROR: settings file not found" << endl;
+		successful = false;
 	}
+	return successful;
 }
+
 
 bool file_specified = false;
 
