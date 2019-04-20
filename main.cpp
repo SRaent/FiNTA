@@ -33,6 +33,7 @@ unsigned long long ML = 7;			//minimum loop length
 double SG = 1.8;					//1.8 ; 2.3 (a bit less than half fibre thickness)
 
 
+
 bool RV_set = false;
 bool RM_set = false;
 bool RS_set = false;
@@ -43,7 +44,14 @@ bool ML_set = false;
 bool SG_set = false;
 
 
-bool starting_points_exist = false;
+
+bool cropped = false;
+double crop_x1 = 0;
+double crop_y1 = 0;
+double crop_x2 = 0;
+double crop_y2 = 0;
+
+
 
 
 //computed
@@ -90,6 +98,38 @@ using namespace cv;
 #include "generate.cpp"
 
 
+
+bool start_points_exist = false;
+vector<Point*> man_start_points;
+
+bool auto_start_points = false;
+unsigned long long n_startpoints = 100;
+double rad_startpoints = 20*RS;
+bool rad_startpoints_specified = false;
+double thresh_startpoints = 0;
+
+
+class draw_command{
+	public:
+	bool all_nodes = false;
+	bool only_loops = false;
+	Scalar all_nodes_color = Scalar(255,0,0);
+	Scalar only_loops_color = Scalar(0,0,255);
+	double all_nodes_thickness = 1;
+	double only_loops_thickness = 1;
+	
+	string background = "original";
+	
+	string name = "";
+	
+	Mat image;
+	
+	bool cropped = false;
+	bool ending_specified = false;
+};
+
+vector<draw_command*> draw_commands;
+
 vector<string> split_string_exclude(string s, string t){
 	vector<string> res;
 	long long spacepos = 0;
@@ -113,7 +153,135 @@ int main(){
 }
 */
 
-
+bool is_number(string s){
+	return (s[0] == '0' || s[0] == '1' || s[0] == '2' || s[0] == '3' || s[0] == '4' || s[0] == '5' || s[0] == '6' || s[0] == '7' || s[0] == '8' || s[0] == '9');
+}
+//draw network 255 0 0 only_loops 0 0 255 on original as .png
+bool interprete_draw(vector<string> w){
+	bool successful = true;
+	unsigned long long l = w.size();
+	draw_commands.push_back(new draw_command);
+	for (unsigned long long i = 1; i < l && successful; ++i){
+		if (w[i] == "network"){
+			draw_commands.back()->all_nodes = true;
+			if (l >= i + 1 && is_number(w[i+1])){
+				if (l >= i + 4 && is_number(w[i+2]) && is_number(w[i+3]) && is_number(w[i+4])){
+					int r = stoi(w[i+1]);
+					int g = stoi(w[i+2]);
+					int b = stoi(w[i+3]);
+					if ( 0 <= r && 0 <= g && 0 <= b && 255 >= r && 255 >= g && 255 >= b){
+						draw_commands.back()->all_nodes_color = Scalar(b,g,r);
+					}
+					else {
+						cout << "ERROR: color values have to be between 0 and 255" << endl;
+						successful = false;
+					}
+					draw_commands.back()->all_nodes_thickness = abs(stoi(w[i+4]));
+					i += 4;
+				}
+				if (l >= i + 3 && is_number(w[i+2]) && is_number(w[i+3])){
+					int r = stoi(w[i+1]);
+					int g = stoi(w[i+2]);
+					int b = stoi(w[i+3]);
+					if ( 0 <= r && 0 <= g && 0 <= b && 255 >= r && 255 >= g && 255 >= b){
+						draw_commands.back()->all_nodes_color = Scalar(b,g,r);
+						i += 3;
+					}
+					else {
+						cout << "ERROR: color values have to be between 0 and 255" << endl;
+						successful = false;
+					}
+				}
+				else if (l >= i + 2 && is_number(w[i+2])) {
+					int c = stoi(w[i+1]);
+					if ( 0 <= c && 255 >= c){
+						draw_commands.back()->all_nodes_color = Scalar(c,c,c);
+						i += 1;
+					}
+					else {
+						cout << "ERROR: color values have to be between 0 and 255" << endl;
+						successful = false;
+					}
+					draw_commands.back()->all_nodes_thickness = abs(stoi(w[i+2]));
+					i += 2;
+				}
+				else {
+					int c = stoi(w[i+1]);
+					if ( 0 <= c && 255 >= c){
+						draw_commands.back()->all_nodes_color = Scalar(c,c,c);
+					}
+					else {
+						cout << "ERROR: color values have to be between 0 and 255" << endl;
+						successful = false;
+					}
+				}
+			}
+		}
+		else if (w[i] == "only_loops"){
+			draw_commands.back()->only_loops = true;
+			if (l >= i + 1 && is_number(w[i+1])){
+				if (l >= i + 4 && is_number(w[i+2]) && is_number(w[i+3]) && is_number(w[i+4])){
+					int r = stoi(w[i+1]);
+					int g = stoi(w[i+2]);
+					int b = stoi(w[i+3]);
+					if ( 0 <= r && 0 <= g && 0 <= b && 255 >= r && 255 >= g && 255 >= b){
+						draw_commands.back()->only_loops_color = Scalar(b,g,r);
+					}
+					else {
+						cout << "ERROR: color values have to be between 0 and 255" << endl;
+						successful = false;
+					}
+					draw_commands.back()->only_loops_thickness = abs(stoi(w[i+4]));
+					i += 4;
+				}
+				if (l >= i + 3 && is_number(w[i+2]) && is_number(w[i+3])){
+					int r = stoi(w[i+1]);
+					int g = stoi(w[i+2]);
+					int b = stoi(w[i+3]);
+					if ( 0 <= r && 0 <= g && 0 <= b && 255 >= r && 255 >= g && 255 >= b){
+						draw_commands.back()->only_loops_color = Scalar(b,g,r);
+						i += 3;
+					}
+					else {
+						cout << "ERROR: color values have to be between 0 and 255" << endl;
+						successful = false;
+					}
+				}
+				else if (l >= i + 2 && is_number(w[i+2])) {
+					int c = stoi(w[i+1]);
+					if ( 0 <= c && 255 >= c){
+						draw_commands.back()->only_loops_color = Scalar(c,c,c);
+						i += 1;
+					}
+					else {
+						cout << "ERROR: color values have to be between 0 and 255" << endl;
+						successful = false;
+					}
+					draw_commands.back()->only_loops_thickness = abs(stoi(w[i+2]));
+					i += 2;
+				}
+				else {
+					int c = stoi(w[i+1]);
+					if ( 0 <= c && 255 >= c){
+						draw_commands.back()->only_loops_color = Scalar(c,c,c);
+						i += 1;
+					}
+					else {
+						cout << "ERROR: color values have to be between 0 and 255" << endl;
+						successful = false;
+					}
+				}
+			}
+			
+		}
+		else {
+			successful = false;
+			cout << "ERROR: Argument:\"" << w[i] << "\" of drawing command could not be interpreted" << endl;
+		}
+	}
+	
+	return successful;
+}
 
 bool read_settings_line(string l){
 	bool successful = true;
@@ -124,13 +292,19 @@ bool read_settings_line(string l){
 		
 		if (w[0] == "sigma_conv"){
 			if (!SG_set){
-				try{
-					SG = abs(stod(w[1]));
-					cout << "sigma_conv set to: " << SG << " pixel" << endl;
-					SG_set = true;
+				if (w.size() == 2){
+					try{
+						SG = abs(stod(w[1]));
+						cout << "sigma_conv set to: " << SG << " pixel" << endl;
+						SG_set = true;
+					}
+					catch(const std::invalid_argument& ia){
+						cout << "ERROR: value intended for sigma_conv: \"" << w[1] << "\" could not be interpreted as a number" << endl;
+						successful = false;
+					}
 				}
-				catch(const std::invalid_argument& ia){
-					cout << "ERROR: value intended for sigma_conv: \"" << w[1] << "\" could not be interpreted as a number" << endl;
+				else {
+					cout << "ERROR: wrong number of input arguments for sigma_conv, it requires 1 input argument instead of " << w.size() - 1 << endl;
 					successful = false;
 				}
 			}
@@ -141,13 +315,19 @@ bool read_settings_line(string l){
 		}
 		else if (w[0] == "r_min"){
 			if (!RM_set){
-				try{
-					RM = abs(stod(w[1]));
-					cout << "r_min set to: " << RM << " pixel" << endl;
-					RM_set = true;
+				if (w.size() == 2){
+					try{
+						RM = abs(stod(w[1]));
+						cout << "r_min set to: " << RM << " pixel" << endl;
+						RM_set = true;
+					}
+					catch(const std::invalid_argument& ia){
+						cout << "ERROR: value intended for r_min: \"" << w[1] << "\" could not be interpreted as a number" << endl;
+						successful = false;
+					}
 				}
-				catch(const std::invalid_argument& ia){
-					cout << "ERROR: value intended for r_min: \"" << w[1] << "\" could not be interpreted as a number" << endl;
+				else {
+					cout << "ERROR: wrong number of input arguments for r_min, it requires 1 input argument instead of " << w.size() - 1 << endl;
 					successful = false;
 				}
 			}
@@ -158,13 +338,19 @@ bool read_settings_line(string l){
 		}
 		else if (w[0] == "r_max"){
 			if (!RV_set){
-				try{
-					RV = abs(stod(w[1]));
-					cout << "r_max set to: " << RV << " pixel" << endl;
-					RV_set = true;
+				if (w.size() == 2){
+					try{
+						RV = abs(stod(w[1]));
+						cout << "r_max set to: " << RV << " pixel" << endl;
+						RV_set = true;
+					}
+					catch(const std::invalid_argument& ia){
+						cout << "ERROR: value intended for r_max: \"" << w[1] << "\" could not be interpreted as a number" << endl;
+						successful = false;
+					}
 				}
-				catch(const std::invalid_argument& ia){
-					cout << "ERROR: value intended for r_max: \"" << w[1] << "\" could not be interpreted as a number" << endl;
+				else {
+					cout << "ERROR: wrong number of input arguments for r_max, it requires 1 input argument instead of " << w.size() - 1 << endl;
 					successful = false;
 				}
 			}
@@ -175,13 +361,19 @@ bool read_settings_line(string l){
 		}
 		else if (w[0] == "sigma_smooth"){
 			if (!DEV_set){
-				try{
-					DEV = abs(stod(w[1]));
-					cout << "sigma_smooth set to: " << DEV << " radians" << endl;
-					DEV_set = true;
+				if (w.size() == 2){
+					try{
+						DEV = abs(stod(w[1]));
+						cout << "sigma_smooth set to: " << DEV << " radians" << endl;
+						DEV_set = true;
+					}
+					catch(const std::invalid_argument& ia){
+						cout << "ERROR: value intended for sigma_smooth: \"" << w[1] << "\" could not be interpreted as a number" << endl;
+						successful = false;
+					}
 				}
-				catch(const std::invalid_argument& ia){
-					cout << "ERROR: value intended for sigma_smooth: \"" << w[1] << "\" could not be interpreted as a number" << endl;
+				else {
+					cout << "ERROR: wrong number of input arguments for sigma_smooth, it requires 1 input argument instead of " << w.size() - 1 << endl;
 					successful = false;
 				}
 			}
@@ -192,13 +384,19 @@ bool read_settings_line(string l){
 		}
 		else if (w[0] == "steps"){
 			if (!STEPS_set){
-				try{
-					STEPS = abs(stoi(w[1]));
-					cout << "steps set to: " << STEPS << endl;
-					STEPS_set = true;
+				if (w.size() == 2){
+					try{
+						STEPS = abs(stoi(w[1]));
+						cout << "steps set to: " << STEPS << endl;
+						STEPS_set = true;
+					}
+					catch(const std::invalid_argument& ia){
+						cout << "ERROR: value intended for steps: \"" << w[1] << "\" could not be interpreted as a number" << endl;
+						successful = false;
+					}
 				}
-				catch(const std::invalid_argument& ia){
-					cout << "ERROR: value intended for steps: \"" << w[1] << "\" could not be interpreted as a number" << endl;
+				else {
+					cout << "ERROR: wrong number of input arguments for steps, it requires 1 input argument instead of " << w.size() - 1 << endl;
 					successful = false;
 				}
 			}
@@ -209,13 +407,19 @@ bool read_settings_line(string l){
 		}
 		else if (w[0] == "thresh"){
 			if (!TH_set){
-				try{
-					TH = stod(w[1]);
-					cout << "thresh set to: " << TH << endl;
-					TH_set = true;
+				if (w.size() == 2){
+					try{
+						TH = stod(w[1]);
+						cout << "thresh set to: " << TH << endl;
+						TH_set = true;
+					}
+					catch(const std::invalid_argument& ia){
+						cout << "ERROR: value intended for thresh: \"" << w[1] << "\" could not be interpreted as a number" << endl;
+						successful = false;
+					}
 				}
-				catch(const std::invalid_argument& ia){
-					cout << "ERROR: value intended for thresh: \"" << w[1] << "\" could not be interpreted as a number" << endl;
+				else {
+					cout << "ERROR: wrong number of input arguments for thresh, it requires 1 input argument instead of " << w.size() - 1 << endl;
 					successful = false;
 				}
 			}
@@ -226,13 +430,19 @@ bool read_settings_line(string l){
 		}
 		else if (w[0] == "r_step"){
 			if (!RS_set){
-				try{
-					RS = abs(stod(w[1]));
-					cout << "r_step set to: " << RS << " pixel" << endl;
-					RS_set = true;
+				if (w.size() == 2){
+					try{
+						RS = abs(stod(w[1]));
+						cout << "r_step set to: " << RS << " pixel" << endl;
+						RS_set = true;
+					}
+					catch(const std::invalid_argument& ia){
+						cout << "ERROR: value intended for r_step: \"" << w[1] << "\" could not be interpreted as a number" << endl;
+						successful = false;
+					}
 				}
-				catch(const std::invalid_argument& ia){
-					cout << "ERROR: value intended for r_step: \"" << w[1] << "\" could not be interpreted as a number" << endl;
+				else {
+					cout << "ERROR: wrong number of input arguments for r_step, it requires 1 input argument instead of " << w.size() - 1 << endl;
 					successful = false;
 				}
 			}
@@ -243,13 +453,19 @@ bool read_settings_line(string l){
 		}
 		else if (w[0] == "min_loop_length"){
 			if (!ML_set){
-				try{
-					ML = abs(stoi(w[1]));
-					cout << "min_loop_length set to: " << ML << endl;
-					ML_set = true;
+				if (w.size() == 2){
+					try{
+						ML = abs(stoi(w[1]));
+						cout << "min_loop_length set to: " << ML << endl;
+						ML_set = true;
+					}
+					catch(const std::invalid_argument& ia){
+						cout << "ERROR: value intended for min_loop_length: \"" << w[1] << "\" could not be interpreted as a number" << endl;
+						successful = false;
+					}
 				}
-				catch(const std::invalid_argument& ia){
-					cout << "ERROR: value intended for min_loop_length: \"" << w[1] << "\" could not be interpreted as a number" << endl;
+				else {
+					cout << "ERROR: wrong number of input arguments for min_loop_length, it requires 1 input argument instead of " << w.size() - 1 << endl;
 					successful = false;
 				}
 			}
@@ -258,6 +474,107 @@ bool read_settings_line(string l){
 				successful = false;
 			}
 		}
+		else if (w[0] == "crop"){
+			if (!cropped){
+				if (w.size() == 5){
+					try{
+						crop_x1 = abs(stoi(w[1]));
+						crop_y1 = abs(stoi(w[2]));
+						crop_x2 = abs(stoi(w[3]));
+						crop_y2 = abs(stoi(w[4]));
+						cout << "The two corners of the cropping rectangle are set to: (x,y) = (" << crop_x1 << "," << crop_y1 << ") and (" << crop_x2 << "," << crop_y2 << ") pixel" << endl;
+						cropped = true;
+					}
+					catch(const std::invalid_argument& ia){
+						cout << "ERROR: At least one of the values intended for cropping: \"" << w[1] << " " << w[2] << " " << w[3] << " " << w[4] << "\" could not be interpreted as a number" << endl;
+						successful = false;
+					}
+				}
+				else {
+					cout << "ERROR: wrong number of input arguments for crop, crop requires 4 input arguments instead of " << w.size() - 1 << endl;
+					successful = false;
+				}
+			}
+			else{
+				cout << "ERROR: min_loop_length was already set to: " << ML << endl;
+				successful = false;
+			}
+		}
+		else if (w[0] == "startpoint"){
+			if (w.size() == 3){
+				try{
+					man_start_points.push_back(new Point(abs(stoi(w[1])),abs(stoi(w[2]))));
+					cout << "Start point added at: (x,y) = (" << man_start_points.back()->x << "," << man_start_points.back()->y << ")" << endl;
+					start_points_exist = true;
+				}
+				catch(const std::invalid_argument& ia){
+					cout << "ERROR: At least one of the values intended as coordinates for a start point: \"" << w[1] << " " << w[2] << w[4] << "\" could not be interpreted as a number" << endl;
+					successful = false;
+				}
+			}
+			else {
+				cout << "ERROR: wrong number of input arguments for startpoint, it requires 2 input arguments instead of " << w.size() - 1 << endl;
+				successful = false;
+			}
+		}
+		else if (w[0] == "auto_startpoint"){
+			if (!auto_start_points){
+				if (w.size() == 4){
+					try{
+						auto_start_points = true;
+						n_startpoints = abs(stoi(w[1]));
+						rad_startpoints = abs(stoi(w[2]));
+						rad_startpoints_specified = true;
+						thresh_startpoints = stoi(w[3]);
+						cout << "Startpoints will be generated automatically.\nThe maximum number of generated start points is set to:" << n_startpoints << "\n The minimum distance between generated startpoints is set to:" << rad_startpoints << " pixel" << "\n The threshold for startpoints is set to:" << thresh_startpoints << endl;
+					}
+					catch(const std::invalid_argument& ia){
+						cout << "ERROR: At least one of the arguments intended for the automated start point generation: \"" << w[1] << " " << w[2] << " " << w[3] << "\" could not be interpreted as a number" << endl;
+						successful = false;
+					}
+				}
+				else if (w.size() == 3){
+					try{
+						auto_start_points = true;
+						n_startpoints = abs(stoi(w[1]));
+						rad_startpoints = abs(stoi(w[2]));
+						rad_startpoints_specified = true;
+						cout << "Startpoints will be generated automatically.\nThe maximum number of generated start points is set to:" << n_startpoints << "\n The minimum distance between generated startpoints is set to:" << rad_startpoints << " pixel" << endl;
+					}
+					catch(const std::invalid_argument& ia){
+						cout << "ERROR: At least one of the arguments intended for the automated start point generation: \"" << w[1] << " " << w[2] << "\" could not be interpreted as a number" << endl;
+						successful = false;
+					}
+				}
+				else if (w.size() == 2){
+					try{
+						auto_start_points = true;
+						n_startpoints = abs(stoi(w[1]));
+						cout << "Startpoints will be generated automatically.\nThe maximum number of generated start points is set to:" << n_startpoints << endl;
+					}
+					catch(const std::invalid_argument& ia){
+						cout << "ERROR: At least one of the arguments intended for the automated start point generation: \"" << w[1] << "\" could not be interpreted as a number" << endl;
+						successful = false;
+					}
+				}
+				else if (w.size() == 1){
+					auto_start_points = true;
+					cout << "Startpoints will be generated automatically" << endl;
+				}
+				else {
+					cout << "ERROR: wrong number of input arguments for auto_startpoint, it requires 0 to 3 input arguments instead of " << w.size() - 1 << endl;
+					successful = false;
+				}
+			}
+			else{
+				cout << "ERROR: Automated start point generation was already activated" << endl;
+				successful = false;
+			}
+		}
+		//draw network 255 0 0 only_loops 0 0 255 on original .png
+		else if (w[0] == "draw"){
+			successful = interprete_draw(w);
+		}
 		else {
 			cout << "ERROR: settings line:\"" + l + "\" could not be interpreted" << endl;
 			successful = false;
@@ -265,6 +582,7 @@ bool read_settings_line(string l){
 	}
 	return successful;
 }
+
 
 bool read_settings(char* filename){
 	bool successful = true;
@@ -307,10 +625,12 @@ int main(int n, char** args){
 			//PRINT(full_path.length())
 			//PRINT(lastdot)
 			if (lastslash == full_path.length() - 1){
-				cout << "Path to image: " + full_path + " appers to be a directory" << endl;
+				cout << "ERROR: Path to image: \"" + full_path + "\" appers to be a directory" << endl;
+				return -1;
 			}
 			else if (lastdot < lastslash && lastdot != -1){
-					cout << "Path to image: " + full_path + " contains a / in the file ending and is therefore not supportet" << endl;
+					folder = full_path.substr(0,lastslash + 1);
+					file = full_path.substr(lastslash + 1);
 			}
 			else if(lastdot != -1){
 				//cout << "folder: " + full_path.substr(0,lastslash + 1) + "\nfile: " + full_path.substr(lastslash + 1,lastdot) + "\nending: " << full_path.substr(lastdot) << endl;
@@ -361,7 +681,7 @@ int main2(){
 	string write_folder = "./results/";
 	Mat I2 = imread(folder+file+".tif");
 	if(!I2.data){
-		cout << "Image could not be importet" << endl;
+		cout << "ERROR: Image could not be importet" << endl;
 		return -1;
 	}
 	//Mat I2(img);
