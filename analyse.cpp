@@ -203,7 +203,7 @@ double loop_length(vector<node*> loop){
 
 
 double inside_loop_area(vector<node*> loop, double thickness){
-	return loop_area(loop) - (loop_length(loop)*thickness/2.0);
+	return loop_area(loop) - (loop_length(loop)*thickness/2.0) + PI * thickness * thickness * 0.25; // the last term is a approximation for the overlapping of the assumed fiber thickness
 }
 
 

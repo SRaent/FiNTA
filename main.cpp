@@ -2,12 +2,28 @@
 #define PRINT(x) cout << #x << " => " << x << endl;
 
 #define SQRT2 (double)1.4142135623730950488016
-
+#define PI (double)3.1415926535897932384626433832795
 
 
 #define PX 396 //412
 #define PY 238 //495
 
+/* DONE;
+allow for scaling units
+*/
+
+/* TODO:
+allow for scaling units
+Tracing data ||
+Loop Data
+Animation
+draw_individual_loops
+fix connection between existing nodes
+write execution of read settings
+print statistics about local maxima of smoothed angfun
+write shell script to apply programm to each file in folder
+allow the user to generate a animation
+*/
 
 
 //#define THREADS 16
@@ -119,16 +135,39 @@ class draw_command{
 	double only_loops_thickness = 1;
 	
 	string background = "original";
+	bool background_specified = false;
 	
+	string folder = "";
 	string name = "";
+	string ending = "";
+	bool name_specified = false;
 	
 	Mat image;
 	
-	bool cropped = false;
-	bool ending_specified = false;
+	bool cropped = true;
 };
 
+
+
 vector<draw_command*> draw_commands;
+
+
+class save_loops{
+	public:
+	double thickness = 0;
+	string path = "<imagename>_loop_areas.dat";
+};
+
+vector<save_loops*> loop_area_settings;
+
+
+string loop_circumference_path = "";
+
+string junc_dist_all_path = "";
+string junc_dist_loop_path = "";
+
+double scaling_factor = 1.0;
+string scale_unit = "";
 
 vector<string> split_string_exclude(string s, string t){
 	vector<string> res;
@@ -144,6 +183,66 @@ vector<string> split_string_exclude(string s, string t){
 	}
 	return res;
 }
+
+vector<string> scale_params(vector<string> w, bool& successful){
+	vector<string> res;
+	
+	for (unsigned long long i = 0; i < w.size() && successful; ++i){
+		if (w[i] != scale_unit){
+			res.push_back(w[i]);
+		}
+		else if (i >= 2) {
+			try{
+				res.back() = to_string(stod(res.back())/scaling_factor);
+			}
+			catch(const std::invalid_argument& ia){
+				cout << "when trying to convert: \"" << w[i-1] << "\" from " << scale_unit << " to pixel, it could not be interpreted as a number" << endl;
+				successful = false;
+			}
+			if (successful) {
+				cout << w[i-1] << " " << w[i] << "was converted to " << res.back() << " pixel" << endl;
+			}
+		}
+		else {
+			successful = false;
+			cout << "keyword for unit conversion: \"" << scale_unit << "\" does not make any sense as the first or second word in a line of a settings file" << endl;
+		}
+	}
+	return res;
+}
+
+bool split_path(string full_path, string& folder, string& file, string& ending){
+	bool directory = false;
+	long long lastslash = full_path.find_last_of("/");
+	long long lastdot = full_path.find_last_of(".");
+	
+	
+	if (lastslash == full_path.length() - 1){
+		folder = full_path;
+		directory = true;
+	}
+	else if (lastdot < lastslash && lastdot != -1){
+			folder = full_path.substr(0,lastslash + 1);
+			file = full_path.substr(lastslash + 1);
+	}
+	else if(lastdot != -1){
+		//cout << "folder: " + full_path.substr(0,lastslash + 1) + "\nfile: " + full_path.substr(lastslash + 1,lastdot) + "\nending: " << full_path.substr(lastdot) << endl;
+		folder = full_path.substr(0,lastslash + 1);
+		file = full_path.substr(lastslash + 1,lastdot - lastslash - 1);
+		ending = full_path.substr(lastdot);
+		//cout << "folder: " + full_path.substr(0,lastslash + 1) + "\nfile: " +file + " " + full_path.substr(lastslash + 1,lastslash + 3) << endl;
+		//cout << "ending: " << full_path.substr(lastdot,-1) << endl;
+	}
+	else {
+		folder = full_path.substr(0,lastslash + 1);
+		file = full_path.substr(lastslash + 1,lastdot);
+		//cout << "folder: " + full_path.substr(0,lastslash + 1) + "\nfile: " + full_path.substr(lastslash + 1) << endl;
+		//cout << "no dot" << endl;
+	}
+	return (!directory);
+}
+
+
 /*
 int main(){
 	vector<string> test = split_string_exclude("   zhis  is  a  test    masafaka"," ");
@@ -156,123 +255,174 @@ int main(){
 bool is_number(string s){
 	return (s[0] == '0' || s[0] == '1' || s[0] == '2' || s[0] == '3' || s[0] == '4' || s[0] == '5' || s[0] == '6' || s[0] == '7' || s[0] == '8' || s[0] == '9');
 }
-//draw network 255 0 0 only_loops 0 0 255 on original as .png
+
+
+//bool interprete_save(vecotr<string> w){ //I know that in unix world we use the word "write" instead of "save", but this programm might be used by windows users therefore i use "save" as a keyword.
+	//
+//}
+
+
+
+//draw network 255 0 0 only_loops 0 0 255 original name .png
 bool interprete_draw(vector<string> w){
 	bool successful = true;
 	unsigned long long l = w.size();
 	draw_commands.push_back(new draw_command);
 	for (unsigned long long i = 1; i < l && successful; ++i){
 		if (w[i] == "network"){
-			draw_commands.back()->all_nodes = true;
-			if (l >= i + 1 && is_number(w[i+1])){
-				if (l >= i + 4 && is_number(w[i+2]) && is_number(w[i+3]) && is_number(w[i+4])){
-					int r = stoi(w[i+1]);
-					int g = stoi(w[i+2]);
-					int b = stoi(w[i+3]);
-					if ( 0 <= r && 0 <= g && 0 <= b && 255 >= r && 255 >= g && 255 >= b){
-						draw_commands.back()->all_nodes_color = Scalar(b,g,r);
+			if (!(draw_commands.back()->all_nodes)){
+				draw_commands.back()->all_nodes = true;
+				if (l >= i + 1 && is_number(w[i+1])){
+					if (l >= i + 4 && is_number(w[i+2]) && is_number(w[i+3]) && is_number(w[i+4])){
+						int r = stoi(w[i+1]);
+						int g = stoi(w[i+2]);
+						int b = stoi(w[i+3]);
+						if ( 0 <= r && 0 <= g && 0 <= b && 255 >= r && 255 >= g && 255 >= b){
+							draw_commands.back()->all_nodes_color = Scalar(b,g,r);
+						}
+						else {
+							cout << "ERROR: color values have to be between 0 and 255" << endl;
+							successful = false;
+						}
+						draw_commands.back()->all_nodes_thickness = abs(stoi(w[i+4]));
+						i += 4;
+					}
+					if (l >= i + 3 && is_number(w[i+2]) && is_number(w[i+3])){
+						int r = stoi(w[i+1]);
+						int g = stoi(w[i+2]);
+						int b = stoi(w[i+3]);
+						if ( 0 <= r && 0 <= g && 0 <= b && 255 >= r && 255 >= g && 255 >= b){
+							draw_commands.back()->all_nodes_color = Scalar(b,g,r);
+							i += 3;
+						}
+						else {
+							cout << "ERROR: color values have to be between 0 and 255" << endl;
+							successful = false;
+						}
+					}
+					else if (l >= i + 2 && is_number(w[i+2])) {
+						int c = stoi(w[i+1]);
+						if ( 0 <= c && 255 >= c){
+							draw_commands.back()->all_nodes_color = Scalar(c,c,c);
+						}
+						else {
+							cout << "ERROR: color values have to be between 0 and 255" << endl;
+							successful = false;
+						}
+						draw_commands.back()->all_nodes_thickness = abs(stoi(w[i+2]));
+						i += 2;
 					}
 					else {
-						cout << "ERROR: color values have to be between 0 and 255" << endl;
-						successful = false;
-					}
-					draw_commands.back()->all_nodes_thickness = abs(stoi(w[i+4]));
-					i += 4;
-				}
-				if (l >= i + 3 && is_number(w[i+2]) && is_number(w[i+3])){
-					int r = stoi(w[i+1]);
-					int g = stoi(w[i+2]);
-					int b = stoi(w[i+3]);
-					if ( 0 <= r && 0 <= g && 0 <= b && 255 >= r && 255 >= g && 255 >= b){
-						draw_commands.back()->all_nodes_color = Scalar(b,g,r);
-						i += 3;
-					}
-					else {
-						cout << "ERROR: color values have to be between 0 and 255" << endl;
-						successful = false;
+						int c = stoi(w[i+1]);
+						if ( 0 <= c && 255 >= c){
+							draw_commands.back()->all_nodes_color = Scalar(c,c,c);
+							i += 1;
+						}
+						else {
+							cout << "ERROR: color values have to be between 0 and 255" << endl;
+							successful = false;
+						}
 					}
 				}
-				else if (l >= i + 2 && is_number(w[i+2])) {
-					int c = stoi(w[i+1]);
-					if ( 0 <= c && 255 >= c){
-						draw_commands.back()->all_nodes_color = Scalar(c,c,c);
-						i += 1;
-					}
-					else {
-						cout << "ERROR: color values have to be between 0 and 255" << endl;
-						successful = false;
-					}
-					draw_commands.back()->all_nodes_thickness = abs(stoi(w[i+2]));
-					i += 2;
-				}
-				else {
-					int c = stoi(w[i+1]);
-					if ( 0 <= c && 255 >= c){
-						draw_commands.back()->all_nodes_color = Scalar(c,c,c);
-					}
-					else {
-						cout << "ERROR: color values have to be between 0 and 255" << endl;
-						successful = false;
-					}
-				}
+			}
+			else {
+				cout << "ERROR: the way all node connections are supposed to be drawn was already specified" << endl;
+				successful = false;
 			}
 		}
 		else if (w[i] == "only_loops"){
-			draw_commands.back()->only_loops = true;
-			if (l >= i + 1 && is_number(w[i+1])){
-				if (l >= i + 4 && is_number(w[i+2]) && is_number(w[i+3]) && is_number(w[i+4])){
-					int r = stoi(w[i+1]);
-					int g = stoi(w[i+2]);
-					int b = stoi(w[i+3]);
-					if ( 0 <= r && 0 <= g && 0 <= b && 255 >= r && 255 >= g && 255 >= b){
-						draw_commands.back()->only_loops_color = Scalar(b,g,r);
+			if(!(draw_commands.back()->only_loops)){
+				draw_commands.back()->only_loops = true;
+				if (l >= i + 1 && is_number(w[i+1])){
+					if (l >= i + 4 && is_number(w[i+2]) && is_number(w[i+3]) && is_number(w[i+4])){
+						int r = stoi(w[i+1]);
+						int g = stoi(w[i+2]);
+						int b = stoi(w[i+3]);
+						if ( 0 <= r && 0 <= g && 0 <= b && 255 >= r && 255 >= g && 255 >= b){
+							draw_commands.back()->only_loops_color = Scalar(b,g,r);
+						}
+						else {
+							cout << "ERROR: color values have to be between 0 and 255" << endl;
+							successful = false;
+						}
+						draw_commands.back()->only_loops_thickness = abs(stoi(w[i+4]));
+						i += 4;
+					}
+					if (l >= i + 3 && is_number(w[i+2]) && is_number(w[i+3])){
+						int r = stoi(w[i+1]);
+						int g = stoi(w[i+2]);
+						int b = stoi(w[i+3]);
+						if ( 0 <= r && 0 <= g && 0 <= b && 255 >= r && 255 >= g && 255 >= b){
+							draw_commands.back()->only_loops_color = Scalar(b,g,r);
+							i += 3;
+						}
+						else {
+							cout << "ERROR: color values have to be between 0 and 255" << endl;
+							successful = false;
+						}
+					}
+					else if (l >= i + 2 && is_number(w[i+2])) {
+						int c = stoi(w[i+1]);
+						if ( 0 <= c && 255 >= c){
+							draw_commands.back()->only_loops_color = Scalar(c,c,c);
+						}
+						else {
+							cout << "ERROR: color values have to be between 0 and 255" << endl;
+							successful = false;
+						}
+						draw_commands.back()->only_loops_thickness = abs(stoi(w[i+2]));
+						i += 2;
 					}
 					else {
-						cout << "ERROR: color values have to be between 0 and 255" << endl;
-						successful = false;
+						int c = stoi(w[i+1]);
+						if ( 0 <= c && 255 >= c){
+							draw_commands.back()->only_loops_color = Scalar(c,c,c);
+							i += 1;
+						}
+						else {
+							cout << "ERROR: color values have to be between 0 and 255" << endl;
+							successful = false;
+						}
 					}
-					draw_commands.back()->only_loops_thickness = abs(stoi(w[i+4]));
-					i += 4;
 				}
-				if (l >= i + 3 && is_number(w[i+2]) && is_number(w[i+3])){
-					int r = stoi(w[i+1]);
-					int g = stoi(w[i+2]);
-					int b = stoi(w[i+3]);
-					if ( 0 <= r && 0 <= g && 0 <= b && 255 >= r && 255 >= g && 255 >= b){
-						draw_commands.back()->only_loops_color = Scalar(b,g,r);
-						i += 3;
-					}
-					else {
-						cout << "ERROR: color values have to be between 0 and 255" << endl;
-						successful = false;
-					}
+			}
+			else{
+				cout << "ERROR: the way the node connection involved in closed loops are supposed to be drawn was already specified" << endl;
+				successful = false;
+			}
+		}
+		else if (w[i] == "original" || w[i] == "cropped" || w[i] == "tubeness" || w[i] == "hessian" || w[i] == "visualized_hessian" || w[i] == "white" || w[i] == "black"){
+			if (!(draw_commands.back()->background_specified)){
+				if (w[i] == "original"){
+					draw_commands.back()->cropped = false;
 				}
-				else if (l >= i + 2 && is_number(w[i+2])) {
-					int c = stoi(w[i+1]);
-					if ( 0 <= c && 255 >= c){
-						draw_commands.back()->only_loops_color = Scalar(c,c,c);
-						i += 1;
+				draw_commands.back()->background = w[i];
+			}
+			else {
+				cout << "ERROR: image to be drawn on was alreadey specified" << endl;
+				successful = false;
+			}
+		}
+		else if (w[i] == "name"){
+			if(!(draw_commands.back()->name_specified)){
+				++i;
+				draw_commands.back()->name_specified = true;
+				split_path(w[i], draw_commands.back()->folder, draw_commands.back()->name, draw_commands.back()->ending);
+				
+				
+				if (draw_commands.back()->ending != "" ){
+					if (draw_commands.back()->ending == ".bmp" || draw_commands.back()->ending == ".bmp" || draw_commands.back()->ending == ".jpeg" || draw_commands.back()->ending == ".jpg" || draw_commands.back()->ending == ".jpe" || draw_commands.back()->ending == ".jp2" || draw_commands.back()->ending == ".png" || draw_commands.back()->ending == ".pbm" || draw_commands.back()->ending == ".pgm" || draw_commands.back()->ending == ".ppm" || draw_commands.back()->ending == ".sr" || draw_commands.back()->ending == ".ras" || draw_commands.back()->ending == ".tiff" || draw_commands.back()->ending == ".tif" ){
 					}
-					else {
-						cout << "ERROR: color values have to be between 0 and 255" << endl;
-						successful = false;
-					}
-					draw_commands.back()->only_loops_thickness = abs(stoi(w[i+2]));
-					i += 2;
-				}
-				else {
-					int c = stoi(w[i+1]);
-					if ( 0 <= c && 255 >= c){
-						draw_commands.back()->only_loops_color = Scalar(c,c,c);
-						i += 1;
-					}
-					else {
-						cout << "ERROR: color values have to be between 0 and 255" << endl;
+					else{
+						cout << "ERROR: file ending:\"" << draw_commands.back()->ending << "\" not supported. Supporded endings are: .bmp, .bmp, jpeg, .jpg, .jpe, .jp2, .png, .pbm, .pgm, .ppm, .sr, .ras, .tiff and .tif" << endl;
 						successful = false;
 					}
 				}
 			}
-			
+			else {
+				cout << "ERROR: name of the image to be saved was already specified" << endl;
+				successful = false;
+			}
 		}
 		else {
 			successful = false;
@@ -286,6 +436,9 @@ bool interprete_draw(vector<string> w){
 bool read_settings_line(string l){
 	bool successful = true;
 	vector<string> w = split_string_exclude(l," "); // w for words (i know i can't code)
+	if (scale_unit != ""){
+		w = scale_params(w, successful);
+	}
 	if (w.size() != 0){
 		
 		cout << endl << "Interpreting: \""+ l + "\"" << endl;
@@ -571,9 +724,197 @@ bool read_settings_line(string l){
 				successful = false;
 			}
 		}
-		//draw network 255 0 0 only_loops 0 0 255 on original .png
+		//draw network 255 0 0 only_loops 0 0 255 original .png
 		else if (w[0] == "draw"){
 			successful = interprete_draw(w);
+		}
+		else if (w[0] == "save_loop_areas"){
+			loop_area_settings.push_back(new save_loops);
+			if (w.size() >= 2){
+				if (is_number(w[1])){
+					loop_area_settings.back()->thickness = abs(stod(w[1]));
+					if (w.size() == 3){
+						loop_area_settings.back()->path = w[2];
+					}
+					else if (w.size() != 2){
+						cout << "ERROR: to many arguments for \"save_loop_areas\", no more than 2 arguments are possible instead of "<< w.size() - 1 << endl;
+						successful = false;
+					}
+				}
+				else {
+					loop_area_settings.back()->path = w[1];
+					if (w.size() == 3){
+						try{
+							loop_area_settings.back()->thickness = abs(stod(w[1]));
+						}
+						catch(const std::invalid_argument& ia){
+							cout << "ERROR: value intended for fiber thickness:\"" << w[1] << "\" could not be interpreted as a number" << endl;
+							successful = false;
+						}
+					}
+					else if (w.size() != 2) {
+						cout << "ERROR: to many arguments for \"save_loop_areas\", no more than 2 arguments are possible instead of "<< w.size() - 1 << endl;
+						successful = false;
+					}
+				}
+			}
+			if (successful) {
+				cout << "loop areas will be saved to: \"" << loop_area_settings.back()->path << "\" and, for their computation, the fiber diameter is assumed to be " << loop_area_settings.back()->thickness << " pixel " << endl;
+			}
+		}
+		else if (w[0] == "save_loop_circumferences"){
+			if (loop_circumference_path == ""){
+				if(w.size() == 1){
+					loop_circumference_path = "<imagename>_loop_circumferences";
+				}
+				else if (w.size() == 2){
+					loop_circumference_path = w[1];
+				}
+				else {
+					cout << "ERROR: to many arguments for \"save_loop_circumferences\", no more than 1 argument is possible instead of "<< w.size() - 1 << endl;
+					successful = false;
+				}
+				cout << "loop circumferences will be saved to: \"" << loop_circumference_path << "\"" << endl;
+			}
+			else {
+				cout << "ERROR: \"save_loop_circumferences\" was already called" << endl;
+				successful = false;
+			}
+		}
+		else if (w[0] == "save_all_junction_distances"){
+			if (junc_dist_all_path == ""){
+				if (w.size() == 2) {
+					junc_dist_all_path = w[1];
+				}
+				else if (w.size() == 1){
+					junc_dist_all_path == "<imagename>_junc_dist.dat";
+				}
+				else {
+					cout << "ERROR: to many arguments for save_all_junction_distances. It accepts no more than 1 argument " << endl;
+					successful = false;
+				}
+			}
+			else{
+				cout << "ERROR: \"save_all_junction_distances\" was already called" << endl;
+				successful = false;
+			}
+		}
+		else if (w[0] == "save_loop_junction_distances"){
+			if (junc_dist_loop_path == ""){
+				if (w.size() == 2) {
+					junc_dist_loop_path = w[1];
+				}
+				else if (w.size() == 1){
+					junc_dist_loop_path == "<imagename>_junc_dist.dat";
+				}
+				else {
+					cout << "ERROR: to many arguments for save_loop_junction_distances. It accepts no more than 1 argument " << endl;
+					successful = false;
+				}
+			}
+			else{
+				cout << "ERROR: \"save_loop_junction_distances\" was already called" << endl;
+				successful = false;
+			}
+		}
+		else if (w[0] == "set_scale"){
+			if (scale_unit == ""){
+				unsigned long long equal_pos = 0;
+				unsigned long long px_pos = 0;
+				
+				double px = 1;
+				double unit = 1;
+				
+				for (unsigned long long i = 1;successful && i < w.size(); ++i){
+					if (w[i] == "="){
+						if (equal_pos == 0){
+							equal_pos = i;
+						}
+						else {
+							cout << "ERROR: two \"=\" characters detected in set scale" << endl;
+							successful = false;
+						}
+					}
+					else if (w[i] == "px" || w[i] == "pixel"){
+						if (px_pos == 0){
+							px_pos = i;
+						}
+						else {
+							cout << "ERROR: two \"px\" or \"pixel\" keywords detected in set scale" << endl;
+							successful = false;
+						}
+					}
+				}
+				//set_scale 300 px = 1 um
+				if (px_pos == 2){
+					try{
+						px = abs(stod(w[1]));
+					}
+					catch(const std::invalid_argument& ia){
+						cout << " value \"" << w[1] << "\" could not be interpreted as a number" << endl;
+						successful = false;
+					}
+					
+					if (equal_pos == 3 && w.size() == 6 && successful) {
+						try{
+							unit = abs(stod(w[4]));
+						}
+						catch(const std::invalid_argument& ia){
+							cout << " value \"" << w[4] << "\" could not be interpreted as a number" << endl;
+							successful = false;
+						}
+						if ( !is_number(w[5])){
+							scale_unit = w[5];
+						}
+						else {
+							cout << "ERROR: scaling unit must not begin with a digit" << endl;
+							successful = false;
+						}
+					}
+				}
+				else if (px_pos == 5){
+					try{
+						px = abs(stod(w[4]));
+					}
+					catch(const std::invalid_argument& ia){
+						cout << " value \"" << w[4] << "\" could not be interpreted as a number" << endl;
+						successful = false;
+					}
+					
+					if (equal_pos == 3 && w.size() == 6 && successful) {
+						try{
+							unit = abs(stod(w[1]));
+						}
+						catch(const std::invalid_argument& ia){
+							cout << " value \"" << w[1] << "\" could not be interpreted as a number" << endl;
+							successful = false;
+						}
+						if ( !is_number(w[2])){
+							scale_unit = w[2];
+						}
+						else {
+							cout << "ERROR: scaling unit must not begin with a digit" << endl;
+							successful = false;
+						}
+					}
+					else{
+						cout << "ERROR: set_scale could not be interpreted" << endl;
+						successful = false;
+					}
+				}
+				else {
+					cout << "ERROR: set_scale could not be interpreted" << endl;
+					successful = false;
+				}
+				if (successful) {
+					scaling_factor = unit/px;
+					cout << "Image scale set to " << scaling_factor << " " << scale_unit << " per pixel" << endl;
+				}
+			}
+			else {
+				cout << "ERROR: scale was already set" << endl;
+				successful = false;
+			}
 		}
 		else {
 			cout << "ERROR: settings line:\"" + l + "\" could not be interpreted" << endl;
@@ -618,35 +959,12 @@ int main(int n, char** args){
 			read_settings(args[i]);
 		}
 		else if(strcmp(args[i],"-f") == 0 && ++i < n){
-			string full_path(args[i]);
-			long long lastslash = full_path.find_last_of("/");
-			long long lastdot = full_path.find_last_of(".");
-			//PRINT(lastslash)
-			//PRINT(full_path.length())
-			//PRINT(lastdot)
-			if (lastslash == full_path.length() - 1){
-				cout << "ERROR: Path to image: \"" + full_path + "\" appers to be a directory" << endl;
+			
+			if(!split_path(args[i], folder, file, ending)){
+				cout << "ERROR: Path to image: \"" + string(args[i]) + "\" appers to be a directory" << endl;
 				return -1;
 			}
-			else if (lastdot < lastslash && lastdot != -1){
-					folder = full_path.substr(0,lastslash + 1);
-					file = full_path.substr(lastslash + 1);
-			}
-			else if(lastdot != -1){
-				//cout << "folder: " + full_path.substr(0,lastslash + 1) + "\nfile: " + full_path.substr(lastslash + 1,lastdot) + "\nending: " << full_path.substr(lastdot) << endl;
-				folder = full_path.substr(0,lastslash + 1);
-				file = full_path.substr(lastslash + 1,lastdot - lastslash - 1);
-				ending = full_path.substr(lastdot);
-				//cout << "folder: " + full_path.substr(0,lastslash + 1) + "\nfile: " +file + " " + full_path.substr(lastslash + 1,lastslash + 3) << endl;
-				//cout << "ending: " << full_path.substr(lastdot,-1) << endl;
-			}
-			else {
-				folder = full_path.substr(0,lastslash + 1);
-				file = full_path.substr(lastslash + 1,lastdot);
-				//cout << "folder: " + full_path.substr(0,lastslash + 1) + "\nfile: " + full_path.substr(lastslash + 1) << endl;
-				//cout << "no dot" << endl;
-			}
-			//cout << "\nfolder: " + folder + "\nfile: " + file + "\nending: " + ending << endl;
+			cout << "\nfolder: " + folder + "\nfile: " + file + "\nending: " + ending << endl;
 		}
 	}
 	return 0;
