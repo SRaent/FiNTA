@@ -169,12 +169,14 @@ void node::procreate_hessian(bool free = 1){
 			}
 			else if(closable){
 				cout << "c" << flush;
-				connections.push_back(child);
-				child->connections.push_back(this);
+				node* inbetween = new node((x + child->x)/2.0, (y + child->y)/2.0, this);
+				inbetween->procreated = true;
+				inbetween->connections.push_back(child);
+				child->connections.push_back(inbetween);
 				node** closure = new node*[2];
 				closures->push_back(closure);
 				closure[0] = this;
-				closure[1] = child;
+				closure[1] = inbetween;
 			}
 		}
 	}

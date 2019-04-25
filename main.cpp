@@ -10,19 +10,16 @@
 
 /* DONE;
 allow for scaling units
+Tracing data
+Loop Data
+Animation
+fix connection between existing nodes
 */
 
 /* TODO:
-allow for scaling units
-Tracing data ||
-Loop Data
-Animation
-draw_individual_loops
-fix connection between existing nodes
 write execution of read settings
 print statistics about local maxima of smoothed angfun
 write shell script to apply programm to each file in folder
-allow the user to generate a animation
 */
 
 
@@ -62,10 +59,10 @@ bool SG_set = false;
 
 
 bool cropped = false;
-double crop_x1 = 0;
-double crop_y1 = 0;
-double crop_x2 = 0;
-double crop_y2 = 0;
+unsigned long long crop_x1 = 0;
+unsigned long long crop_y1 = 0;
+unsigned long long crop_x2 = 0;
+unsigned long long crop_y2 = 0;
 
 
 
@@ -144,7 +141,7 @@ class draw_command{
 	
 	Mat image;
 	
-	bool cropped = true;
+	bool cropped = false;
 };
 
 
@@ -169,6 +166,17 @@ string junc_dist_loop_path = "";
 double scaling_factor = 1.0;
 string scale_unit = "";
 
+
+string tracing_data_path = "";
+string loop_data_path = "";
+
+
+string animation_path = "";
+Scalar animation_color = Scalar(0,0,255);
+double animation_thickness = 1.0;
+
+
+
 vector<string> split_string_exclude(string s, string t){
 	vector<string> res;
 	long long spacepos = 0;
@@ -184,7 +192,7 @@ vector<string> split_string_exclude(string s, string t){
 	return res;
 }
 
-vector<string> scale_params(vector<string> w, bool& successful){
+vector<string> scale_params(vector<string> w, bool& successful, bool& scaled){
 	vector<string> res;
 	
 	for (unsigned long long i = 0; i < w.size() && successful; ++i){
@@ -201,11 +209,8 @@ vector<string> scale_params(vector<string> w, bool& successful){
 			}
 			if (successful) {
 				cout << w[i-1] << " " << w[i] << "was converted to " << res.back() << " pixel" << endl;
+				scaled = true;
 			}
-		}
-		else {
-			successful = false;
-			cout << "keyword for unit conversion: \"" << scale_unit << "\" does not make any sense as the first or second word in a line of a settings file" << endl;
 		}
 	}
 	return res;
@@ -263,7 +268,7 @@ bool is_number(string s){
 
 
 
-//draw network 255 0 0 only_loops 0 0 255 original name .png
+//draw network 255 0 0 2 only_loops 0 0 255 1 original name .png
 bool interprete_draw(vector<string> w){
 	bool successful = true;
 	unsigned long long l = w.size();
@@ -387,14 +392,14 @@ bool interprete_draw(vector<string> w){
 				}
 			}
 			else{
-				cout << "ERROR: the way the node connection involved in closed loops are supposed to be drawn was already specified" << endl;
+				cout << "ERROR: the way the node connections involved in closed loops are supposed to be drawn was already specified" << endl;
 				successful = false;
 			}
 		}
 		else if (w[i] == "original" || w[i] == "cropped" || w[i] == "tubeness" || w[i] == "hessian" || w[i] == "visualized_hessian" || w[i] == "white" || w[i] == "black"){
 			if (!(draw_commands.back()->background_specified)){
-				if (w[i] == "original"){
-					draw_commands.back()->cropped = false;
+				if (w[i] != "original"){
+					draw_commands.back()->cropped = true;
 				}
 				draw_commands.back()->background = w[i];
 			}
@@ -436,15 +441,17 @@ bool interprete_draw(vector<string> w){
 bool read_settings_line(string l){
 	bool successful = true;
 	vector<string> w = split_string_exclude(l," "); // w for words (i know i can't code)
+	
+	bool scaled = false;
 	if (scale_unit != ""){
-		w = scale_params(w, successful);
+		w = scale_params(w, successful, scaled);
 	}
 	if (w.size() != 0){
 		
 		cout << endl << "Interpreting: \""+ l + "\"" << endl;
 		
 		if (w[0] == "sigma_conv"){
-			if (!SG_set){
+			if (!SG_set && successful){
 				if (w.size() == 2){
 					try{
 						SG = abs(stod(w[1]));
@@ -513,7 +520,11 @@ bool read_settings_line(string l){
 			}
 		}
 		else if (w[0] == "sigma_smooth"){
-			if (!DEV_set){
+			if (scaled) {
+				successful = false;
+				cout << "sigma_smooth has the unit radians and is scale invariat, trying to scale it with the image is senseless" << endl;
+			}
+			else if (!DEV_set){
 				if (w.size() == 2){
 					try{
 						DEV = abs(stod(w[1]));
@@ -536,7 +547,11 @@ bool read_settings_line(string l){
 			}
 		}
 		else if (w[0] == "steps"){
-			if (!STEPS_set){
+			if (scaled) {
+				successful = false;
+				cout << "steps has no unit and is scale invariat, trying to scale it with the image is senseless" << endl;
+			}
+			else if (!STEPS_set && successful){
 				if (w.size() == 2){
 					try{
 						STEPS = abs(stoi(w[1]));
@@ -559,7 +574,11 @@ bool read_settings_line(string l){
 			}
 		}
 		else if (w[0] == "thresh"){
-			if (!TH_set){
+			if (scaled) {
+				successful = false;
+				cout << "thresh is specified in arbitrary units and is scale invariat, trying to scale it with the image is senseless" << endl;
+			}
+			if (!TH_set && successful){
 				if (w.size() == 2){
 					try{
 						TH = stod(w[1]);
@@ -576,7 +595,7 @@ bool read_settings_line(string l){
 					successful = false;
 				}
 			}
-			else{
+			else if (!scaled){
 				cout << "ERROR: thresh was already set to: " << TH << endl;
 				successful = false;
 			}
@@ -605,7 +624,11 @@ bool read_settings_line(string l){
 			}
 		}
 		else if (w[0] == "min_loop_length"){
-			if (!ML_set){
+			if (scaled) {
+				successful = false;
+				cout << "thresh is specified in arbitrary units and is scale invariat, trying to scale it with the image is senseless" << endl;
+			}
+			else if (!ML_set){
 				if (w.size() == 2){
 					try{
 						ML = abs(stoi(w[1]));
@@ -916,6 +939,63 @@ bool read_settings_line(string l){
 				successful = false;
 			}
 		}
+		else if (w[0] == "save_tracing_data") {
+			if ( tracing_data_path == ""){
+				if (w.size() == 2){
+					tracing_data_path = w[1];
+				}
+				else if (w.size() == 1){
+					tracing_data_path = "<imagename>_tracing_data.dat";
+				}
+				else {
+					successful = false;
+					cout << "to many argumets for save_tracing_data, no more than one argument allowed" << endl;
+				}
+			}
+			else {
+				cout << "save_tracing_data was already called" << endl;
+			}
+		}
+		else if (w[0] == "save_loop_data") {
+			if ( loop_data_path == ""){
+				if (w.size() == 2){
+					loop_data_path = w[1];
+				}
+				else if (w.size() == 1){
+					loop_data_path = "<imagename>_loop_data.dat";
+				}
+				else {
+					successful = false;
+					cout << "to many argumets for save_loop_data, no more than one argument allowed" << endl;
+				}
+			}
+			else {
+				cout << "save_loop_data was already called" << endl;
+			}
+		}
+		else if (w[0] == "animate_tracing"){
+			if (animation_path == ""){
+				animation_path = "<imagename>_animated";
+				if (w.size() == 2){
+					try{
+						animation_thickness = stod(w[1]);
+					}
+					catch(const std::invalid_argument& ia){
+						cout << w[1] << " could not be interpreted as a number" << endl;
+						successful = false;
+					}
+				}
+			}
+			else {
+				cout << "animate_tracing was already called" << endl;
+			}
+		}
+		
+		//string animation_path = "";
+		//Scalar animation_color = Scalar(0,0,255);
+		//double animation_thickness = 1.0;
+		
+		
 		else {
 			cout << "ERROR: settings line:\"" + l + "\" could not be interpreted" << endl;
 			successful = false;
@@ -953,10 +1033,25 @@ string ending = "";
 
 int main(int n, char** args){
 	
+	bool settings_read = false;
+	bool image_specified = false;
+	
 	for(int i = 0; i < n; ++i){
 		cout << args[i] << " " << i << endl;
 		if(strcmp(args[i],"-s") == 0 && ++i < n){
-			read_settings(args[i]);
+			if(!settings_read){
+				if (read_settings(args[i])){
+					settings_read = true;
+					cout << "Settings read successfully" << endl;
+				}
+				else {
+					cout << "ERROR: Settings could not be read" << endl;
+					return -1;
+				}
+			}
+			else {
+				cout << "ERROR: Settings already read" << endl;
+			}
 		}
 		else if(strcmp(args[i],"-f") == 0 && ++i < n){
 			
@@ -966,11 +1061,113 @@ int main(int n, char** args){
 			}
 			cout << "\nfolder: " + folder + "\nfile: " + file + "\nending: " + ending << endl;
 		}
+		else {
+			cout << "ERROR: argument \"" << args[i] << "\" could not be interpreted" << endl;
+			return -1;
+		}
 	}
+	
+	if (!(RV_set && RM_set && RS_set && STEPS_set && DEV_set && TH_set && ML_set && SG_set)){
+		cout << "ERROR: not all necessary parameters were specified" << endl;
+		return -1;
+	}
+	
+	Mat I1 = imread(folder+file+ending);
+	if ( !I1.data){
+		cout << "ERROR: Image \"" << folder + file + ending << "\" could not be opened" << endl;
+		return -1;
+	}
+	Size s = I1.size();
+	Mat I2;
+	
+	if (cropped && (crop_x1 - crop_x2) * (crop_y1 - crop_y2) == 0){
+		cout << "ERROR: cropping recktangle has no area" << endl;
+		return -1;
+	}
+	else if (cropped && (s.width < crop_x1 || s.width < crop_x2 || s.height < crop_y1 || s.height < crop_y2)){
+		cout << "ERROR: Intended cropping recktangle does not fit inside image" << endl;
+		return -1;
+	}
+	if (cropped){
+		double x1 = crop_x1;
+		double x2 = crop_x2;
+		double y1 = crop_y1;
+		double y2 = crop_y2;
+		
+		crop_x1 = min(x1,x2);
+		crop_x2 = max(x1,x2);
+		crop_y1 = min(y1,y2);
+		crop_y2 = max(y1,y2);
+		
+		Rect myROI(crop_x1,crop_y1,crop_x2-crop_x1,crop_y2 - crop_y1);
+		I2 = I1(myROI);
+	}
+	else {
+		I2 = I1;
+	}
+	Mat I3;
+	I2.copyTo(I3);
+	cvtColor(I3,I3,COLOR_BGR2GRAY);
+	Mat I4;
+	I3.convertTo(I4, CV_64F);
+	
+	normalize(I4,I4,255,0,32); // the 32 is a flag, that produced errors if the keyword is used directly
+	
+	Mat hessian = convolve_hessian(I4,SG*30,SG);
+	Mat tubeness = tubeness_hessian(hessian);
+	Mat viz_hessian = visualize_hessian(hessian);
+	
+	vector<node*> list;
+	vector<node**> closures;
+	
+	if (auto_start_points){
+		if (!rad_startpoints_specified){
+			rad_startpoints = 20.0 * RS;
+		}
+		gen_startpoints(list, closures, hessian, tubeness, n_startpoints, rad_startpoints, thresh_startpoints);
+		if (list.size() == 0){
+			cout << "WARNING: the automated start point generation did not generate any starting points, this is likely due to a to big threshold" << endl;
+		}
+	}
+	
+	for ( unsigned long long i = 0; i < man_start_points.size(); ++i){
+		new node(man_start_points[i]->x,man_start_points[i]->x, &list, &closures, &hessian);
+	}
+	
+	if (list.size() == 0){
+		cout << "ERROR: No starting points were created" << endl;
+		return -1;
+	}
+	
+	
+	normalize(tubeness,tubeness,255,0,32);
+	
+	unsigned long long i = 0;
+	
+	cout << endl <<  "Starting tracing" << endl;
+	
+	for (bool buisy = 1; buisy;){
+		buisy = 0;
+		unsigned long long end = list.size();
+		for (unsigned long long it = 0; it < end; ++it){
+			if (!(list[it]->procreated)){
+				list[it]->procreate_hessian();
+				buisy = 1;
+			}
+		}
+		
+		//for (unsigned long long i = 0; i < list.size(); ++i){
+		//	PRINT(list[i])
+		//}
+		//cout << i++ << " " << list.size() << endl;
+		
+	}
+	
+	
 	return 0;
 }
 
-
+// if you wish to tinker with the code, use this main function here.
 
 int main2(){
 	
@@ -996,7 +1193,7 @@ int main2(){
 //	string file = "02_CalycA_RPE1_wt_adh_2GA_2PFA027_002";
 	file = "03_CalycA_RPE1_wt_adh_2GA_2PFA027_004";
 
-	string write_folder = "./results/";
+	string write_folder = "./";
 	Mat I2 = imread(folder+file+".tif");
 	if(!I2.data){
 		cout << "ERROR: Image could not be importet" << endl;

@@ -734,8 +734,8 @@ double** gaussavgcircle_MT(vector<double>* fun,unsigned long long steps,double d
 	}
 	*/
 	
-	delete t;
-	delete thread_borders;
+	delete[] t;
+	delete[] thread_borders;
 	
 	if (free) {
 		delete[] fun;
