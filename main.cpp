@@ -20,6 +20,8 @@ fix connection between existing nodes
 write execution of read settings
 print statistics about local maxima of smoothed angfun
 write shell script to apply programm to each file in folder
+read THREADS
+TEST THAT SHIT!!!
 */
 
 
@@ -1031,6 +1033,21 @@ string folder = "";
 string file = "";
 string ending = "";
 
+
+string replace_keywords(string s){
+	string ret = s;
+	long long pos = 0;
+	string find = "<imagename>";
+	string replace = file;
+	while (pos != -1){
+		pos = ret.find(find);
+		ret.replace(pos,find.size(),replace);
+	}
+	return ret;
+}
+
+
+
 int main(int n, char** args){
 	
 	bool settings_read = false;
@@ -1081,7 +1098,7 @@ int main(int n, char** args){
 	Mat I2;
 	
 	if (cropped && (crop_x1 - crop_x2) * (crop_y1 - crop_y2) == 0){
-		cout << "ERROR: cropping recktangle has no area" << endl;
+		cout << "ERROR: specified cropping recktangle has no area" << endl;
 		return -1;
 	}
 	else if (cropped && (s.width < crop_x1 || s.width < crop_x2 || s.height < crop_y1 || s.height < crop_y2)){
@@ -1105,6 +1122,7 @@ int main(int n, char** args){
 	else {
 		I2 = I1;
 	}
+	s = I2.size();
 	Mat I3;
 	I2.copyTo(I3);
 	cvtColor(I3,I3,COLOR_BGR2GRAY);
@@ -1117,6 +1135,8 @@ int main(int n, char** args){
 	Mat tubeness = tubeness_hessian(hessian);
 	Mat viz_hessian = visualize_hessian(hessian);
 	
+	
+	
 	vector<node*> list;
 	vector<node**> closures;
 	
@@ -1128,25 +1148,81 @@ int main(int n, char** args){
 		if (list.size() == 0){
 			cout << "WARNING: the automated start point generation did not generate any starting points, this is likely due to a to big threshold" << endl;
 		}
+		else {
+			cout << list.size() << " startpoints were generated automatically" << endl;
+		}
 	}
 	
 	for ( unsigned long long i = 0; i < man_start_points.size(); ++i){
-		new node(man_start_points[i]->x,man_start_points[i]->x, &list, &closures, &hessian);
+		if (man_start_points[i]->x <= s.width && man_start_points[i]->y <= s.height){
+			new node(man_start_points[i]->x,man_start_points[i]->x, &list, &closures, &hessian);
+		}
+		else {
+			cout << "ERROR: Manually placed startpoint lies outside the (cropped) image" << endl;
+			return -1;
+		}
 	}
 	
 	if (list.size() == 0){
-		cout << "ERROR: No starting points were created" << endl;
-		return -1;
+		cout << "WARNING: No starting points were created, therefore no tracing will take place" << endl;
 	}
 	
 	
 	normalize(tubeness,tubeness,255,0,32);
 	
+	
+	
+	
+	for (unsigned long long i = 0; i < draw_commands.size(); ++i){
+		if ( draw_commands[i]->background == "original"){
+			I1.copyTo(draw_commands[i]->image);
+			draw_commands[i]->cropped = false;
+		}
+		else if ( draw_commands[i]->background == "cropped"){
+			I2.copyTo(draw_commands[i]->image);
+			draw_commands[i]->cropped = true;
+		}
+		else if ( draw_commands[i]->background == "tubeness"){
+			tubeness.copyTo(draw_commands[i]->image);
+			draw_commands[i]->cropped = true;
+		}
+		else if ( draw_commands[i]->background == "hessian"){
+			hessian.copyTo(draw_commands[i]->image);
+			normalize(draw_commands[i]->image,draw_commands[i]->image,255,0,32);
+			draw_commands[i]->cropped = true;
+		}
+		else if ( draw_commands[i]->background == "visualized_hessian"){
+			viz_hessian.copyTo(draw_commands[i]->image);
+			draw_commands[i]->cropped = true;
+		}
+		else if ( draw_commands[i]->background == "white"){
+			Mat tmp(s.width,s.height, CV_8UC3, Scalar::all(255));
+			tmp.copyTo(draw_commands[i]->image);
+			draw_commands[i]->cropped = true;
+		}
+		else if ( draw_commands[i]->background == "black"){
+			Mat tmp(s.width,s.height, CV_8UC3, Scalar::all(0));
+			tmp.copyTo(draw_commands[i]->image);
+			draw_commands[i]->cropped = true;
+		}
+		else {
+			cout << "something went terribly wrong, please send me the config file you used via moritz.schu@t-online.de" << endl;
+			return -1;
+		}
+	}
+	
+	
+	
 	unsigned long long i = 0;
 	
-	cout << endl <<  "Starting tracing" << endl;
 	
-	for (bool buisy = 1; buisy;){
+	if (list.size() != 0){
+		cout << endl << "Starting tracing" << endl;
+	}
+	
+	
+	
+	for (bool buisy = 1; buisy && list.size() != 0;){
 		buisy = 0;
 		unsigned long long end = list.size();
 		for (unsigned long long it = 0; it < end; ++it){
@@ -1161,6 +1237,115 @@ int main(int n, char** args){
 		//}
 		//cout << i++ << " " << list.size() << endl;
 		
+	}
+	
+	if (list.size() != 0){
+		cout << endl << "Tracing finished" << endl;
+	}
+	
+	
+	for (unsigned long long i = 0; i < draw_commands.size(); ++i){
+		if (draw_commands[i]->all_nodes){
+			if (draw_commands[i]->cropped){
+				draw_commands[i]->image = draw_list(draw_commands[i]->image,list,draw_commands[i]->all_nodes_color,draw_commands[i]->all_nodes_thickness);
+			}
+			else {
+				draw_commands[i]->image = draw_list_offset(draw_commands[i]->image,list,draw_commands[i]->all_nodes_color,draw_commands[i]->all_nodes_thickness,crop_x1,crop_y1);
+			}
+		}
+	}
+	
+	
+	if (junc_dist_all_path != ""){
+		
+		cout<< "analysing all Junctions" << endl;
+		vector<node*> junctions = find_junctions(list);
+		vector<double> jd =  junction_distances(junctions);
+		
+		double_vector_to_file(replace_keywords(junc_dist_all_path),jd);
+		
+		cout<< "done analysing all Junctions" << endl;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	cout << "extracting all closed loops from the traced network" << endl;
+	
+	
+	only_loops(list, closures);
+	
+	if (list.size() == 0){
+		cout << "WARNING: no loops present in the traced network" << endl;
+		for (unsigned long long i = 0; i < draw_commands.size(); ++i){
+			imwrite(replace_keywords(draw_commands[i]->folder+draw_commands[i]->name+draw_commands[i]->ending),draw_commands[i]->image);
+		}
+		return 0;
+	}
+	
+	
+	if (junc_dist_loop_path != ""){
+		
+		cout<< "analysing Junctions in the network of nodes that are part of a loop" << endl;
+		vector<node*> junctions = find_junctions(list);
+		vector<double> jd =  junction_distances(junctions);
+		
+		double_vector_to_file(replace_keywords(junc_dist_loop_path),jd);
+		
+		cout<< "done analysing Junctions" << endl;
+	}
+	
+	
+	vector<vector<node*>> loops = find_loops(closures);
+	
+	cout << "Done extractiong loops" << endl;
+	
+	
+	for (unsigned long long i = 0; i < loop_area_settings.size(); ++i){
+		vector<double> areas = find_loop_areas_wo_max_w_diam(loops,loop_area_settings[i]->thickness);
+		double_vector_to_file(replace_keywords(loop_area_settings[i]->path),areas);
+	}
+	
+	if (loop_circumference_path != ""){
+		double_vector_to_file(replace_keywords(loop_circumference_path,find_loop_lengths(loops)));
+	}
+	
+	
+	for (unsigned long long i = 0; i < draw_commands.size(); ++i){
+		if (draw_commands[i]->only_loops){
+			if (draw_commands[i]->cropped){
+				draw_commands[i]->image = draw_list(draw_commands[i]->image,list,draw_commands[i]->only_loops_color,draw_commands[i]->only_loops_thickness);
+			}
+			else {
+				draw_commands[i]->image = draw_list_offset(draw_commands[i]->image,list,draw_commands[i]->only_loops_color,draw_commands[i]->only_loops_thickness,crop_x1,crop_y1);
+			}
+		}
+	}
+	
+	for (unsigned long long i = 0; i < draw_commands.size(); ++i){
+		imwrite(replace_keywords(draw_commands[i]->folder+draw_commands[i]->name+draw_commands[i]->ending),draw_commands[i]->image);
 	}
 	
 	

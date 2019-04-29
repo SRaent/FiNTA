@@ -33,6 +33,18 @@ Mat draw_list(Mat input_image, vector<node*>list,Scalar color = Scalar(0,255,0),
 	return image;
 }
 
+Mat draw_list_offset(Mat input_image, vector<node*>list,Scalar color = Scalar(0,255,0),double thickness = 1, double off_x = 0, double off_y = 0){
+	Mat image;
+	input_image.copyTo(image);
+	for (unsigned long long i = 0; i < list.size(); ++i){
+		for (unsigned long long j = 0; j < list[i]->connections.size(); ++j){
+			line(image,Point(list[i]->x+off_x,list[i]->y+off_y),Point(list[i]->connections[j]->x+off_x,list[i]->connections[j]->y+off_y),color, thickness, LINE_AA);
+			
+		}
+	}
+	return image;
+}
+
 
 void draw_loops(char* folder, vector<vector<node*>> loops, Mat image,bool print_loop_params = false){
 	Mat loops_img;
