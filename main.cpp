@@ -29,6 +29,8 @@ TEST THAT SHIT!!!
 
 unsigned long long THREADS = 16;
 
+double scaling_factor = 1.0;
+
 //#define RV 8 // 8 vision radius (~2 times fibre thickness)
 //#define RM 0 //minimum vision radius
 //#define RS 3 //step radius
@@ -165,9 +167,8 @@ string loop_circumference_path = "";
 string junc_dist_all_path = "";
 string junc_dist_loop_path = "";
 
-double scaling_factor = 1.0;
-string scale_unit = "";
 
+string scale_unit = "";
 
 string tracing_data_path = "";
 string loop_data_path = "";
@@ -1047,6 +1048,35 @@ string replace_keywords(string s){
 }
 
 
+void save_tracing_data(vector<node*> list, string path){
+	ofstream f;
+	f.open(path);
+	for (unsigned long long i = 0; i < list.size(); i++){
+		f << i << " " << list[i]->x << list[i]->y << endl;
+	}
+	
+	for (unsigned long long i = 0; i < list.size(); ++i){
+		for (unsigned long long j = 0; j < list[i]->connections.size(); ++j){
+			f << i << " " << find_node_list_position(list[i]->connections[j],list) << endl;
+		}
+	}
+	
+	f.close();
+}
+
+void save_loop_data(vector<vector<node*>> loops, string path){
+	
+	ofstream f;
+	f.open(path);
+	for (unsigned long long i = 0; i < loops.size() ; ++i){
+		for (unsigned long long j = 0; j < (loops[i]).size(); ++j){
+			f << i << " " << loops[i][j]->x << " " << loops[i][j]->y << endl;
+		}
+	}
+	f.close();
+}
+
+
 
 int main(int n, char** args){
 	
@@ -1267,7 +1297,9 @@ int main(int n, char** args){
 		cout<< "done analysing all Junctions" << endl;
 	}
 	
-	
+	if (tracing_data_path != ""){
+		save_tracing_data(list, tracing_data_path);
+	}
 	
 	
 	
@@ -1306,6 +1338,15 @@ int main(int n, char** args){
 	}
 	
 	
+	vector<vector<node*>> loops = find_loops(closures);
+	
+	cout << "Done extractiong loops" << endl;
+	
+	if (loop_data_path != ""){
+		save_loop_data(loops, loop_data_path);
+	}
+	
+	
 	if (junc_dist_loop_path != ""){
 		
 		cout<< "analysing Junctions in the network of nodes that are part of a loop" << endl;
@@ -1318,10 +1359,6 @@ int main(int n, char** args){
 	}
 	
 	
-	vector<vector<node*>> loops = find_loops(closures);
-	
-	cout << "Done extractiong loops" << endl;
-	
 	
 	for (unsigned long long i = 0; i < loop_area_settings.size(); ++i){
 		vector<double> areas = find_loop_areas_wo_max_w_diam(loops,loop_area_settings[i]->thickness);
@@ -1329,7 +1366,7 @@ int main(int n, char** args){
 	}
 	
 	if (loop_circumference_path != ""){
-		double_vector_to_file(replace_keywords(loop_circumference_path,find_loop_lengths(loops)));
+		double_vector_to_file(replace_keywords(loop_circumference_path),find_loop_lengths(loops));
 	}
 	
 	

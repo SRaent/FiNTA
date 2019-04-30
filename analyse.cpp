@@ -22,7 +22,14 @@
 
 #define PI (double)3.1415926535897932384626433832795
 
-
+unsigned long long find_node_list_position(node* n, vector<node*> list){
+	for (unsigned long long i = 0; i < list.size(); ++i){
+		if (list[i] == n){
+			return i;
+		}
+	}
+	return 0;
+}
 
 unsigned long long find_connection_index(node* n, node* connection){
 	for (unsigned long long i = 0; i < n->connections.size(); ++i){
