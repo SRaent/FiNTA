@@ -168,7 +168,7 @@ void node::procreate_hessian(bool free = 1){
 //				std::cout << xnew << " " << ynew << std::endl;
 			}
 			else if(closable){
-				cout << "c" << flush;
+				//cout << "c" << flush;
 				node* inbetween = new node((x + child->x)/2.0, (y + child->y)/2.0, this);
 				inbetween->procreated = true;
 				inbetween->connections.push_back(child);

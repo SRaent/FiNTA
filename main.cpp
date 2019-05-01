@@ -17,17 +17,19 @@ fix connection between existing nodes
 */
 
 /* TODO:
-write execution of read settings
+TEST THAT SHIT!!!
+warning if imwrite returns false
+read THREADS
+animation
 print statistics about local maxima of smoothed angfun
 write shell script to apply programm to each file in folder
-read THREADS
-TEST THAT SHIT!!!
 */
 
 
 //#define THREADS 16
 
 unsigned long long THREADS = 16;
+bool THREADS_set = false;
 
 double scaling_factor = 1.0;
 
@@ -45,8 +47,8 @@ double RM = 0;						//minimum vision radius
 double RS = 3;						//step radius (~ 0.5 - 1 x fiber thickness)
 unsigned long long STEPS = 360;		//number of steps the smoothing function is computed for
 double DEV = 0.5;					// 0.55 deviation of gaussian smooth of circlefun
-double TH = 2;						//0.5 threshold for findpks
-unsigned long long ML = 7;			//minimum loop length
+double TH = 0;						//0.5 threshold for findpks
+unsigned long long ML = 6;			//minimum loop length
 double SG = 1.8;					//1.8 ; 2.3 (a bit less than half fibre thickness)
 
 
@@ -101,6 +103,8 @@ unsigned long long crop_y2 = 0;
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
+#include <opencv2/videoio.hpp>
+
 
 using namespace std;
 using namespace cv;
@@ -211,7 +215,7 @@ vector<string> scale_params(vector<string> w, bool& successful, bool& scaled){
 				successful = false;
 			}
 			if (successful) {
-				cout << w[i-1] << " " << w[i] << "was converted to " << res.back() << " pixel" << endl;
+				cout << w[i-1] << " " << w[i] << " was converted to " << res.back() << " pixel" << endl;
 				scaled = true;
 			}
 		}
@@ -274,7 +278,7 @@ bool is_number(string s){
 //draw network 255 0 0 2 only_loops 0 0 255 1 original name .png
 bool interprete_draw(vector<string> w){
 	bool successful = true;
-	unsigned long long l = w.size();
+	unsigned long long l = w.size() - 1;
 	draw_commands.push_back(new draw_command);
 	for (unsigned long long i = 1; i < l && successful; ++i){
 		if (w[i] == "network"){
@@ -295,7 +299,7 @@ bool interprete_draw(vector<string> w){
 						draw_commands.back()->all_nodes_thickness = abs(stoi(w[i+4]));
 						i += 4;
 					}
-					if (l >= i + 3 && is_number(w[i+2]) && is_number(w[i+3])){
+					else if (l >= i + 3 && is_number(w[i+2]) && is_number(w[i+3])){
 						int r = stoi(w[i+1]);
 						int g = stoi(w[i+2]);
 						int b = stoi(w[i+3]);
@@ -356,7 +360,7 @@ bool interprete_draw(vector<string> w){
 						draw_commands.back()->only_loops_thickness = abs(stoi(w[i+4]));
 						i += 4;
 					}
-					if (l >= i + 3 && is_number(w[i+2]) && is_number(w[i+3])){
+					else if (l >= i + 3 && is_number(w[i+2]) && is_number(w[i+3])){
 						int r = stoi(w[i+1]);
 						int g = stoi(w[i+2]);
 						int b = stoi(w[i+3]);
@@ -445,13 +449,15 @@ bool read_settings_line(string l){
 	bool successful = true;
 	vector<string> w = split_string_exclude(l," "); // w for words (i know i can't code)
 	
-	bool scaled = false;
-	if (scale_unit != ""){
-		w = scale_params(w, successful, scaled);
-	}
+
 	if (w.size() != 0){
 		
 		cout << endl << "Interpreting: \""+ l + "\"" << endl;
+
+		bool scaled = false;
+		if (scale_unit != ""){
+			w = scale_params(w, successful, scaled);
+		}
 		
 		if (w[0] == "sigma_conv"){
 			if (!SG_set && successful){
@@ -771,10 +777,10 @@ bool read_settings_line(string l){
 					loop_area_settings.back()->path = w[1];
 					if (w.size() == 3){
 						try{
-							loop_area_settings.back()->thickness = abs(stod(w[1]));
+							loop_area_settings.back()->thickness = abs(stod(w[2]));
 						}
 						catch(const std::invalid_argument& ia){
-							cout << "ERROR: value intended for fiber thickness:\"" << w[1] << "\" could not be interpreted as a number" << endl;
+							cout << "ERROR: value intended for fiber thickness:\"" << w[2] << "\" could not be interpreted as a number" << endl;
 							successful = false;
 						}
 					}
@@ -783,6 +789,9 @@ bool read_settings_line(string l){
 						successful = false;
 					}
 				}
+			}
+			else {
+			 loop_area_settings.back()->path = "<imagename>_loop_areas.dat";
 			}
 			if (successful) {
 				cout << "loop areas will be saved to: \"" << loop_area_settings.back()->path << "\" and, for their computation, the fiber diameter is assumed to be " << loop_area_settings.back()->thickness << " pixel " << endl;
@@ -935,6 +944,7 @@ bool read_settings_line(string l){
 				if (successful) {
 					scaling_factor = unit/px;
 					cout << "Image scale set to " << scaling_factor << " " << scale_unit << " per pixel" << endl;
+					cout << "All output data relating to lenghts or areas will be written in the units " << scale_unit <<" or " << scale_unit << "² and scaled accordingly" << endl;
 				}
 			}
 			else {
@@ -1040,9 +1050,10 @@ string replace_keywords(string s){
 	long long pos = 0;
 	string find = "<imagename>";
 	string replace = file;
+	pos = ret.find(find);
 	while (pos != -1){
-		pos = ret.find(find);
 		ret.replace(pos,find.size(),replace);
+		pos = ret.find(find);
 	}
 	return ret;
 }
@@ -1052,7 +1063,7 @@ void save_tracing_data(vector<node*> list, string path){
 	ofstream f;
 	f.open(path);
 	for (unsigned long long i = 0; i < list.size(); i++){
-		f << i << " " << list[i]->x << list[i]->y << endl;
+		f << i << " " << list[i]->x*scaling_factor << list[i]->y*scaling_factor << endl;
 	}
 	
 	for (unsigned long long i = 0; i < list.size(); ++i){
@@ -1070,26 +1081,34 @@ void save_loop_data(vector<vector<node*>> loops, string path){
 	f.open(path);
 	for (unsigned long long i = 0; i < loops.size() ; ++i){
 		for (unsigned long long j = 0; j < (loops[i]).size(); ++j){
-			f << i << " " << loops[i][j]->x << " " << loops[i][j]->y << endl;
+			f << i << " " << loops[i][j]->x*scaling_factor << " " << loops[i][j]->y*scaling_factor << endl;
 		}
 	}
 	f.close();
 }
-
-
-
+/*
+int main(){
+	Mat tmp(50,50, CV_8UC3, Scalar::all(255));
+	if (imwrite("./test/test.png", tmp)){
+		cout << "success" << endl;
+	}
+	else {
+		cout << "faliour" << endl;
+	}
+}
+*/
 int main(int n, char** args){
 	
 	bool settings_read = false;
 	bool image_specified = false;
 	
-	for(int i = 0; i < n; ++i){
-		cout << args[i] << " " << i << endl;
+	for(int i = 1; i < n; ++i){
+		//cout << args[i] << " " << i << endl;
 		if(strcmp(args[i],"-s") == 0 && ++i < n){
 			if(!settings_read){
 				if (read_settings(args[i])){
 					settings_read = true;
-					cout << "Settings read successfully" << endl;
+					cout << "\nSettings read successfully" << endl;
 				}
 				else {
 					cout << "ERROR: Settings could not be read" << endl;
@@ -1106,7 +1125,7 @@ int main(int n, char** args){
 				cout << "ERROR: Path to image: \"" + string(args[i]) + "\" appers to be a directory" << endl;
 				return -1;
 			}
-			cout << "\nfolder: " + folder + "\nfile: " + file + "\nending: " + ending << endl;
+			//cout << "\nfolder: " + folder + "\nfile: " + file + "\nending: " + ending << endl;
 		}
 		else {
 			cout << "ERROR: argument \"" << args[i] << "\" could not be interpreted" << endl;
@@ -1114,7 +1133,7 @@ int main(int n, char** args){
 		}
 	}
 	
-	if (!(RV_set && RM_set && RS_set && STEPS_set && DEV_set && TH_set && ML_set && SG_set)){
+	if (!(RV_set && RS_set && DEV_set && SG_set)){
 		cout << "ERROR: not all necessary parameters were specified" << endl;
 		return -1;
 	}
@@ -1125,6 +1144,8 @@ int main(int n, char** args){
 		return -1;
 	}
 	Size s = I1.size();
+	//PRINT(s.width);
+	//PRINT(s.height);
 	Mat I2;
 	
 	if (cropped && (crop_x1 - crop_x2) * (crop_y1 - crop_y2) == 0){
@@ -1153,6 +1174,8 @@ int main(int n, char** args){
 		I2 = I1;
 	}
 	s = I2.size();
+	//PRINT(s.width);
+	//PRINT(s.height);
 	Mat I3;
 	I2.copyTo(I3);
 	cvtColor(I3,I3,COLOR_BGR2GRAY);
@@ -1179,7 +1202,7 @@ int main(int n, char** args){
 			cout << "WARNING: the automated start point generation did not generate any starting points, this is likely due to a to big threshold" << endl;
 		}
 		else {
-			cout << list.size() << " startpoints were generated automatically" << endl;
+			cout << "\n" << list.size() << " startpoints were generated automatically" << endl;
 		}
 	}
 	
@@ -1226,12 +1249,12 @@ int main(int n, char** args){
 			draw_commands[i]->cropped = true;
 		}
 		else if ( draw_commands[i]->background == "white"){
-			Mat tmp(s.width,s.height, CV_8UC3, Scalar::all(255));
+			Mat tmp(s.height,s.width, CV_8UC3, Scalar::all(255));
 			tmp.copyTo(draw_commands[i]->image);
 			draw_commands[i]->cropped = true;
 		}
 		else if ( draw_commands[i]->background == "black"){
-			Mat tmp(s.width,s.height, CV_8UC3, Scalar::all(0));
+			Mat tmp(s.height,s.width, CV_8UC3, Scalar::all(0));
 			tmp.copyTo(draw_commands[i]->image);
 			draw_commands[i]->cropped = true;
 		}
@@ -1243,14 +1266,15 @@ int main(int n, char** args){
 	
 	
 	
+	
+	
+	
+	
 	unsigned long long i = 0;
 	
-	
 	if (list.size() != 0){
-		cout << endl << "Starting tracing" << endl;
+		cout << endl << "Starting tracing. This might take several minutes." << endl;
 	}
-	
-	
 	
 	for (bool buisy = 1; buisy && list.size() != 0;){
 		buisy = 0;
@@ -1272,6 +1296,11 @@ int main(int n, char** args){
 	if (list.size() != 0){
 		cout << endl << "Tracing finished" << endl;
 	}
+	
+	
+	
+	
+	
 	
 	
 	for (unsigned long long i = 0; i < draw_commands.size(); ++i){
@@ -1332,7 +1361,9 @@ int main(int n, char** args){
 	if (list.size() == 0){
 		cout << "WARNING: no loops present in the traced network" << endl;
 		for (unsigned long long i = 0; i < draw_commands.size(); ++i){
-			imwrite(replace_keywords(draw_commands[i]->folder+draw_commands[i]->name+draw_commands[i]->ending),draw_commands[i]->image);
+			if(!imwrite(replace_keywords(draw_commands[i]->folder+draw_commands[i]->name+draw_commands[i]->ending),draw_commands[i]->image)){
+				cout << "WARNING: File: \"" << replace_keywords(draw_commands[i]->folder+draw_commands[i]->name+draw_commands[i]->ending) << "\" could not be opened" << endl;
+			}
 		}
 		return 0;
 	}
@@ -1366,7 +1397,7 @@ int main(int n, char** args){
 	}
 	
 	if (loop_circumference_path != ""){
-		double_vector_to_file(replace_keywords(loop_circumference_path),find_loop_lengths(loops));
+		double_vector_to_file(replace_keywords(loop_circumference_path),find_loop_lengths_wo_max(loops));
 	}
 	
 	
@@ -1382,7 +1413,9 @@ int main(int n, char** args){
 	}
 	
 	for (unsigned long long i = 0; i < draw_commands.size(); ++i){
-		imwrite(replace_keywords(draw_commands[i]->folder+draw_commands[i]->name+draw_commands[i]->ending),draw_commands[i]->image);
+		if (!imwrite(replace_keywords(draw_commands[i]->folder+draw_commands[i]->name+draw_commands[i]->ending),draw_commands[i]->image)){
+			cout << "WARNING: File: \"" << replace_keywords(draw_commands[i]->folder+draw_commands[i]->name+draw_commands[i]->ending) << "\" could not be opened" << endl;
+		}
 	}
 	
 	

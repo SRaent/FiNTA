@@ -191,7 +191,7 @@ double loop_area(vector<node*> loop){
 		area += (loop[i]->x) * (loop[j]->y);
 		area -= (loop[i]->y) * (loop[j]->x);
 	}
-	return abs(area/2.0);
+	return abs(area * scaling_factor * scaling_factor/2.0);
 }
 
 
@@ -205,12 +205,12 @@ double loop_length(vector<node*> loop){
 		}
 		length += sqrt(pow(loop[i]->x - loop[j]->x,2) + pow(loop[i]->y - loop[j]->y,2));
 	}
-	return length;
+	return length * scaling_factor;
 }
 
 
 double inside_loop_area(vector<node*> loop, double thickness){
-	return loop_area(loop) - (loop_length(loop)*thickness/2.0) + PI * thickness * thickness * 0.25; // the last term is a approximation for the overlapping of the assumed fiber thickness
+	return loop_area(loop) - (loop_length(loop)*thickness * scaling_factor/2.0) + PI * thickness * thickness * 0.25 * scaling_factor * scaling_factor; // the last term is a approximation for the overlapping of the assumed fiber thickness
 }
 
 
@@ -343,8 +343,13 @@ vector<double> all_con_angles_long_curvature(vector<node*> list, unsigned long l
 void double_vector_to_file(string filename, vector<double> list){
 	ofstream f;
 	f.open(filename);
-	for(unsigned long long i = 0; i < list.size(); ++i){
-		f << list[i] << "\n";
+	if (f.is_open()){
+		for(unsigned long long i = 0; i < list.size(); ++i){
+			f << list[i] << "\n";
+		}
+	}
+	else {
+		cout << "WARNING: File: \"" << filename << "\" could not be opened" << endl;
 	}
 	f.close();
 }
@@ -368,7 +373,7 @@ double total_loop_area(vector<vector<node*>> loops){
 vector<double> find_loop_areas(vector<vector<node*>> loops){
 	vector<double> areas;
 	for (unsigned long long l = 0; l < loops.size(); ++l){
-		areas.push_back(loop_area(loops[l])*scaling_factor*scaling_factor);
+		areas.push_back(loop_area(loops[l]));
 	}
 	return areas;
 }
@@ -376,12 +381,29 @@ vector<double> find_loop_areas(vector<vector<node*>> loops){
 vector<double> find_loop_lengths(vector<vector<node*>> loops){
 	vector<double> lengths;
 	for (unsigned long long l = 0; l < loops.size(); ++l){
-		lengths.push_back(loop_length(loops[l])*scaling_factor);
+		lengths.push_back(loop_length(loops[l]));
 	}
 	return lengths;
 }
 
-
+vector<double> find_loop_lengths_wo_max(vector<vector<node*>> loops){
+	vector<double> lengths;
+	double length = 0;
+	double max_length = 0;
+	for (unsigned long long l = 0; l < loops.size(); ++l){
+		length = loop_length(loops[l]);
+		if (length > max_length){
+			if (max_length != 0){
+				lengths.push_back(max_length);
+			}
+			max_length = length;
+		}
+		else{
+			lengths.push_back(length);
+		}
+	}
+	return lengths;
+}
 
 
 // the loop with the biggest area encompasses all other loops because of the way the loops are found. not considering the biggest area is not manipulating data
@@ -425,6 +447,8 @@ vector<double> find_loop_areas_wo_max_w_diam(vector<vector<node*>> loops,double 
 	}
 	return areas;
 }
+
+
 
 
 

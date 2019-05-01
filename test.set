@@ -1,0 +1,22 @@
+set_scale 300 px = 1000 nm
+
+sigma_smooth 0.5
+sigma_conv 1.8
+r_min 0
+r_max 8
+steps 360
+thresh 2
+r_step 3
+min_loop_length 7
+crop 500 500 1024 884 
+
+draw original network 255 0 0 2 name ./results/test.png only_loops 0 0 255
+draw original name ./results/orig.png
+
+auto_startpoint
+
+#startpoint 100 100
+
+save_loop_areas  ./results/loop_areas_thickness.dat 8 nm
+save_loop_areas  ./results/loop_areas.dat
+save_loop_circumferences ./results/loop_circ.dat

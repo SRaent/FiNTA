@@ -452,6 +452,7 @@ Mat visualize_hessian(Mat hes){
 	HSV.push_back(V);
 	cv::merge(HSV,ret);
 	ret = convertHSVtoBGR(ret);
+	normalize(ret,ret,255,0,32); // the 32 is a flag, that produced errors if the keyword is used directly
 	return ret;
 }
 
