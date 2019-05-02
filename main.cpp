@@ -17,8 +17,6 @@ fix connection between existing nodes
 */
 
 /* TODO:
-TEST THAT SHIT!!!
-animation
 print statistics about local maxima of smoothed angfun
 write shell script to apply programm to each file in folder
 */
@@ -1009,7 +1007,7 @@ bool read_settings_line(string l){
 		}
 		else if (w[0] == "animate_tracing"){
 			if (animation_path == ""){
-				animation_path = "<imagename>_animated";
+				animation_path = "<imagename>_animated.avi";
 				if (w.size() == 2){
 					try{
 						animation_thickness = stod(w[1]);
@@ -1175,6 +1173,7 @@ int main(int n, char** args){
 		return -1;
 	}
 	Size s = I1.size();
+	Size s_orig = I1.size();
 	//PRINT(s.width);
 	//PRINT(s.height);
 	Mat I2;
@@ -1307,6 +1306,36 @@ int main(int n, char** args){
 		cout << endl << "Starting tracing. This might take several minutes." << endl;
 	}
 	
+	
+	
+	//VideoWriter animation(animation_path, VideoWriter::fourcc('P','I','M','1') , 3, s_orig);
+	
+	VideoWriter animation;
+	//int codec = VideoWriter::fourcc('P','I','M','1');
+	//double fps = 3;
+	if (animation_path != ""){
+		int codec = animation.fourcc('P','I','M','1');  // select desired codec (must be available at runtime)
+		double fps = 20.0;                          // framerate of the created video stream
+		animation.open(replace_keywords(animation_path), codec, fps, s_orig, true);
+		if (!animation.isOpened()){
+			cout << "WARNING: animation can not be saved to path: \"" << animation_path << "\"" << endl;
+		}
+	}
+	//animation.open(animation_path, VideoWriter::fourcc('P','I','M','1'), 3, s_orig);
+	
+	
+	
+	/*
+	//--- INITIALIZE VIDEOWRITER
+    VideoWriter writer;
+    int codec = VideoWriter::fourcc('P','I','M','1');  // select desired codec (must be available at runtime)
+    double fps = 25.0;                          // framerate of the created video stream
+    //string filename = "./live.avi";             // name of the output video file
+    //PRINT(replace_keywords(animation_path))
+    writer.open(replace_keywords(animation_path), codec, fps, s_orig, true);
+	*/
+	
+	
 	for (bool buisy = 1; buisy && list.size() != 0;){
 		buisy = 0;
 		unsigned long long end = list.size();
@@ -1316,6 +1345,15 @@ int main(int n, char** args){
 				buisy = 1;
 			}
 		}
+		
+		if (animation_path != ""){
+			Mat frame;
+			I1.copyTo(frame);
+			frame = draw_list_offset(frame,list,animation_color, animation_thickness, crop_x1, crop_y1);
+			animation.write(frame);
+		}
+		
+		
 		
 		//for (unsigned long long i = 0; i < list.size(); ++i){
 		//	PRINT(list[i])
