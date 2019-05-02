@@ -1,5 +1,7 @@
 set_scale 300 px = 1000 nm
 
+threads 16
+
 sigma_smooth 0.5
 sigma_conv 1.8
 r_min 0
@@ -20,3 +22,8 @@ auto_startpoint
 save_loop_areas  ./results/loop_areas_thickness.dat 8 nm
 save_loop_areas  ./results/loop_areas.dat
 save_loop_circumferences ./results/loop_circ.dat
+save_all_junction_distances ./results/all_junc_dist.dat
+save_loop_junction_distances ./results/loop_junc_dist.dat
+
+save_tracing_data ./results/tracing.dat
+save_loop_data ./results/loops.dat

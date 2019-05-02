@@ -609,7 +609,7 @@ vector<double> junction_distances(vector<node*> junc){
 	}
 	
 	for (unsigned long long i = 0; i < jc.size(); ++i){
-		jd.push_back(line_length(jc[i]));
+		jd.push_back(line_length(jc[i]) * scaling_factor);
 	}
 	
 	

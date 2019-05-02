@@ -18,8 +18,6 @@ fix connection between existing nodes
 
 /* TODO:
 TEST THAT SHIT!!!
-warning if imwrite returns false
-read THREADS
 animation
 print statistics about local maxima of smoothed angfun
 write shell script to apply programm to each file in folder
@@ -28,7 +26,7 @@ write shell script to apply programm to each file in folder
 
 //#define THREADS 16
 
-unsigned long long THREADS = 16;
+unsigned long long THREADS = 1;
 bool THREADS_set = false;
 
 double scaling_factor = 1.0;
@@ -459,7 +457,30 @@ bool read_settings_line(string l){
 			w = scale_params(w, successful, scaled);
 		}
 		
-		if (w[0] == "sigma_conv"){
+		
+		if (w[0] == "threads"){
+			if (!THREADS_set){
+				if (w.size() == 2){
+					try{
+						THREADS = abs(stoi(w[1]));
+						cout << THREADS << " threads will be used for the computation" << endl;
+					}
+					catch( const std::invalid_argument& ia){
+						cout << "ERROR: value intended for the number of threads: \"" << w[1] << " could not be interpreted as a number" << endl;
+						successful = false;
+					}
+				}
+				else {
+					cout << "ERROR: To many input arguments for threads. It expects 1 argument instead of " << w.size() - 1 << endl;
+					successful = false;
+				}
+			}
+			else {
+				cout << "ERROR: number of threads was already set" << endl;
+				successful = false;
+			}
+		}
+		else if (w[0] == "sigma_conv"){
 			if (!SG_set && successful){
 				if (w.size() == 2){
 					try{
@@ -1062,16 +1083,20 @@ string replace_keywords(string s){
 void save_tracing_data(vector<node*> list, string path){
 	ofstream f;
 	f.open(path);
-	for (unsigned long long i = 0; i < list.size(); i++){
-		f << i << " " << list[i]->x*scaling_factor << list[i]->y*scaling_factor << endl;
-	}
-	
-	for (unsigned long long i = 0; i < list.size(); ++i){
-		for (unsigned long long j = 0; j < list[i]->connections.size(); ++j){
-			f << i << " " << find_node_list_position(list[i]->connections[j],list) << endl;
+	if (f.is_open()){
+		for (unsigned long long i = 0; i < list.size(); i++){
+			f << i << " " << list[i]->x*scaling_factor << " " << list[i]->y*scaling_factor << endl;
+		}
+		
+		for (unsigned long long i = 0; i < list.size(); ++i){
+			for (unsigned long long j = 0; j < list[i]->connections.size(); ++j){
+				f << i << " " << find_node_list_position(list[i]->connections[j],list) << endl;
+			}
 		}
 	}
-	
+	else {
+		cout << "WARNING: Path to save tracing data: \"" << path << "\" could not be opened" << endl;
+	}
 	f.close();
 }
 
@@ -1079,10 +1104,16 @@ void save_loop_data(vector<vector<node*>> loops, string path){
 	
 	ofstream f;
 	f.open(path);
-	for (unsigned long long i = 0; i < loops.size() ; ++i){
-		for (unsigned long long j = 0; j < (loops[i]).size(); ++j){
-			f << i << " " << loops[i][j]->x*scaling_factor << " " << loops[i][j]->y*scaling_factor << endl;
+	
+	if (f.is_open()){
+		for (unsigned long long i = 0; i < loops.size() ; ++i){
+			for (unsigned long long j = 0; j < (loops[i]).size(); ++j){
+				f << i << " " << loops[i][j]->x*scaling_factor << " " << loops[i][j]->y*scaling_factor << endl;
+			}
 		}
+	}
+	else {
+		cout << "WARNING: Path to save tracing data: \"" << path << "\" could not be opened" << endl;
 	}
 	f.close();
 }
@@ -1371,7 +1402,7 @@ int main(int n, char** args){
 	
 	vector<vector<node*>> loops = find_loops(closures);
 	
-	cout << "Done extractiong loops" << endl;
+	cout << "Done extracting loops" << endl;
 	
 	if (loop_data_path != ""){
 		save_loop_data(loops, loop_data_path);
