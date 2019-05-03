@@ -21,6 +21,7 @@ Since many imaging programs add a scalebar or other information at various place
 ```
 crop 0 0 1024 884
 ```
+Cropping can also be used to quickly trace a smaller section of the image in order to more quickly optimize the tracing parameters.
 
 ## Tracing start points
 In order for the algorithm to function, at least one starting point has to be set on the image. Starting points can be set manually by the keyword "startpoint" followed by the x and y koordinate of the startpoint. A arbitrary number of startpoints can be defined this way by simply using the "startpoint" keyword in several lines each followed by the corresponding koordinates.
@@ -33,6 +34,9 @@ and for defining the settings for automated startpoint generation:
 auto_startpoint 100 60 10
 ```
 where a maximal number of 100 startpoints will be generated at least 60 pixel apart and with a minimum negative second order derivative of 10.
+
+## The <imagename\> keyword
+The "<imagename\>" keyword can be used in any path that is specified in the settings file. It will be replaced by the name of the image that is beeing analyzed in the respective run of the programm.
 
 
 ## Drawing commands
@@ -70,9 +74,25 @@ draw original network 255 0 0 8 nm name ./results/test.png
 where the "8 nm" will be converted to 2.4 pixel automatically. This conversion does not work on a few specific parameters, that are scale invariant. Specifically: "sigma\_smooth", "steps", "thresh" and "min\_loop\_length", because defining them in terms of length does not make any sense. Note that the defined unit can only be used AFTER "set\_scale" has been called.
 
 ## Saving extracted data
-Currently the programm only supports a small number of parameters that are extracted form the traced network.
+Currently the programm only supports a small number of parameters that are extracted form the traced network. The files saved this way only contain numbers and no text. If the "set\_scale" command is used in the settings file, all numerical values contained in these files will have the appropriate unit derived from the one in the "set_scale" command. Specifically it will be the unit itself or the unit squared. There will be no remark or other indication in the saved files that this scaling has taken place.
 
 ### Saving loop areas
-In order to save the loop areas, the keyword "save\_loop\_areas" is used. The path where the loop areas will be saved can be specified after a whitespace.
+In order to save the loop areas, the keyword "save\_loop\_areas" is used. The path where the loop areas will be saved can be specified after a whitespace. In addition a fiber thickness can be specified by a numerical value. In that case from each loop area, the circumference of the loop times half the specified fiber thickness will be subtracted from each loop area. This takes the fiber thicknes into account, but since the loop is not a streight line, the line segments that now have a thickness associated with them will slightly overlap at inward kinks and leave empty space at outward kinks. In order to compensate for this inaccuracy as best as possible, pi times the fiber thickness squared devided by 4 is added to each of the areas obtained this way. If the resulting area is smaller than 0, it is discarded.
+A arbitrary amount of files containing the loop areas for different considered fiber diameters can be saved to different paths. The default value for fiber thickness is 0, so only the area of the polygon describing the loop is considered. A example for how to save loop areas would be:
+```
+save_loop_areas  ./results/loop_areas_thickness.dat 3
+save_loop_areas  ./results/loop_areas.dat
+```
+Where two seperate files would be saved. One with a assumed fiber thickness of 3 pixels and one with a assumed fiber thickness of 0 pixels. The order in which the path and the fiber thickness is stated is irrelevant. If the "set\_scale" command is called in the settings file, the output will have the dimension of the defined unit squared without any remarks in the saved file.
 
 ### Save loop circumferences
+In order to save the loop circumferences of all closed loops, the keyword "save\_loop\_circumferences" is used. It can only be called once and the path, to which the data will be saved can be specified after a white space. If the "set\_scale" keyword is used in the settings file, the output will be in the unit defined there and scaled accordingly without any indication in the created file. If "save\_loop\_areas" is also used with the default considered fiber thickness of 0, the two files will have the same number of values in them and the values will correspond to one another. This means that the 5th entry in the loop area file will correspond to the same loop as the 5th entry in the loop circumference file and so on.
+
+## Saving the raw tracing data
+If one wishes to evaluate the generated tracing data on their own, it is recommended to modifie the c++ source code, since there the raw tracing data is accessible in a convinient datastructure. Nevertheless a keyword to save a representation of the raw tracing date is available. It is "save\_tracing\_data" and can only be called once, followed by the path to the file, where the data should be saved. The datastructure is the following: The first part of the file consists of three columns, that contain the number, x and y position of each node in the traced network in that order. If "set_scale" was used in the settings file, the x and y coordinates position will be scaled accordingly. After the three column part of the file, it transitions to a two column part, in which all the connections between the nodes defined in the first part are listet. For a connection between nodes A and B, the index of node A is given in the first column and the index of the second node B is given in the second column. Here for every connection between two nodes A and B, there exists a second connection between B and A, with the same inices but with the order of them flipped. Therefore each connection is sort of listed twice.
+
+## Saving the loop poligons
+If one wishes to do more extensive analysis on the closed loops in the traced network, it is possible to save those to a file with the keyword "save\_loop\_data", which can only be used once. Behind this keyword after a whitespace, the path, where the loop data should be saved can be entered. This data is represented in the file in the following way: The file containes three columns seperated by whitespaces. The first column containes the index of the loop. Each time the first column increases by 1, a new loop is beeing described. The second and third column contain the x and y koordinates of the nodes the loop consists of. If the "set\_scale" keyword is used in the settings file, the output will be in the unit defined there and scaled accordingly without any indication in the created file.
+
+## Generating a animation of the tracing
+To generate a animation of the tracing, the keyword "animate\_tracing" can be used. It takes a single argument that specifies the thickness of the lines to be drawn. The animation will always be saved with the name "<imagename\>\_animated.avi" and the background will always be the original image and the color of the lines will always be red.
