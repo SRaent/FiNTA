@@ -10,6 +10,7 @@ steps 360
 thresh 2
 r_step 3
 min_loop_length 7
+
 crop 0 0 1024 884 
 
 draw original network 255 0 0 2 name ./results/test.png only_loops 0 0 255

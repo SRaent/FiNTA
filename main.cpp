@@ -1232,7 +1232,7 @@ int main(int n, char** args){
 			cout << "WARNING: the automated start point generation did not generate any starting points, this is likely due to a to big threshold" << endl;
 		}
 		else {
-			cout << "\n" << list.size() << " startpoints were generated automatically" << endl;
+			cout << "\n" << list.size() << " startpoint(s) generated automatically" << endl;
 		}
 	}
 	

@@ -1,4 +1,4 @@
 #!/bin/sh
-rm ./a.out
+rm ./atafut
 ./compile.sh
-./a.out
+./atafut
