@@ -1,5 +1,5 @@
 # Automated tracing algorithm for fibers of uniform thickness
-This programm was specifically developed to trace the actin fibers visible in SEM images of mammalian cells after triton extraction. It can likely also be applied to any other fiber system where the fibers have sufficiently uniform thickness.
+This programm was specifically developed to trace the actin fibers visible in SEM images of mammalian cells after triton extraction. It can likely also be applied to any other fiber system where the fibers have a sufficiently uniform thickness. The programm works with grayscale images and any color images used as input will be converted to greyscale internally for the tracing.
 
 # Usage
 To apply the tracing algorithm to a given image, the path to the image, and the path to a configuration file have to be handed over to the programm. To archieve this, run the programm in the command line with the paths as arguments. The path to the image has to be passed as a argument after the "-f" flag and the path to the settings file after the "-s" flag. To successfully execute the programm, type something like
