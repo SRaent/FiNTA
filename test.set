@@ -13,14 +13,14 @@ min_loop_length 7
 
 crop 0 0 1024 884 
 
-draw original network 255 0 0 2 name ./results/test.png only_loops 0 0 255
-draw original name ./results/orig.png
-
-auto_startpoint 1
+#draw original network 255 0 0 8 nm name ./results/test.png only_loops 0 0 255 8 nm
+#draw original name ./results/orig.png
+draw visualized_hessian
+#auto_startpoint
 
 #startpoint 100 100
 
-#save_loop_areas  ./results/loop_areas_thickness.dat 8 nm
+save_loop_areas  ./results/loop_areas_thickness.dat 8 nm
 #save_loop_areas  ./results/loop_areas.dat
 #save_loop_circumferences ./results/loop_circ.dat
 #save_all_junction_distances ./results/all_junc_dist.dat

@@ -17,6 +17,7 @@ fix connection between existing nodes
 */
 
 /* TODO:
+draw name or ending not specified
 print statistics about local maxima of smoothed angfun
 write shell script to apply programm to each file in folder
 */
@@ -94,7 +95,7 @@ unsigned long long crop_y2 = 0;
 #include <fftw3.h>
 #include <thread>
 
-#include "tiffio.h"
+//#include "tiffio.h"
 #include <opencv2/core/core.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui.hpp>
@@ -105,8 +106,8 @@ unsigned long long crop_y2 = 0;
 using namespace std;
 using namespace cv;
 
-#include "datafun.h"
-#include "datafun.cpp"
+//#include "datafun.h"
+//#include "datafun.cpp"
 #include "mathfun.cpp"
 #include "node.h"
 #include "node.cpp"
@@ -276,7 +277,7 @@ bool interprete_draw(vector<string> w){
 	bool successful = true;
 	unsigned long long l = w.size() - 1;
 	draw_commands.push_back(new draw_command);
-	for (unsigned long long i = 1; i < l && successful; ++i){
+	for (unsigned long long i = 1; i <= l && successful; ++i){
 		if (w[i] == "network"){
 			if (!(draw_commands.back()->all_nodes)){
 				draw_commands.back()->all_nodes = true;
@@ -1167,6 +1168,21 @@ int main(int n, char** args){
 		return -1;
 	}
 	
+	
+	for (unsigned long long i = 0; i < draw_commands.size(); ++i){
+		if (!draw_commands[i]->name_specified){
+			draw_commands[i]->name = "<imagename>_" + draw_commands[i]->background;
+		}
+		if (draw_commands[i]->ending == ""){
+			draw_commands[i]->ending = ending;
+		}
+	}
+	
+	
+	
+	
+	
+	
 	Mat I1 = imread(folder+file+ending);
 	if ( !I1.data){
 		cout << "ERROR: Image \"" << folder + file + ending << "\" could not be opened" << endl;
@@ -1218,7 +1234,8 @@ int main(int n, char** args){
 	Mat tubeness = tubeness_hessian(hessian);
 	Mat viz_hessian = visualize_hessian(hessian);
 	
-	
+	//PRINT(viz_hessian.channels())
+	viz_hessian.convertTo(viz_hessian,CV_8UC3);
 	
 	vector<node*> list;
 	vector<node**> closures;
@@ -1430,7 +1447,10 @@ int main(int n, char** args){
 	if (list.size() == 0){
 		cout << "WARNING: no loops present in the traced network" << endl;
 		for (unsigned long long i = 0; i < draw_commands.size(); ++i){
+			//Mat test(s.height,s.width, CV_8UC3, Scalar::all(255));
+			cout << "TEST " << replace_keywords(draw_commands[i]->folder+draw_commands[i]->name+draw_commands[i]->ending) << endl;
 			if(!imwrite(replace_keywords(draw_commands[i]->folder+draw_commands[i]->name+draw_commands[i]->ending),draw_commands[i]->image)){
+			//if(!imwrite("test.png",test)){//draw_commands[i]->image)){
 				cout << "WARNING: File: \"" << replace_keywords(draw_commands[i]->folder+draw_commands[i]->name+draw_commands[i]->ending) << "\" could not be opened" << endl;
 			}
 		}
