@@ -1,5 +1,5 @@
 #!/bin/sh
-#g++ -o atafut -std=c++11 -I /usr/include/opencv4 -L /usr/lib -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs -lopencv_videoio -O0 -g -pthread main.cpp #-Wall -Werror
+g++ -o atafut -std=c++11 -I /usr/include/opencv4 -L /usr/lib -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs -lopencv_videoio -O3 -g -pthread main.cpp -Wl,-rpath=./opencv/lib64/ #-Wall -Werror
 #-O0 -g
 
 
@@ -29,7 +29,7 @@
 
 #gcc main.cpp -o atafut -std=c++11 -O3 -L /usr/local/lib64 -I /usr/local/include/opencv4 $(pkg-config --cflags opencv; for x in $(ls /usr/local/lib64/libopencv*.a; ls /usr/local/lib64/libopencv*.a); do echo -n "$x "; done) /usr/local/lib64/opencv4/3rdparty/libippicv.a -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs -lopencv_videoio -ldl -lm -lpthread -lrt -lstdc++ -ljasper -ljpeg -lpng -ltiff -lz -lgtk-x11-2.0 -lgdk-x11-2.0 -latk-1.0 -lgio-2.0 -lpangoft2-1.0 -lpangocairo-1.0 -lgdk_pixbuf-2.0 -lcairo -lpng12 -lpango-1.0 -lfreetype -lfontconfig -lgobject-2.0 -lgmodule-2.0 -lgthread-2.0 -lglib-2.0 -lgstbase-0.10 -lgstreamer-0.10 -lxml2 -lrt -lavcodec -lavformat -lavutil -lswscale -ldc1394 -lv4l1 -lwebp #least errors so far!
 
-gcc main.cpp -o atafut -std=c++11 -O3 -L /usr/local/lib64 -I /usr/local/include/opencv4 $(pkg-config --cflags opencv; for x in $(ls /usr/local/lib64/libopencv*.a; ls /usr/local/lib64/opencv4/3rdparty/*.a; ls /usr/local/lib64/libopencv*.a; ls /usr/local/lib64/opencv4/3rdparty/*.a); do echo -n "$x "; done) /usr/local/lib64/opencv4/3rdparty/libippicv.a -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs -lopencv_videoio -ldl -lm -lpthread -lrt -lstdc++ -ljasper -ljpeg -lpng -ltiff -lz -lgtk-x11-2.0 -lgdk-x11-2.0 -latk-1.0 -lgio-2.0 -lpangoft2-1.0 -lpangocairo-1.0 -lgdk_pixbuf-2.0 -lcairo -lpng12 -lpango-1.0 -lfreetype -lfontconfig -lgobject-2.0 -lgmodule-2.0 -lgthread-2.0 -lglib-2.0 -lgstbase-0.10 -lgstreamer-0.10 -lxml2 -lrt -lavcodec -lavformat -lavutil -lswscale -ldc1394 -lv4l1 -lwebp -lIlmImf -lgstreamer-1.0 -lgstapp-1.0 -lgstriff-1.0 -lgstpbutils-1.0 #least errors so far!
+#gcc main.cpp -o atafut -std=c++11 -O3 -L /usr/local/lib64 -I /usr/local/include/opencv4 $(pkg-config --cflags opencv; for x in $(ls /usr/local/lib64/libopencv*.a; ls /usr/local/lib64/opencv4/3rdparty/*.a; ls /usr/local/lib64/libopencv*.a; ls /usr/local/lib64/opencv4/3rdparty/*.a); do echo -n "$x "; done) /usr/local/lib64/opencv4/3rdparty/libippicv.a -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs -lopencv_videoio -ldl -lm -lpthread -lrt -lstdc++ -ljasper -ljpeg -lpng -ltiff -lz -lgtk-x11-2.0 -lgdk-x11-2.0 -latk-1.0 -lgio-2.0 -lpangoft2-1.0 -lpangocairo-1.0 -lgdk_pixbuf-2.0 -lcairo -lpng12 -lpango-1.0 -lfreetype -lfontconfig -lgobject-2.0 -lgmodule-2.0 -lgthread-2.0 -lglib-2.0 -lgstbase-0.10 -lgstreamer-0.10 -lxml2 -lrt -lavcodec -lavformat -lavutil -lswscale -ldc1394 -lv4l1 -lwebp -lIlmImf -lgstreamer-1.0 -lgstapp-1.0 -lgstriff-1.0 -lgstpbutils-1.0 #least errors so far!
 
 
 
