@@ -1155,6 +1155,9 @@ int main(int n, char** args){
 				cout << "ERROR: Path to image: \"" + string(args[i]) + "\" appers to be a directory" << endl;
 				return -1;
 			}
+			else{
+				cout << "analyzing image: " << file+ending << endl;
+			}
 			//cout << "\nfolder: " + folder + "\nfile: " + file + "\nending: " + ending << endl;
 		}
 		else {
@@ -1320,7 +1323,7 @@ int main(int n, char** args){
 	unsigned long long i = 0;
 	
 	if (list.size() != 0){
-		cout << endl << "Started tracing. This might take several minutes." << endl;
+		cout << endl << "Started tracing. This might take several minutes. Every iteration a \"i\" will be printed in the command line to see if the programm is still running" << endl;
 	}
 	
 	
@@ -1376,6 +1379,7 @@ int main(int n, char** args){
 		//	PRINT(list[i])
 		//}
 		//cout << i++ << " " << list.size() << endl;
+		cout << "i" << flush;
 		
 	}
 	
