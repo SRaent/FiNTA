@@ -1269,7 +1269,7 @@ int main(int n, char** args){
 	
 	
 	normalize(tubeness,tubeness,255,0,32);
-	
+	tubeness.convertTo(tubeness,CV_8UC3);
 	
 	
 	
@@ -1320,7 +1320,7 @@ int main(int n, char** args){
 	unsigned long long i = 0;
 	
 	if (list.size() != 0){
-		cout << endl << "Starting tracing. This might take several minutes." << endl;
+		cout << endl << "Started tracing. This might take several minutes." << endl;
 	}
 	
 	
@@ -1448,7 +1448,7 @@ int main(int n, char** args){
 		cout << "WARNING: no loops present in the traced network" << endl;
 		for (unsigned long long i = 0; i < draw_commands.size(); ++i){
 			//Mat test(s.height,s.width, CV_8UC3, Scalar::all(255));
-			cout << "TEST " << replace_keywords(draw_commands[i]->folder+draw_commands[i]->name+draw_commands[i]->ending) << endl;
+			//cout << "TEST " << replace_keywords(draw_commands[i]->folder+draw_commands[i]->name+draw_commands[i]->ending) << endl;
 			if(!imwrite(replace_keywords(draw_commands[i]->folder+draw_commands[i]->name+draw_commands[i]->ending),draw_commands[i]->image)){
 			//if(!imwrite("test.png",test)){//draw_commands[i]->image)){
 				cout << "WARNING: File: \"" << replace_keywords(draw_commands[i]->folder+draw_commands[i]->name+draw_commands[i]->ending) << "\" could not be opened" << endl;
