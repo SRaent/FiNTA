@@ -7,6 +7,10 @@
 #set_scale 300 px = 1000 nm
 
 
+#The threads keyword defines the number of threads used by the programm for its computations. For the best performance use the number of physical threads in your processor.
+#threads 8
+
+
 #The tracing parameters that can be specified are "sigma_smooth", "sigma_conv", "r_min", "r_max", "steps", "thresh", "r_step" and "min_loop_length". Guidelines on how to choose them and their exact function is described in the choosing_parameters.pdf. Here only the briefest of descriptions is given. The parameters that have to be specified are: "sigma_smooth", "sigma_conv", "r_max" and "r_step", all others have default values. The parameters are specified by the parameter name followed by a whitespace and the value that is to be assigned to it. They can only be specified once. Only the parameters relating to length that scale with the image can be set using the unit from the "set_scale" command. The parameters given here as a example were used to trace actin fibers in SEM images where the fibers were approximately 4 pixels thick.
 
 #Since some parameters are specified relative to the fiber diameter, here the set_scale command is used to easily adjust these parameters to the scale of the image. Simple fill in how many pixel thick the fibers are in your image before the word "pixel" in the next command.
