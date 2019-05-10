@@ -92,7 +92,7 @@ unsigned long long crop_y2 = 0;
 #include <iostream>
 #include <fstream>
 #include <complex.h>
-#include <fftw3.h>
+//#include <fftw3.h>
 #include <thread>
 
 //#include "tiffio.h"

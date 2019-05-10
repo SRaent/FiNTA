@@ -4,7 +4,7 @@ This programm was specifically developed to trace the actin fibers visible in SE
 # Usage
 To apply the tracing algorithm to a given image, the path to the image, and the path to a configuration file have to be handed over to the programm. To archieve this, run the programm in the command line with the paths as arguments. The path to the image has to be passed as a argument after the "-f" flag and the path to the settings file after the "-s" flag. To successfully execute the programm, type something like
 ```
-atafut -s /path/to/settings_file.set -f /path/to/image.tif
+./atafut -s /path/to/settings_file.set -f /path/to/image.tif
 ```
 
 # The settings file

@@ -412,36 +412,8 @@ void hessian_weighted_relative_angle_distribution(Mat hes, double dev, unsigned 
 		cout << hist_rel[j] << endl;
 	}
 }
-// sets all pixels of a image img to 0 that are inside a ellipse with "radius" rad, while taking the "topology" of a discrete fourier transfrom into aount (the center where the frequency is 0 is devidet between the 4 corners). also the ellips is streched according to the aspect ratio of the image given by w and h (width and hight).
-void cutinneroval_ft(fftw_complex* img,double rad,unsigned long w, unsigned long h){
-	rad = pow((double)h * rad / 2.0,2);
-	double rel = (double)h / (double)w;
-	double xcent = (double)w/2.0;
-	double ycent = (double)h/2.0;
-	for(unsigned long x = 0; x < w; ++x){
-		for(unsigned long y = 0; y < h; ++y){
-			if ((x <= xcent && y <= ycent && (pow((x * rel),2) + pow(y,2) < rad)) || (x >= xcent && y <= ycent && pow(((w - x) * rel),2) + pow(y,2) < rad) || (x <= xcent && y >= ycent && pow((x * rel),2) + pow((h - y),2) < rad) || (x >= xcent && y >= ycent && pow(((w - x) * rel),2) + pow((h - y),2) < rad)){
-				img[(x * h) + y][0] = 0;
-				img[(x * h) + y][1] = 0;
-			}
-		}
-	}
-}
-//almost same as cutinneroval_ft only the outside of the oval is set to 0
-void cutouteroval_ft(fftw_complex* img,double rad,unsigned long w, unsigned long h){
-	rad = pow((double)h * rad / 2.0,2);
-	double rel = (double)h / (double)w;
-	double xcent = (double)w/2.0;
-	double ycent = (double)h/2.0;
-	for(unsigned long x = 0; x < w; ++x){
-		for(unsigned long y = 0; y < h; ++y){
-			if ((x <= xcent && y <= ycent && (pow((x * rel),2) + pow(y,2) > rad)) || (x >= xcent && y <= ycent && pow(((w - x) * rel),2) + pow(y,2) > rad) || (x <= xcent && y >= ycent && pow((x * rel),2) + pow((h - y),2) > rad) || (x >= xcent && y >= ycent && pow(((w - x) * rel),2) + pow((h - y),2) > rad)){
-				img[(x * h) + y][0] = 0;
-				img[(x * h) + y][1] = 0;
-			}
-		}
-	}
-}
+
+
 // clamps a Mat between lower and upper (if a value is outside the bounds of lower and upper, it is set to lower or upper respectively)
 void clamp(Mat &mat, double lower, double upper) {
     min(max(mat, lower), upper, mat);
