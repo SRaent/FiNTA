@@ -6,6 +6,7 @@ To apply the tracing algorithm to a given image, the path to the image, and the 
 ```
 ./atafut -s /path/to/settings_file.set -f /path/to/image.tif
 ```
+into the linux terminal.
 
 # The settings file
 This file defines the tracing parameters as well as the output of the programm. Comments in this file are defined as everything behind a "#".
