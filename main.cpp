@@ -1127,7 +1127,7 @@ int main(){
 	}
 }
 */
-int main(int n, char** args){
+int main2(int n, char** args){
 	
 	bool settings_read = false;
 	bool image_specified = false;
@@ -1517,7 +1517,27 @@ int main(int n, char** args){
 
 // if you wish to tinker with the code, use this main function here.
 
-int main2(){
+int main_gen_grid(){
+	for (int linedist = 1; linedist <= 5; ++linedist){
+	Mat img(2*2*2*3*3*7*5 + 5 + linedist, 2*2*2*3*3*7*5 + 5 + linedist, CV_8UC3, Scalar::all(0));
+	gen_streight_lines(img, (2*2*2*3*3*7*5/(5+linedist)) ,0,4.99, Scalar::all(255));
+	gen_streight_lines(img, (2*2*2*3*3*7*5/(5+linedist)) ,-90.0 * PI / 180.0,4.99, Scalar::all(255));
+	
+	imwrite("line_dist_" + to_string(linedist + 5) + ".png" ,img);
+	}
+	
+	return 0;
+}
+
+int main(){
+	Mat img(5, 5, CV_8UC3, Scalar::all(0));
+	gen_streight_lines(img, 1 ,0,2, Scalar::all(255));
+	imwrite("test.png",img);
+	
+	return 0;
+}
+
+int main3(){
 	
 	//Mat I2 = imread("/home/moritz/Documents/Moritz_pics_lap/Franzi_CPD_012.tif");
 	folder = "/home/moritz/Documents/Moritz_pics_lap/analysable images/";

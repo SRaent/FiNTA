@@ -19,7 +19,7 @@
 #include "node.cpp"
 #include "analyse.cpp"
 
-bool draw_infinite_line(Mat &img,double x1,double y1,double x2,double y2, Scalar color = 255, unsigned long long thickness = 1){
+bool draw_infinite_line(Mat &img,double x1,double y1,double x2,double y2, Scalar color = 255, double thickness = 1){
 	Size s = img.size();
 	bool intersect = false;
 	double crosspar1[4];
@@ -30,9 +30,9 @@ bool draw_infinite_line(Mat &img,double x1,double y1,double x2,double y2, Scalar
 	//s.widht
 	//s.hight
 	// this part has a lot of exeptions you dont imidiatly think about and the <= and < are very important to destinguish!!!
-	find_intersect(crosspar, x1, y1, x2, y2, 0.0, 0.0, s.width, 0.0);
+	find_intersect(crosspar, x1, y1, x2, y2, 0.0, 0.0, s.width - 1, 0.0);
 	if (crosspar[3] <= 1.0 && crosspar[3] > 0.0){crosspar = crosspar2; intersect = true;}
-	find_intersect(crosspar, x1, y1, x2, y2, 0.0, 0.0, 0.0, s.height);
+	find_intersect(crosspar, x1, y1, x2, y2, 0.0, 0.0, 0.0, s.height - 1);
 	if (crosspar[3] < 1.0 && crosspar[3] >= 0.0){
 		if (intersect){
 			goto intersects_found;
@@ -42,7 +42,7 @@ bool draw_infinite_line(Mat &img,double x1,double y1,double x2,double y2, Scalar
 			intersect = true;
 		}
 	}
-	find_intersect(crosspar, x1, y1, x2, y2, 0.0, s.height, s.width, s.height);
+	find_intersect(crosspar, x1, y1, x2, y2, 0.0, s.height - 1, s.width - 1, s.height - 1);
 	if (crosspar[3] < 1.0 && crosspar[3] >= 0.0){
 		if (intersect){
 			goto intersects_found;
@@ -52,7 +52,7 @@ bool draw_infinite_line(Mat &img,double x1,double y1,double x2,double y2, Scalar
 			intersect = true;
 		}
 	}
-	find_intersect(crosspar, x1, y1, x2, y2, s.width, 0.0, s.width, s.height);
+	find_intersect(crosspar, x1, y1, x2, y2, s.width - 1, 0.0, s.width - 1, s.height - 1);
 	if (crosspar[3] <= 1.0 && crosspar[3] > 0.0 && !intersect){
 		cout << "something fucky goin on in draw_infinite_line" << endl;
 	}
@@ -74,8 +74,8 @@ intersects_found:
 		*/
 		return intersect;
 	}
-	
-	line(img, Point(crosspar1[0],crosspar1[1]), Point(crosspar2[0],crosspar2[1]), color, thickness);
+	//PRINT(thickness)
+	line(img, Point(crosspar1[0] + 1,crosspar1[1]), Point(crosspar2[0],crosspar2[1]), color, thickness, LINE_AA);
 	/*
 	PRINT(crosspar1[0])
 	PRINT(crosspar1[1])
@@ -86,12 +86,12 @@ intersects_found:
 }
 
 
-void gen_streight_lines(Mat &img, unsigned long long linenumber1, double angle1, unsigned long long linethickness = 1, Scalar linecolor = Scalar::all(255)){
+void gen_streight_lines(Mat &img, unsigned long long linenumber1, double angle1, double linethickness = 1, Scalar linecolor = Scalar::all(255)){
 	
 	Size s = img.size();
 	
-	unsigned long long xsize = s.width;
-	unsigned long long ysize = s.height;
+	unsigned long long xsize = s.width - 1;
+	unsigned long long ysize = s.height - 1;
 	
 	
 	while (angle1 < 0){
