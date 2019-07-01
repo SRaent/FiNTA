@@ -75,7 +75,7 @@ intersects_found:
 		return intersect;
 	}
 	//PRINT(thickness)
-	line(img, Point(crosspar1[0] + 1,crosspar1[1]), Point(crosspar2[0],crosspar2[1]), color, thickness, LINE_AA);
+	line(img, Point(crosspar1[0] + 1,crosspar1[1]), Point(crosspar2[0],crosspar2[1]), color, thickness);
 	/*
 	PRINT(crosspar1[0])
 	PRINT(crosspar1[1])
