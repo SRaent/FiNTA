@@ -75,12 +75,13 @@ intersects_found:
 		return intersect;
 	}
 	//PRINT(thickness)
-	line(img, Point(crosspar1[0] + 1,crosspar1[1]), Point(crosspar2[0],crosspar2[1]), color, thickness);
+	line(img, Point(crosspar1[0],crosspar1[1]), Point(crosspar2[0],crosspar2[1]), color, thickness);
 	/*
 	PRINT(crosspar1[0])
 	PRINT(crosspar1[1])
 	PRINT(crosspar2[0])
 	PRINT(crosspar2[1])
+	cout << endl;
 	*/
 	return intersect;
 }
@@ -90,8 +91,9 @@ void gen_streight_lines(Mat &img, unsigned long long linenumber1, double angle1,
 	
 	Size s = img.size();
 	
-	unsigned long long xsize = s.width - 1;
-	unsigned long long ysize = s.height - 1;
+	//because the opencv line drawing function is compleatly retarded, i have to subtract a number ever so slightly less than 1 here.
+	double xsize = s.width - 0.999;
+	double ysize = s.height - 0.999;
 	
 	
 	while (angle1 < 0){
