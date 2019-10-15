@@ -1517,7 +1517,6 @@ int main_usual(int n, char** args){
 	return 0;
 }
 
-// if you wish to tinker with the code, use this main function here.
 
 int main_gen_grid(){
 	for (int linedist = 1; linedist <= 5; ++linedist){
@@ -1608,7 +1607,7 @@ Mat noisify_gauss(Mat img, double ston = 1.0){
 	return img;
 }
 
-int main() {
+int main_generate_noisy_grid() {
 	int line_thick = 5;
 	int i = 30;
 	
@@ -1670,38 +1669,25 @@ int main() {
 	return 0;
 }
 
-int main3(){
+// if you wish to tinker with the code, use this main function here.
+int main(){
 	
-	//Mat I2 = imread("/home/moritz/Documents/Moritz_pics_lap/Franzi_CPD_012.tif");
-	folder = "/home/moritz/Documents/Moritz_pics_lap/analysable images/";
-//	string file = "10T_2GA_2PFA_RPE1_wt_susp_011";
-//	string file = "10T_2GA_2PFA_RPE1_wt_susp_024";
-//	string file = "Cx_hmds_4-37_058";
-//	string file = "C2_p_hmds_048";
-//	string file = "C1_p_hmds_045";
-//	string file = "C1_p_hmds_044";
-//	string file = "C1_p_LatA_hmds_041";
-
-//	string file = "1T_002";
-//	string file = "1T_004";
-//	string file = "1T_005";
-//	string file = "Blebbistatin_20muM_0.5h_010";
-//	string file = "Blebbistatin_20muM_0.5h_011";
-//	string file = "Blebbistatin_20muM_0.5h_012";
-//	string file = "LatA_adh_100nM_0.25h_005";
-//	string file = "LatA_adh_100nM_0.25h_006";
-//	string file = "01_CalycA_RPE1_wt_adh_2GA_2PFA027_001";
-//	string file = "02_CalycA_RPE1_wt_adh_2GA_2PFA027_002";
-	file = "03_CalycA_RPE1_wt_adh_2GA_2PFA027_004";
-
+	//Mat I2 = imread("/full/path/to/image.tif"); // use if you dont want to input the file and folder seperately
+	folder = "/folder/containing/images/";
+	file = "imagename.tif";
 	string write_folder = "./";
+	
+	
+	
+	
 	Mat I2 = imread(folder+file+".tif");
 	if(!I2.data){
 		cout << "ERROR: Image could not be importet" << endl;
 		return -1;
 	}
 	//Mat I2(img);
-	Rect myROI(0,0,1024,884);
+	Rect myROI(0,0,I2.width,I2.hight); // Here the rectangle used to crop the image is defined
+	//Rect myROI(0,0,1024,884); // Here the rectangle used to crop the image is defined
 	Mat I3 = I2(myROI);
 	cv::cvtColor(I3, I3, cv::COLOR_BGR2GRAY);
 	Size s = I2.size();
