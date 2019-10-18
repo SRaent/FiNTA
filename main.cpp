@@ -5,8 +5,6 @@
 #define PI (double)3.1415926535897932384626433832795
 
 
-#define PX 396 //412
-#define PY 238 //495
 
 /* DONE;
 allow for scaling units
@@ -14,16 +12,15 @@ Tracing data
 Loop Data
 Animation
 fix connection between existing nodes
-*/
-
-/* TODO:
 draw name or ending not specified
-print statistics about local maxima of smoothed angfun
 write shell script to apply programm to each file in folder
 */
 
+/* TODO:
+print statistics about local maxima of smoothed angfun
+*/
 
-//#define THREADS 16
+
 
 unsigned long long THREADS = 1;
 bool THREADS_set = false;
@@ -116,7 +113,7 @@ using namespace cv;
 #include "analyse.cpp"
 #include "visualise.cpp"
 #include "generate.cpp"
-
+#include "userinterface.cpp"
 
 
 bool start_points_exist = false;
