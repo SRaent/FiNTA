@@ -23,6 +23,9 @@
 using namespace std;
 using namespace cv;
 
+double scaling_factor = 1.0;
+
+
 //#include "datafun.h"
 //#include "datafun.cpp"
 #include "mathfun.cpp"
@@ -34,7 +37,6 @@ using namespace cv;
 
 
 
-double scaling_factor = 1.0;
 
 bool RV_set = false;
 bool RM_set = false;
@@ -52,13 +54,6 @@ unsigned long long crop_x1 = 0;
 unsigned long long crop_y1 = 0;
 unsigned long long crop_x2 = 0;
 unsigned long long crop_y2 = 0;
-
-
-
-
-
-
-
 
 
 
@@ -113,6 +108,12 @@ string loop_circumference_path = "";
 
 string junc_dist_all_path = "";
 string junc_dist_loop_path = "";
+
+string junc_conn_all_path = "";
+string junc_conn_loop_path = "";
+
+
+string aux_data_path = "";
 
 
 string scale_unit = "";
@@ -788,7 +789,7 @@ bool read_settings_line(string l){
 					junc_dist_all_path = w[1];
 				}
 				else if (w.size() == 1){
-					junc_dist_all_path == "<imagename>_junc_dist.dat";
+					junc_dist_all_path = "<imagename>_junc_dist.dat";
 				}
 				else {
 					cout << "ERROR: to many arguments for save_all_junction_distances. It accepts no more than 1 argument " << endl;
@@ -806,7 +807,7 @@ bool read_settings_line(string l){
 					junc_dist_loop_path = w[1];
 				}
 				else if (w.size() == 1){
-					junc_dist_loop_path == "<imagename>_junc_dist.dat";
+					junc_dist_loop_path = "<imagename>_junc_dist.dat";
 				}
 				else {
 					cout << "ERROR: to many arguments for save_loop_junction_distances. It accepts no more than 1 argument " << endl;
@@ -815,6 +816,46 @@ bool read_settings_line(string l){
 			}
 			else{
 				cout << "ERROR: \"save_loop_junction_distances\" was already called" << endl;
+				successful = false;
+			}
+		}
+		else if (w[0] == "save_all_junction_connectivities"){
+			//PRINT(w[0])
+			if (junc_conn_all_path == ""){
+				//PRINT(junc_conn_all_path)
+				if (w.size() == 2) {
+					junc_conn_all_path = w[1];
+					PRINT(junc_conn_all_path)
+				}
+				else if (w.size() == 1){
+					junc_conn_all_path = "<imagename>_junc_conn.dat";
+					PRINT(junc_conn_all_path)
+				}
+				else {
+					cout << "ERROR: to many arguments for save_all_junction_distances. It accepts no more than 1 argument " << endl;
+					successful = false;
+				}
+			}
+			else{
+				cout << "ERROR: \"save_all_junction_connectivities\" was already called" << endl;
+				successful = false;
+			}
+		}
+		else if (w[0] == "save_loop_junction_connectivities"){
+			if (junc_conn_loop_path == ""){
+				if (w.size() == 2) {
+					junc_conn_loop_path = w[1];
+				}
+				else if (w.size() == 1){
+					junc_conn_loop_path = "<imagename>_junc_conn.dat";
+				}
+				else {
+					cout << "ERROR: to many arguments for save_loop_junction_distances. It accepts no more than 1 argument " << endl;
+					successful = false;
+				}
+			}
+			else{
+				cout << "ERROR: \"save_loop_junction_connectivities\" was already called" << endl;
 				successful = false;
 			}
 		}

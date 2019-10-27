@@ -88,13 +88,13 @@ using namespace cv;
 
 //#include "datafun.h"
 //#include "datafun.cpp"
+#include "userinterface.cpp"
 #include "mathfun.cpp"
 #include "node.h"
 #include "node.cpp"
 #include "analyse.cpp"
 #include "visualise.cpp"
 #include "generate.cpp"
-#include "userinterface.cpp"
 
 int main(int n, char** args){
 	
@@ -175,10 +175,10 @@ int main(int n, char** args){
 		return -1;
 	}
 	if (cropped){
-		double x1 = crop_x1;
-		double x2 = crop_x2;
-		double y1 = crop_y1;
-		double y2 = crop_y2;
+		unsigned long long x1 = crop_x1;
+		unsigned long long x2 = crop_x2;
+		unsigned long long y1 = crop_y1;
+		unsigned long long y2 = crop_y2;
 		
 		crop_x1 = min(x1,x2);
 		crop_x2 = max(x1,x2);
@@ -384,30 +384,24 @@ int main(int n, char** args){
 		
 		cout<< "done analysing all Junctions" << endl;
 	}
+
+	if (junc_conn_all_path != ""){
+		
+		vector<node*> junctions = find_junctions(list);
+		vector<double> jc;
+		
+		for (unsigned long long i = 0; i < junctions.size(); ++i){
+			jc.push_back(junctions[i]->connections.size());
+		}
+		
+		double_vector_to_file(replace_keywords(junc_conn_all_path),jc);
+		
+	}
+
 	
 	if (tracing_data_path != ""){
 		save_tracing_data(list, tracing_data_path);
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	
 	
@@ -425,6 +419,7 @@ int main(int n, char** args){
 			if(!imwrite(replace_keywords(draw_commands[i]->folder+draw_commands[i]->name+draw_commands[i]->ending),draw_commands[i]->image)){
 			//if(!imwrite("test.png",test)){//draw_commands[i]->image)){
 				cout << "WARNING: File: \"" << replace_keywords(draw_commands[i]->folder+draw_commands[i]->name+draw_commands[i]->ending) << "\" could not be opened" << endl;
+				return -1;
 			}
 		}
 		return 0;
@@ -451,6 +446,19 @@ int main(int n, char** args){
 		cout<< "done analysing Junctions" << endl;
 	}
 	
+	//PRINT(junc_conn_loop_path)
+	if (junc_conn_loop_path != ""){
+		//PRINT(junc_conn_loop_path)
+		vector<node*> junctions = find_junctions(list);
+		vector<double> jc;
+		
+		for (unsigned long long i = 0; i < junctions.size(); ++i){
+			jc.push_back(junctions[i]->connections.size());
+		}
+		
+		double_vector_to_file(replace_keywords(junc_conn_loop_path),jc);
+		
+	}
 	
 	
 	for (unsigned long long i = 0; i < loop_area_settings.size(); ++i){
@@ -485,33 +493,6 @@ int main(int n, char** args){
 }
 
 
-int main_gen_grid(){
-	for (int linedist = 1; linedist <= 5; ++linedist){
-	Mat img(2*2*2*3*3*7*5 + 5 + linedist, 2*2*2*3*3*7*5 + 5 + linedist, CV_8UC3, Scalar::all(0));
-	gen_streight_lines(img, (2*2*2*3*3*7*5/(5+linedist)) ,0,4.99, Scalar::all(255));
-	gen_streight_lines(img, (2*2*2*3*3*7*5/(5+linedist)) ,-90.0 * PI / 180.0,4.99, Scalar::all(255));
-	
-	imwrite("line_dist_" + to_string(linedist + 5) + ".png" ,img);
-	}
-	
-	return 0;
-}
-
-Mat gen_grid(double line_thick, int between_line, int desired_pixels){
-	int total_thick = line_thick + between_line;
-	int actual_pixels = (round((double(desired_pixels)/(double)total_thick)) ) * total_thick + 1;
-	int line_num = max(round((double(desired_pixels)/(double)total_thick)) - 1,0.0);
-	
-	Mat ret(actual_pixels,actual_pixels, CV_8UC3,Scalar::all(0));
-	
-	en_streight_lines(ret, line_num, 0, (double)line_thick - 0.01, Scalar::all(255));
-	gen_streight_lines(ret, line_num, -90.0 * PI / 180.0, (double)line_thick - 0.01, Scalar::all(255));
-	
-	return ret;
-}
-
-
-
 
 
 // if you wish to tinker with the code, use this main function here.
@@ -520,7 +501,7 @@ int main_tinker(){
 	//Mat I2 = imread("/full/path/to/image.tif"); // use if you dont want to input the file and folder seperately
 	folder = "/folder/containing/images/";
 	file = "imagename.tif";
-	string write_folder = "./";
+	string write_folder = "./"; //Folder where output will be written
 	
 	
 	
@@ -531,7 +512,7 @@ int main_tinker(){
 		return -1;
 	}
 	//Mat I2(img);
-	Rect myROI(0,0,I2.width,I2.hight); // Here the rectangle used to crop the image is defined
+	Rect myROI(0,0,I2.size().width,I2.size().height); // Here the rectangle used to crop the image is defined
 	//Rect myROI(0,0,1024,884); // Here the rectangle used to crop the image is defined
 	Mat I3 = I2(myROI);
 	cv::cvtColor(I3, I3, cv::COLOR_BGR2GRAY);

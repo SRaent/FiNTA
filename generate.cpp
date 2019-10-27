@@ -206,4 +206,53 @@ void polar_coordinate_illustration(){
 	imwrite("polar.png",ret);
 }
 
+
+
+Mat noisify_gauss(Mat img, double ston = 1.0){
+	
+	cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
+	img.convertTo(img, CV_64F);
+	normalize(img,img,ston,0,32);
+	
+	Size s = img.size();
+	PRINT(s.width)
+	PRINT(s.height)
+	PRINT(img.channels())
+	
+	default_random_engine generator;
+	//independent_bits_engine generator;
+	normal_distribution<double> distribution(0.0,1.0);
+	generator.seed(ston*1000 + time(NULL));
+	
+	for (unsigned long long x = 0; x < s.width; ++x){
+		for (unsigned long long y = 0; y < s.height; ++y){
+			img.at<double>(y,x) = img.at<double>(y,x) + distribution(generator);
+		}
+	}
+	
+	normalize(img,img,255,0,32);
+	//cv::cvtColor(grid, grid, cv::COLOR_GRAY2BGR);
+	img.convertTo(img, CV_8UC3);
+	
+	return img;
+}
+
+
+
+Mat gen_grid(double line_thick, int between_line, int desired_pixels){
+	int total_thick = line_thick + between_line;
+	int actual_pixels = (round((double(desired_pixels)/(double)total_thick)) ) * total_thick + 1;
+	int line_num = max(round((double(desired_pixels)/(double)total_thick)) - 1,0.0);
+	
+	Mat ret(actual_pixels,actual_pixels, CV_8UC3,Scalar::all(0));
+	
+	gen_streight_lines(ret, line_num, 0, (double)line_thick - 0.01, Scalar::all(255));
+	gen_streight_lines(ret, line_num, -90.0 * PI / 180.0, (double)line_thick - 0.01, Scalar::all(255));
+	
+	return ret;
+}
+
+
+
+
 #endif

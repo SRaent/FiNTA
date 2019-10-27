@@ -34,34 +34,20 @@ int main_grids(){
 	return 0;
 }
 
-Mat noisify_gauss(Mat img, double ston = 1.0){
+
+int main_gen_grid(){
+	for (int linedist = 1; linedist <= 5; ++linedist){
+	Mat img(2*2*2*3*3*7*5 + 5 + linedist, 2*2*2*3*3*7*5 + 5 + linedist, CV_8UC3, Scalar::all(0));
+	gen_streight_lines(img, (2*2*2*3*3*7*5/(5+linedist)) ,0,4.99, Scalar::all(255));
+	gen_streight_lines(img, (2*2*2*3*3*7*5/(5+linedist)) ,-90.0 * PI / 180.0,4.99, Scalar::all(255));
 	
-	cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
-	img.convertTo(img, CV_64F);
-	normalize(img,img,ston,0,32);
-	
-	Size s = img.size();
-	PRINT(s.width)
-	PRINT(s.height)
-	PRINT(img.channels())
-	
-	default_random_engine generator;
-	//independent_bits_engine generator;
-	normal_distribution<double> distribution(0.0,1.0);
-	generator.seed(ston*1000 + time(NULL));
-	
-	for (unsigned long long x = 0; x < s.width; ++x){
-		for (unsigned long long y = 0; y < s.height; ++y){
-			img.at<double>(y,x) = img.at<double>(y,x) + distribution(generator);
-		}
+	imwrite("line_dist_" + to_string(linedist + 5) + ".png" ,img);
 	}
 	
-	normalize(img,img,255,0,32);
-	//cv::cvtColor(grid, grid, cv::COLOR_GRAY2BGR);
-	img.convertTo(img, CV_8UC3);
-	
-	return img;
+	return 0;
 }
+
+
 
 int main_generate_noisy_grid() {
 	int line_thick = 5;
