@@ -859,6 +859,24 @@ bool read_settings_line(string l){
 				successful = false;
 			}
 		}
+		else if (w[0] == "save_auxiliary_data"){
+			if (aux_data_path == ""){
+				if (w.size() == 2) {
+					aux_data_path = w[1];
+				}
+				else if (w.size() == 1){
+					aux_data_path = "<imagename>_junc_conn.dat";
+				}
+				else {
+					cout << "ERROR: to many arguments for save_auxillary_data. It accepts no more than 1 argument " << endl;
+					successful = false;
+				}
+			}
+			else{
+				cout << "ERROR: \"save_auxiliary_data\" was already called" << endl;
+				successful = false;
+			}
+		}
 		else if (w[0] == "set_scale"){
 			if (scale_unit == ""){
 				unsigned long long equal_pos = 0;

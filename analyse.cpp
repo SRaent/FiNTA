@@ -615,5 +615,15 @@ vector<double> junction_distances(vector<node*> junc){
 	
 	return jd;
 }
+double network_length(vector<node*> list){
+	double len = 0;
+	for (auto it = list.begin(); it != list.end(); ++it){
+		for (auto it2 = (*it)->connections.begin(); it2 != (*it)->connections.end(); ++it2){
+			len += sqrt(pow((*it)->x - (*it2)->x,2) + pow((*it)->y - (*it2)->y,2));
+		}
+	}
+	return len;
+}
+
 
 #endif

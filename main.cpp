@@ -358,8 +358,12 @@ int main(int n, char** args){
 	
 	
 	
-	
-	
+	vector<double> aux_data; //entries contain: total number of nodes; total number of junctions; number of nodes part of closed loops; number of junctions in the network of closed loops; total number of loops; 
+	vector<string> aux_labels;
+	aux_data.push_back(list.size());
+	aux_labels_push_back("total number of nodes");
+	aux_data.push_back(find_junctions(list).size());
+	aux_labels_push_back("total number of junctions");
 	
 	
 	for (unsigned long long i = 0; i < draw_commands.size(); ++i){
@@ -425,10 +429,20 @@ int main(int n, char** args){
 		return 0;
 	}
 	
-	
 	vector<vector<node*>> loops = find_loops(closures);
+
+	
 	
 	cout << "Done extracting loops" << endl;
+	
+	
+	
+	aux_data.push_back(list.size());
+	aux_labels_push_back("total number of nodes contributing to closed loops");
+	aux_data.push_back(find_junctions(list).size());
+	aux_labels_push_back("total number of junctions in the network of closed loops");
+	aux_data.push_back(loops.size());
+	aux_labels_push_back("total number of closed loops");
 	
 	if (loop_data_path != ""){
 		save_loop_data(loops, loop_data_path);
