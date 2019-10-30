@@ -1,5 +1,5 @@
 #!/bin/sh
-g++ -o atafut -std=c++11 -I /usr/include/opencv4 -L /usr/lib -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs -lopencv_videoio -O333 -g -pthread main.cpp -Wl,-rpath=./opencv/lib64/ #-Wall -Werror
+g++ -o atafut -std=c++11 -I /usr/include/opencv4 -L /usr/lib -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs -lopencv_videoio -O3 -g -pthread main.cpp -Wl,-rpath=./opencv/lib64/ #-Wall -Werror
 #-O0 -g
 
 

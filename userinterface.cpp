@@ -865,7 +865,7 @@ bool read_settings_line(string l){
 					aux_data_path = w[1];
 				}
 				else if (w.size() == 1){
-					aux_data_path = "<imagename>_junc_conn.dat";
+					aux_data_path = "<imagename>_auxiliary.dat";
 				}
 				else {
 					cout << "ERROR: to many arguments for save_auxillary_data. It accepts no more than 1 argument " << endl;
@@ -1121,6 +1121,18 @@ void save_loop_data(vector<vector<node*>> loops, string path){
 	}
 	f.close();
 }
+
+void save_aux_data(vector<double> data, vector<string> labels, string path){
+	ofstream f;
+	f.open(path);
+
+	if (f.is_open()){
+		for (auto i = 0;i < data.size(); ++i){
+			f << labels[i] << ": " << data[i] << endl;
+		}
+	}
+}
+
 /*
 int main(){
 	Mat tmp(50,50, CV_8UC3, Scalar::all(255));

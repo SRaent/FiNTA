@@ -622,7 +622,7 @@ double network_length(vector<node*> list){
 			len += sqrt(pow((*it)->x - (*it2)->x,2) + pow((*it)->y - (*it2)->y,2));
 		}
 	}
-	return len;
+	return len/2;
 }
 
 

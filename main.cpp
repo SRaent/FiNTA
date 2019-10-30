@@ -358,13 +358,14 @@ int main(int n, char** args){
 	
 	
 	
-	vector<double> aux_data; //entries contain: total number of nodes; total number of junctions; number of nodes part of closed loops; number of junctions in the network of closed loops; total number of loops; 
+	vector<double> aux_data;
 	vector<string> aux_labels;
 	aux_data.push_back(list.size());
-	aux_labels_push_back("total number of nodes");
+	aux_labels.push_back("total number of nodes");
 	aux_data.push_back(find_junctions(list).size());
-	aux_labels_push_back("total number of junctions");
-	
+	aux_labels.push_back("total number of junctions");
+	aux_data.push_back(scaling_factor*network_length(list));
+	aux_labels.push_back("total network lengt");
 	
 	for (unsigned long long i = 0; i < draw_commands.size(); ++i){
 		if (draw_commands[i]->all_nodes){
@@ -425,6 +426,9 @@ int main(int n, char** args){
 				cout << "WARNING: File: \"" << replace_keywords(draw_commands[i]->folder+draw_commands[i]->name+draw_commands[i]->ending) << "\" could not be opened" << endl;
 				return -1;
 			}
+			if (aux_data_path != ""){
+				save_aux_data(aux_data,aux_labels,replace_keywords(aux_data_path));
+			}
 		}
 		return 0;
 	}
@@ -438,12 +442,21 @@ int main(int n, char** args){
 	
 	
 	aux_data.push_back(list.size());
-	aux_labels_push_back("total number of nodes contributing to closed loops");
+	aux_labels.push_back("total number of nodes contributing to closed loops");
 	aux_data.push_back(find_junctions(list).size());
-	aux_labels_push_back("total number of junctions in the network of closed loops");
+	aux_labels.push_back("total number of junctions in the network of closed loops");
 	aux_data.push_back(loops.size());
-	aux_labels_push_back("total number of closed loops");
+	aux_labels.push_back("total number of closed loops");
+	aux_data.push_back(scaling_factor*scaling_factor*total_loop_area(loops));
+	aux_labels.push_back("total area of all loops");
+	aux_data.push_back(scaling_factor*network_length(list));
+	aux_labels.push_back("total network length of closed loop network");
 	
+	if (aux_data_path != ""){
+		save_aux_data(aux_data,aux_labels,replace_keywords(aux_data_path));
+	}
+
+
 	if (loop_data_path != ""){
 		save_loop_data(loops, loop_data_path);
 	}
