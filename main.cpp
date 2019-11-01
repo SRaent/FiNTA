@@ -358,6 +358,35 @@ int main(int n, char** args){
 	
 	
 	
+	//experiment did not work, optimising the node positions after initial tracing was futile
+	
+/*	
+	cout << "experiment starting" << endl;
+	
+	for (unsigned long long i = 0; i < list.size(); ++i){
+		list[i]->x_orig = list[i]->x;
+		list[i]->y_orig = list[i]->y;
+	}
+	
+	unsigned long long iterations = 20;
+	unsigned long long positions = 20;
+	double thic = 2*SG;
+	PRINT(thic);
+	
+	for (unsigned long long i = 0; i < iterations; ++i){
+		for (unsigned long long j = 0; j < list.size(); ++j){
+			list[j]->wiggle(positions, thic);
+		}
+		PRINT(i);
+	}
+*/
+	
+	
+	
+	
+	
+	
+	
 	vector<double> aux_data;
 	vector<string> aux_labels;
 	aux_data.push_back(list.size());

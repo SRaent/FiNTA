@@ -389,4 +389,46 @@ node* node::get_straight_distant_connected(node* origin, unsigned long long dist
 	return dc;
 	
 }
+
+
+double node::score_connections(double thic, double dx = 0, double dy = 0){
+	double score = 0;
+	for (unsigned long long i = 0; i < connections.size(); ++i){
+		score += linefun_score_hessian(img, x_orig + dx, y_orig + dy, connections[i]->x, connections[i]->y, thic);
+	}
+	return score;
+}
+
+
+void node::wiggle(unsigned long long iterations, double thic){
+	double best_score = score_connections(thic,x - x_orig, y - y_orig);
+	double score = best_score;
+
+	default_random_engine generator;
+	//independent_bits_engine generator;
+	uniform_real_distribution<double> distribution(-0.5,0.5);
+	generator.seed(time(NULL));
+
+	double dx;
+	double dy;
+	
+	for (unsigned long long i = 0; i < iterations; ++i){
+		do {
+			dx =  RS * distribution(generator);
+			dy =  RS * distribution(generator);
+		} while ((dx*dx + dy*dy)*4 > RS*RS );
+
+		score = score_connections(thic, dx, dy);
+
+		if (score > best_score){
+			best_score = score;
+			x = x_orig + dx;
+			y = y_orig + dy;
+		}	
+	}
+}
+
+
+
+
 #endif

@@ -684,6 +684,44 @@ vector<double>* linefun(Mat* img, double xstart, double ystart, double xend, dou
 	return fun;
 }
 
+
+
+double linefun_score_hessian(Mat* img, double xstart, double ystart, double xend, double yend, double thic){
+	double score = 0;
+	Size s = img->size();
+	
+	double dx = xend - xstart;
+	double dy = yend - ystart;
+	double len = sqrt(pow(dx,2) + pow(dy,2));
+	
+	double e1x = xstart + thic*0.5*dy/len;
+	double e1y = ystart - thic*0.5*dx/len;
+	double e2x = xstart - thic*0.5*dy/len;
+	double e2y = ystart + thic*0.5*dx/len;
+	double e3x = xend - thic*0.5*dy/len;
+	double e3y = yend + thic*0.5*dx/len;
+	double e4x = xend + thic*0.5*dy/len;
+	double e4y = yend - thic*0.5*dx/len;
+	
+	
+	unsigned long long xmax = ceil(min(max(max(e1x,e2x),max(e3x,e4x)),(double)s.width - 1));
+	unsigned long long xmin = floor(max(min(min(e1x,e2x),min(e3x,e4x)),0.0));
+	unsigned long long ymax = ceil(min(max(max(e1y,e2y),max(e3y,e4y)),(double)s.height - 1));
+	unsigned long long ymin = floor(max(min(min(e1y,e2y),min(e3y,e4y)),0.0));
+	
+	Vec3d vals;
+
+	for ( unsigned long long x = xmin; x <= xmax; ++x){
+		for (unsigned long long y = ymin; y <= ymax; ++y){
+			if ((y-e2y)*(e3x-e2x) <= (e3y-e2y)*(x-e2x) && (y-e1y)*(e4x-e1x) >= (e4y-e1y)*(x-e1x) && (y-e1y)*(e2x-e1x) <= (e2y-e1y)*(x-e1x) && (y-e4y)*(e3x-e4x) >= (e3y-e4y)*(x-e4x)){
+				vals = img->at<Vec3d>(y,x);
+				score += -(pow(dy,2)*vals[0] - 2.0 * vals[1] * dx * dy + vals[2] * pow(dx,2));
+			}
+		}
+	}
+	return score/pow(len,3);
+}
+
 bool gaussavgoverthresh(vector<double>* fun,double length,unsigned long long steps,double dev, double thresh, bool free = 1){
 	double avgx[steps];
 	bool overthresh = true;

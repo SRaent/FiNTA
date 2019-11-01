@@ -26,6 +26,10 @@ class node {
 	bool procreated;
 	double x;
 	double y;
+	double x_orig;
+	double y_orig;
+	
+	
 	node(double, double,vector<node*>*,Mat*);
 	node(double, double,vector<node*>*,vector<node**>*,Mat*);
 	node(double, double, node*);
@@ -38,6 +42,8 @@ class node {
 	vector<node*> get_distant_connected(unsigned long long);
 	vector<node*> get_distant_connected(node*, unsigned long long);
 	node* get_straight_distant_connected(node*, unsigned long long);
+	double score_connections(double,double,double);
+	void wiggle(unsigned long long, double);
 };
 
 #endif
