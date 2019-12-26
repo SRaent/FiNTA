@@ -1,3 +1,64 @@
+int main_gen_logo(){
+	unsigned long long xr = 1000;
+	unsigned long long yr = 1000;
+	double xm = (double)xr/(double)2;
+	double ym = (double)yr/(double)2;
+	double r = 0;
+	double p = 0;
+	double x = 0;
+	double y = 0;
+	Mat img(xr,yr,CV_64F);
+	for(unsigned long long i = 0; i < yr; ++i){
+		for(unsigned long long j = 0; j < xr; ++j){
+			x = xm - (double)j;
+			y = ym - (double)i;
+			r = sqrt(x*x + y*y)*50/sqrt(xr*xr + yr*yr);
+			if (x != 0 || y != 0){
+				p = atan2(x,y);
+			}
+			else {
+				p = 0;
+			}
+			img.at<double>(i,j) = r*r*r*r*exp(-r)*pow((3*pow(cos(p),2) - 1),2);
+		}
+	}
+
+	normalize(img,img,255,0,32);
+	img.convertTo(img, CV_8U);
+	cv::cvtColor(img, img, cv::COLOR_GRAY2BGR);
+	uint8_t thresh = 255;
+	unsigned long long total_bright = 0;
+	unsigned long long hist[256];
+
+	memset(hist,0,256*sizeof(unsigned long long));
+
+	for(unsigned long long i = 0; i < yr; ++i){
+		for(unsigned long long j = 0; j < xr; ++j){
+			++hist[img.at<uint8_t>(i,j)];
+			total_bright += img.at<uint8_t>(i,j);
+		}
+	}
+	for(int i = 0; i < 256; ++i){
+		PRINT(hist[i])
+	}
+
+	double thresh_frac = 0.9;
+
+	unsigned long long brightness_above_thresh = 0;
+
+	while ( (double)brightness_above_thresh / (double)total_bright < thresh_frac){
+		brightness_above_thresh += thresh*hist[thresh];
+		--thresh;
+	}
+	++thresh;
+
+	PRINT((int)thresh)
+	
+	threshold(img, img, thresh,255,1);
+	imwrite("orbital.png",img);
+
+}
+
 
 int main_grids(){
 	int line_thick = 5;

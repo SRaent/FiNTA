@@ -96,6 +96,7 @@ using namespace cv;
 #include "visualise.cpp"
 #include "generate.cpp"
 
+
 int main(int n, char** args){
 	
 	bool settings_read = false;
@@ -359,8 +360,8 @@ int main(int n, char** args){
 	
 	
 	//experiment did not work, optimising the node positions after initial tracing was futile
+	/*
 	
-/*	
 	cout << "experiment starting" << endl;
 	
 	for (unsigned long long i = 0; i < list.size(); ++i){
@@ -368,8 +369,8 @@ int main(int n, char** args){
 		list[i]->y_orig = list[i]->y;
 	}
 	
-	unsigned long long iterations = 20;
-	unsigned long long positions = 20;
+	unsigned long long iterations = 50;
+	unsigned long long positions = 50;
 	double thic = 2*SG;
 	PRINT(thic);
 	
@@ -379,9 +380,8 @@ int main(int n, char** args){
 		}
 		PRINT(i);
 	}
-*/
 	
-	
+*/	
 	
 	
 	
