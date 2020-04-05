@@ -39,6 +39,8 @@ where a maximal number of 100 startpoints will be generated at least 60 pixel ap
 ## The <imagename\> keyword
 The "<imagename\>" keyword can be used in any path that is specified in the settings file. It will be replaced by the name of the image that is beeing analyzed in the respective run of the programm.
 
+## Using the Modified hessian
+The "use\_modified\_hessian" keyword causes the program to use a modified hessian matrix which can improve the tracing result. The parameters might have to be adjusted slightly when compared to using the unmodified hessain on the same image.
 
 ## Drawing commands
 Drawing commands are initiated by the "draw" keyword. Next a number of properties of the image to be drawn can be specified in any order behind the "draw" keyword seperated by whitespaces. These properties have to be specified in the same line as the "draw" keyword.

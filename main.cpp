@@ -205,7 +205,13 @@ int main(int n, char** args){
 	
 	normalize(I4,I4,255,0,32); // the 32 is a flag, that produced errors if the keyword is used directly
 	
-	Mat hessian = convolve_hessian(I4,SG*30,SG);
+	Mat hessian;
+	if (modified_hessian){
+		hessian = convolve_modified_hessian(I4,SG*30,SG);
+	}
+	else{
+		hessian = convolve_hessian(I4,SG*30,SG);
+	}
 	Mat tubeness = tubeness_hessian(hessian);
 	Mat viz_hessian = visualize_hessian(hessian);
 	

@@ -60,6 +60,7 @@ unsigned long long crop_y2 = 0;
 
 
 
+bool modified_hessian = false;
 
 bool start_points_exist = false;
 vector<Point*> man_start_points;
@@ -1096,6 +1097,9 @@ bool read_settings_line(string l){
 			else {
 				cout << "animate_tracing was already called" << endl;
 			}
+		}
+		else if (w[0] == "use_modified_hessian"){
+			modified_hessian = true;
 		}
 		
 		//string animation_path = "";
