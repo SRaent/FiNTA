@@ -95,6 +95,8 @@ using namespace cv;
 #include "analyse.cpp"
 #include "visualise.cpp"
 #include "generate.cpp"
+#include "united_junction.h"
+#include "united_junction.cpp"
 
 
 int main(int n, char** args){
@@ -228,7 +230,7 @@ int main(int n, char** args){
 	
 	for ( unsigned long long i = 0; i < man_start_points.size(); ++i){
 		if (man_start_points[i]->x <= s.width && man_start_points[i]->y <= s.height){
-			new node(man_start_points[i]->x,man_start_points[i]->x, &list, &closures, &hessian);
+			new node(man_start_points[i]->x,man_start_points[i]->y, &list, &closures, &hessian);
 		}
 		else {
 			cout << "ERROR: Manually placed startpoint lies outside the (cropped) image" << endl;
@@ -406,31 +408,58 @@ int main(int n, char** args){
 			}
 		}
 	}
-	
-	
-	if (junc_dist_all_path != ""){
-		
-		cout<< "analysing all Junctions" << endl;
-		vector<node*> junctions = find_junctions(list);
-		vector<double> jd =  junction_distances(junctions);
-		
-		double_vector_to_file(replace_keywords(junc_dist_all_path),jd);
-		
-		cout<< "done analysing all Junctions" << endl;
+
+
+
+	arrange_unite_vals_all(junc_dist_all);
+	arrange_unite_vals_all(junc_conn_all);
+
+	for (auto it = junc_opt::unite_vals_all.begin(); it != junc_opt::unite_vals_all.end(); ++it){
+		cout << "analysing united junction discances with unification distance " << (*it) << endl;
+		vector<united_junction*> united_junctions = find_united_junctions(list,(*it));
+		aux_labels.push_back("total number of junited junctions with unification distance " + (*it));
+		aux_data.push_back(united_junctions.size());
+		for ( auto jt = junc_dist_all.begin(); jt != junc_dist_all.end(); ++jt){
+			if ((*jt)->unite == (*it)){
+				(*jt)->data_floating = united_junction_distances(united_junctions);
+			}
+		}
+		for (auto jt = united_junctions.begin(); jt != united_junctions.end(); ++jt){
+			for ( auto lt = junc_conn_all.begin(); lt != junc_conn_all.end(); ++lt){
+					if ((*lt)->unite == (*it)){
+						(*lt)->data_integer.push_back((*jt)->outgoing_connections.size());
+					}
+			}
+			delete (*jt);
+		}
 	}
 
-	if (junc_conn_all_path != ""){
-		
-		vector<node*> junctions = find_junctions(list);
-		vector<double> jc;
-		
-		for (unsigned long long i = 0; i < junctions.size(); ++i){
-			jc.push_back(junctions[i]->connections.size());
+
+/*
+
+	// this can be very inefficient since if a unite value is chosen for both distances and connectivities, the junctions are determined twice
+	for (auto it = junc_dist_all.begin(); it != junc_dist_all.end(); ++it){
+		cout << "analysing united junction discances with unification distance " << (*it)->unite << endl;
+		vector<united_junction*> united_junctions = find_united_junctions(list,(*it)->unite);
+		(*it)->data_floating = united_junction_distances(unite_junctions);
+		aux_data.push_back(united_junctions.size());
+		aux_labels.push_back("number of unified junctions with unification distance " << (*it)->unite);
+		for (auto jt = united_junctions.begin(); jt =! united_junctions.end(); ++jt){
+			delete (*jt);
 		}
-		
-		double_vector_to_file(replace_keywords(junc_conn_all_path),jc);
-		
 	}
+	
+	for (auto it = junc_conn_all.begin(); it != junc_conn_all.end(); ++it){
+		cout << "analysing united junction connectivities with unification distance " << (*it)->unite << endl;
+		vector<united_junction*> united_junctions = find_united_junctions(list,(*it)->unite);
+
+		for (auto jt = united_junctions.begin(); jt =! united_junctions.end(); ++jt){
+			(*it)->data_integer.push_back() = (*jt)->outgoing_connections.size();
+			delete (*jt);
+		}
+	}
+*/
+	
 
 	
 	if (tracing_data_path != ""){
@@ -481,16 +510,39 @@ int main(int n, char** args){
 	aux_data.push_back(scaling_factor*network_length(list));
 	aux_labels.push_back("total network length of closed loop network");
 	
-	if (aux_data_path != ""){
-		save_aux_data(aux_data,aux_labels,replace_keywords(aux_data_path));
-	}
 
 
 	if (loop_data_path != ""){
 		save_loop_data(loops, loop_data_path);
 	}
 	
-	
+	arrange_unite_vals_loop(junc_dist_loop);
+	arrange_unite_vals_loop(junc_conn_loop);
+	PRINT(junc_opt::unite_vals_loop.size())
+
+	for (auto it = junc_opt::unite_vals_loop.begin(); it != junc_opt::unite_vals_loop.end(); ++it){
+		cout << "analysing united junction discances with unification distance " << (*it) << endl;
+		vector<united_junction*> united_junctions = find_united_junctions(list,(*it));
+		aux_labels.push_back("total number of junited junctions with unification distance " + (*it));
+		aux_data.push_back(united_junctions.size());
+		for ( auto jt = junc_dist_loop.begin(); jt != junc_dist_loop.end(); ++jt){
+			if ((*jt)->unite == (*it)){
+				(*jt)->data_floating = united_junction_distances(united_junctions);
+			}
+		}
+		for (auto jt = united_junctions.begin(); jt != united_junctions.end(); ++jt){
+			for ( auto lt = junc_conn_loop.begin(); lt != junc_conn_loop.end(); ++lt){
+					if ((*lt)->unite == (*it)){
+						(*lt)->data_integer.push_back((*jt)->outgoing_connections.size());
+					}
+			}
+			delete (*jt);
+		}
+	}
+	if (aux_data_path != ""){
+		save_aux_data(aux_data,aux_labels,replace_keywords(aux_data_path));
+	}
+/*	
 	if (junc_dist_loop_path != ""){
 		
 		cout<< "analysing Junctions in the network of nodes that are part of a loop" << endl;
@@ -514,7 +566,7 @@ int main(int n, char** args){
 		
 		double_vector_to_file(replace_keywords(junc_conn_loop_path),jc);
 		
-	}
+	}*/
 	
 	
 	for (unsigned long long i = 0; i < loop_area_settings.size(); ++i){

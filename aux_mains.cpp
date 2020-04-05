@@ -1,3 +1,98 @@
+
+int main_logo_16bit(){
+	unsigned long long xr = 3000;
+	unsigned long long yr = 3000;
+	double xm = (double)xr/(double)2;
+	double ym = (double)yr/(double)2;
+	double r = 0;
+	double p = 0;
+	double x = 0;
+	double y = 0;
+	Mat img(xr,yr,CV_64F);
+	for(unsigned long long i = 0; i < yr; ++i){
+		for(unsigned long long j = 0; j < xr; ++j){
+			x = xm - (double)j;
+			y = ym - (double)i;
+			r = sqrt(x*x + y*y)*65/sqrt(xr*xr + yr*yr);
+			if (x != 0 || y != 0){
+				p = atan2(x,y);
+			}
+			else {
+				p = 0;
+			}
+			img.at<double>(i,j) = r*r*r*r*exp(-r)*pow((3*pow(cos(p),2) - 1),2);
+		}
+	}
+	
+	unsigned long long discretisations = pow(2,16);
+	PRINT(discretisations)
+
+	normalize(img,img,discretisations - 1,0,32);
+	/*
+	double max_bright1 = 0;
+	for(unsigned long long i = 0; i < yr; ++i){
+		for(unsigned long long j = 0; j < xr; ++j){
+			//++hist[img.at<double>(i,j)];
+			//total_bright += img.at<double>(i,j);
+			//cout << img.at<uint16_t>(i,j) << " ";
+			max_bright1 = max(img.at<double>(i,j),max_bright1);
+		}
+	}
+	PRINT(max_bright1)
+	*/
+	img.convertTo(img, CV_16U);
+	//cv::cvtColor(img, img, cv::COLOR_GRAY2BGR);
+	unsigned long long thresh = discretisations - 1;
+	unsigned long long total_bright = 0;
+	unsigned long long hist[discretisations];
+
+	memset(hist,0,discretisations*sizeof(unsigned long long));
+
+	uint16_t max_bright = 0;
+	for(unsigned long long i = 0; i < yr; ++i){
+		for(unsigned long long j = 0; j < xr; ++j){
+			++hist[img.at<uint16_t>(i,j)];
+			total_bright += img.at<uint16_t>(i,j);
+			//cout << img.at<uint16_t>(i,j) << " ";
+			max_bright = max(img.at<uint16_t>(i,j),max_bright);
+		}
+	}/*
+	PRINT(max_bright)
+	for(int i = 0; i < discretisations; ++i){
+		cout << hist[i] << " ";
+	}*/
+
+	//double thresh_frac = (sqrt(5)-1)/2;
+	double thresh_frac = 1.0/sqrt(2);
+	//double thresh_frac = 0.95;
+	unsigned long long brightness_above_thresh = 0;
+	PRINT(total_bright)
+	//PRINT(brightness_above_thresh)
+	PRINT(thresh_frac)
+
+	while ( (double)brightness_above_thresh / (double)total_bright < thresh_frac){
+		brightness_above_thresh += thresh*hist[thresh];
+		/*
+		cout << endl;
+		PRINT(thresh*hist[thresh])
+		PRINT((unsigned long long)thresh)
+		PRINT(brightness_above_thresh)
+		PRINT(thresh_frac)
+		*/
+		--thresh;
+	}
+	++thresh;
+//	thresh = 1;
+
+	PRINT((unsigned long long)thresh)
+	
+	threshold(img, img, thresh,discretisations,1);
+	imwrite("orbital.png",img);
+
+}
+
+
+
 int main_gen_logo(){
 	unsigned long long xr = 1000;
 	unsigned long long yr = 1000;

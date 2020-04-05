@@ -14,6 +14,11 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
+
+
+
+class united_junction;
+
 class node {
 	public:
 	vector<node*> neighbors;
@@ -28,6 +33,7 @@ class node {
 	double y;
 	double x_orig;
 	double y_orig;
+	united_junction* j;
 	
 	
 	node(double, double,vector<node*>*,Mat*);
@@ -41,9 +47,19 @@ class node {
 	bool connected(node*, node*, unsigned long long);
 	vector<node*> get_distant_connected(unsigned long long);
 	vector<node*> get_distant_connected(node*, unsigned long long);
+	vector<node*> get_all_distant_connected(unsigned long long);
+	vector<node*> get_all_distant_connected(node*, unsigned long long);
 	node* get_straight_distant_connected(node*, unsigned long long);
 	double score_connections(double,double,double);
 	void wiggle(unsigned long long, double);
+	vector<node*> unite_junctions(unsigned long long);
+	bool junction_in_steps(unsigned long long, node*);
+
+
+	bool is_in(vector<node*>);
+	bool is_in(vector<vector<node*>>);
+	bool is_in(vector<united_junction*>);
 };
+	
 
 #endif

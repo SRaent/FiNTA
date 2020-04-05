@@ -308,7 +308,7 @@ bool node::connected(node* n, node* origin, unsigned long long l){
 	return ret;
 }
 
-vector<node*> node::get_distant_connected(node* origin, unsigned long long dist){
+vector<node*> node::get_all_distant_connected(node* origin, unsigned long long dist){
 	vector<node*> dc;
 	if (dist == 1){
 		for (unsigned long long i = 0; i < connections.size(); ++i){
@@ -318,6 +318,45 @@ vector<node*> node::get_distant_connected(node* origin, unsigned long long dist)
 		}
 	}
 	else {
+		vector<node*> dcr;
+		for (unsigned long long i = 0; i < connections.size(); ++i){
+			if (connections[i] != origin){
+				dcr = connections[i]->get_distant_connected(this, dist - 1);
+				dc.insert(dc.end(),dcr.begin(),dcr.end());
+			}
+		}
+	}
+	dc.push_back(this);
+	
+	return dc;
+	
+}
+
+vector<node*> node::get_all_distant_connected(unsigned long long dist){
+	vector<node*> dc;
+	if (dist == 1){
+		dc = connections;
+	}
+	else if(dist != 0){
+		vector<node*> dcr;
+		for (unsigned long long i = 0; i < connections.size(); ++i){
+			dcr = connections[i]->get_distant_connected(this, dist - 1);
+			dc.insert(dc.end(),dcr.begin(),dcr.end());
+		}
+	}
+	return dc;
+}
+
+vector<node*> node::get_distant_connected(node* origin, unsigned long long dist){
+	vector<node*> dc;
+	if (dist == 1){
+		for (unsigned long long i = 0; i < connections.size(); ++i){
+			if (connections[i] != origin){
+				dc.push_back(connections[i]);
+			}
+		}
+	}
+	else if(dist != 0){
 		vector<node*> dcr;
 		for (unsigned long long i = 0; i < connections.size(); ++i){
 			if (connections[i] != origin){
@@ -338,8 +377,8 @@ vector<node*> node::get_distant_connected(unsigned long long dist){
 	else {
 		vector<node*> dcr;
 		for (unsigned long long i = 0; i < connections.size(); ++i){
-			 dcr = connections[i]->get_distant_connected(this, dist - 1);
-			 dc.insert(dc.end(),dcr.begin(),dcr.end());
+			dcr = connections[i]->get_distant_connected(this, dist - 1);
+			dc.insert(dc.end(),dcr.begin(),dcr.end());
 		}
 	}
 	return dc;
@@ -361,7 +400,7 @@ node* node::get_straight_distant_connected(node* origin, unsigned long long dist
 			else if(connections[1] == origin){
 				dc = connections[0]->get_straight_distant_connected(this, dist - 1);
 			}
-			else {cout << "something fucky goin on, you try to find the streightest connection between 2 non connected nodes" << endl;}
+			else {cout << "something fucky goin on, you tryna find the streightest connection between 2 non connected nodes" << endl;}
 		}
 		else {
 			double max_angle = 0;
@@ -427,8 +466,85 @@ void node::wiggle(unsigned long long iterations, double thic){
 		}	
 	}
 }
+//this function does not work and inevetably produces a stack overflow
+/*
+vector<node*> node::unite_junctions(unsigned long long dist){
+	vector<node*> united;
+	if (connections.size() <= 2){
+		return united;
+	}
+	united.push_back(this);
+	vector<node*> temp;
+	vector<node*> unitable = get_all_distant_connected(dist);
+	for (unsigned long long i = 0; i < unitable.size(); ++i){
+		if (!node_is_in(united,unitable[i])){
+			temp = unitable[i]->unite_junctions(dist);
+			united.insert(united.end(),temp.begin(),temp.end());
+		}
+	}
+	return united;
+}*/
 
+vector<node*> node::unite_junctions(unsigned long long dist){
+	vector<node*> united;
+	if (connections.size() <= 2){
+		return united;
+	}
+	united.push_back(this);
+	vector<node*> temp;
+	vector<node*> unitable;
+	unsigned long long processed = 0;
+	while (processed < united.size()){
+		unitable = united[processed]->get_all_distant_connected(dist);
+		for (unsigned long long i = 0; i < unitable.size(); ++i){
+			if (!unitable[i]->is_in(united) && unitable[i]->connections.size() > 2){
+				united.push_back(unitable[i]);
+			}
+		}
+		++processed;
+	}
+	return united;
+}
+bool node::is_in(vector<node*> list){
+	for (unsigned long long i = 0; i < list.size(); ++i){
+		if (list[i] == this){
+			return true;
+		}
+	}
+	return false;
+}
 
+bool node::is_in(vector<united_junction*> united_junctions){
+	for (unsigned long long j = 0; j < united_junctions.size(); ++j){
+		vector<node*> list = united_junctions[j]->nodes;
+		for (unsigned long long i = 0; i < list.size(); ++i){
+			if (list[i] == this){
+				return true;
+			}
+		}
+	}
+	return false;
+}
 
+bool node::is_in(vector<vector<node*>> lists){
+	for (unsigned long long j = 0; j < lists.size(); ++j){
+		vector<node*> list = lists[j];
+		for (unsigned long long i = 0; i < list.size(); ++i){
+			if (list[i] == this){
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool node::junction_in_steps(unsigned long long dist, node* direction){
+	if (dist == 0){ return false; }
+	else if ( direction->connections.size() > 2){ return true; }
+	else if ( direction->connections.size() <= 1){ return false; }
+	else{
+		return direction->junction_in_steps(dist - 1,direction->connections[((find_connection_index(direction, this) + 1 )%2)]);
+	}
+}
 
 #endif

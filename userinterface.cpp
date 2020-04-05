@@ -1,4 +1,5 @@
-
+#ifndef USERINTERFACE_CPP
+#define USERINTERFACE_CPP USERINTERFACE_CPP
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -34,6 +35,8 @@ double scaling_factor = 1.0;
 #include "analyse.cpp"
 #include "visualise.cpp"
 #include "generate.cpp"
+#include "united_junction.h"
+#include "united_junction.cpp"
 
 
 
@@ -106,11 +109,73 @@ vector<save_loops*> loop_area_settings;
 
 string loop_circumference_path = "";
 
-string junc_dist_all_path = "";
-string junc_dist_loop_path = "";
+bool is_number(string,unsigned long long&);
+class junc_opt{
+	public:
+	string path;
+	unsigned long long unite = 0;
+	vector<double> data_floating;
+	vector<unsigned long long> data_integer;
+	
+	static vector<unsigned long long> unite_vals_all;
+	static vector<unsigned long long> unite_vals_loop;
+	//static vector<vector<junc_opt*>*> unite_val_settings_all;
+	//static vector<vector<junc_opt*>*> unite_val_settings_loop;
+	
+	junc_opt(vector<string> w, string default_path, bool& successful){
+		path = default_path;
+		if (w.size() == 3){
+			if(is_number(w[1],unite)){
+				path = w[2];
+			}
+			else if (is_number(w[2],unite)){
+				path = w[1];
+			}
+			else{ cout << w[0] << " arguments could not be interpretetd as a number and a path" << endl; successful = false;}
+		}
+		else if (w.size() == 2){
+			if(!is_number(w[1],unite)){
+				path = w[1];
+			}
+		}
+	}
+};
+vector<unsigned long long> junc_opt::unite_vals_all;
+vector<unsigned long long> junc_opt::unite_vals_loop;
 
-string junc_conn_all_path = "";
-string junc_conn_loop_path = "";
+void arrange_unite_vals(vector<junc_opt*> junc_opts, vector<unsigned long long>& unite_vals){
+	for (auto it = junc_opts.begin(); it != junc_opts.end(); ++it){
+		bool unite_val_exists = false;
+		for (unsigned long long i = 0;(!unite_val_exists) && (i < unite_vals.size()); ++i){
+			if ((*it)->unite == unite_vals[i]){
+				//unite_val_settings[i]->push_back((*it));
+				unite_val_exists = true;
+			}
+		}
+		if (!unite_val_exists){
+			//unite_val_settings.push_back(new vector<junc_opt*>);
+			unite_vals.push_back((*it)->unite);
+			//unite_val_settings.back()->push_back(*it);
+		}
+	}
+}
+void arrange_unite_vals_all(vector<junc_opt*> junc_opts){
+	arrange_unite_vals(junc_opts, junc_opt::unite_vals_all);
+}
+void arrange_unite_vals_loop(vector<junc_opt*> junc_opts){
+	arrange_unite_vals(junc_opts, junc_opt::unite_vals_loop);
+}
+vector<junc_opt*> junc_dist_all;
+vector<junc_opt*> junc_dist_loop;
+
+vector<junc_opt*> junc_conn_all;
+vector<junc_opt*> junc_conn_loop;
+
+//string junc_dist_all_path = "";
+//string junc_dist_loop_path = "";
+
+//string junc_conn_all_path = "";
+//string junc_conn_loop_path = "";
 
 
 string aux_data_path = "";
@@ -208,8 +273,42 @@ int main(){
 }
 */
 
+bool is_number(string s,double& n){
+	try{
+		n = stod(s);
+		return true;
+	}
+	catch(const std::invalid_argument& ia){
+		return false;
+	}
+}
+
+bool is_number(string s,long long& n){
+	try{
+		n = stoll(s);
+		return true;
+	}
+	catch(const std::invalid_argument& ia){
+		return false;
+	}
+}
+bool is_number(string s,unsigned long long& n){
+	try{
+		n = stoull(s);
+		return true;
+	}
+	catch(const std::invalid_argument& ia){
+		return false;
+	}
+}
 bool is_number(string s){
-	return (s[0] == '0' || s[0] == '1' || s[0] == '2' || s[0] == '3' || s[0] == '4' || s[0] == '5' || s[0] == '6' || s[0] == '7' || s[0] == '8' || s[0] == '9');
+	try{
+		stod(s);
+		return true;
+	}
+	catch(const std::invalid_argument& ia){
+		return false;
+	}
 }
 
 
@@ -784,79 +883,35 @@ bool read_settings_line(string l){
 			}
 		}
 		else if (w[0] == "save_all_junction_distances"){
-			if (junc_dist_all_path == ""){
-				if (w.size() == 2) {
-					junc_dist_all_path = w[1];
-				}
-				else if (w.size() == 1){
-					junc_dist_all_path = "<imagename>_junc_dist.dat";
-				}
-				else {
-					cout << "ERROR: to many arguments for save_all_junction_distances. It accepts no more than 1 argument " << endl;
-					successful = false;
-				}
+			if (w.size() <= 3){
+				junc_dist_all.push_back(new junc_opt(w,"<imagename>_all_junc_dist.dat",successful));
 			}
 			else{
-				cout << "ERROR: \"save_all_junction_distances\" was already called" << endl;
-				successful = false;
+				cout << "ERROR: to many arguments for save_all_junction_distances. It accepts no more than 2 arguments " << endl;
 			}
 		}
 		else if (w[0] == "save_loop_junction_distances"){
-			if (junc_dist_loop_path == ""){
-				if (w.size() == 2) {
-					junc_dist_loop_path = w[1];
-				}
-				else if (w.size() == 1){
-					junc_dist_loop_path = "<imagename>_junc_dist.dat";
-				}
-				else {
-					cout << "ERROR: to many arguments for save_loop_junction_distances. It accepts no more than 1 argument " << endl;
-					successful = false;
-				}
+			if (w.size() <= 3){
+				junc_dist_loop.push_back(new junc_opt(w,"<imagename>_loop_junc_dist.dat",successful));
 			}
 			else{
-				cout << "ERROR: \"save_loop_junction_distances\" was already called" << endl;
-				successful = false;
+				cout << "ERROR: to many arguments for save_loop_junction_distance. It accepts no more than 2 arguments " << endl;
 			}
 		}
 		else if (w[0] == "save_all_junction_connectivities"){
-			//PRINT(w[0])
-			if (junc_conn_all_path == ""){
-				//PRINT(junc_conn_all_path)
-				if (w.size() == 2) {
-					junc_conn_all_path = w[1];
-					PRINT(junc_conn_all_path)
-				}
-				else if (w.size() == 1){
-					junc_conn_all_path = "<imagename>_junc_conn.dat";
-					PRINT(junc_conn_all_path)
-				}
-				else {
-					cout << "ERROR: to many arguments for save_all_junction_distances. It accepts no more than 1 argument " << endl;
-					successful = false;
-				}
+			if (w.size() <= 3){
+				junc_conn_all.push_back(new junc_opt(w,"<imagename>_all_junc_conn.dat",successful));
 			}
 			else{
-				cout << "ERROR: \"save_all_junction_connectivities\" was already called" << endl;
-				successful = false;
+				cout << "ERROR: to many arguments for save_all_junction_connectivitie. It accepts no more than 2 arguments " << endl;
 			}
 		}
 		else if (w[0] == "save_loop_junction_connectivities"){
-			if (junc_conn_loop_path == ""){
-				if (w.size() == 2) {
-					junc_conn_loop_path = w[1];
-				}
-				else if (w.size() == 1){
-					junc_conn_loop_path = "<imagename>_junc_conn.dat";
-				}
-				else {
-					cout << "ERROR: to many arguments for save_loop_junction_distances. It accepts no more than 1 argument " << endl;
-					successful = false;
-				}
+			if (w.size() <= 3){
+				junc_conn_loop.push_back(new junc_opt(w,"<imagename>_loop_junc_conn.dat",successful));
 			}
 			else{
-				cout << "ERROR: \"save_loop_junction_connectivities\" was already called" << endl;
-				successful = false;
+				cout << "ERROR: to many arguments for save_loop_junction_connectivitie. It accepts no more than 2 arguments " << endl;
 			}
 		}
 		else if (w[0] == "save_auxiliary_data"){
@@ -1144,4 +1199,4 @@ int main(){
 	}
 }
 */
-
+#endif

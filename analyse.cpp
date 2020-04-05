@@ -18,6 +18,8 @@
 #include "mathfun.cpp"
 #include "node.h"
 #include "node.cpp"
+#include "united_junction.h"
+#include "united_junction.cpp"
 
 
 #define PI (double)3.1415926535897932384626433832795
@@ -67,14 +69,12 @@ node* find_next_loop_node(node* prev, node* n, long long sign){
 
 
 bool node_is_in(vector<node*> list, node* element){
-	for (unsigned long long i = 0; i < list.size(); ++i){
-		if (list[i] == element){
-			return true;
-		}
-	}
-	return false;
+	return element->is_in(list);
 }
 
+bool node_is_in(vector<vector<node*>> lists, node* element){
+	return element->is_in(lists);
+}
 
 
 bool node_list_eql(vector<node*> loop1, vector<node*> loop2){
@@ -128,17 +128,11 @@ vector<vector<node*>> find_loops(vector<node**> closures){
 		ret.push_back(find_loop(closures[i], -1));
 	}
 	
-	//double check = 0;
-		
 	for (unsigned long long i = 0; i < ret.size() - 1; ++i){
-		//check = loop_checksum(ret[i]);
 		for (unsigned long long j = i + 1; j < ret.size(); ++j){
-			//if(abs(loop_checksum(ret[j]) - check) < 0.000001){
 			if(node_list_eql(ret[i],ret[j])){
-//				PRINT(abs(loop_checksum(ret[j]) - check))
 				ret.erase(ret.begin() + j);
 				--j;
-//				cout << "checksum match " << i + 1 << endl;
 			}
 		}
 	}
@@ -462,6 +456,69 @@ vector<node*> find_junctions(vector<node*> list){
 	return junctions;
 }
 
+void del_ident_node_lsts(vector<vector<node*>>& jc){
+	for (unsigned long long i = 0; i < jc.size() - 1; ++i){
+		for (unsigned long long j = i + 1; j < jc.size(); ++j){
+			if(node_list_eql(jc[i],jc[j])){
+				jc.erase(jc.begin() + j);
+				--j;
+			}
+		}
+	}
+}
+
+
+vector<node*> junc_line(node*, node*);
+double line_length(vector<node*>);
+vector<double> junction_distances(vector<node*> junc){
+	vector<double> jd;
+	vector<vector<node*>> jc;
+	
+	
+	for(auto it = junc.begin(); it != junc.end(); ++it){
+		for(auto jt = (*it)->connections.begin(); jt != (*it)->connections.end(); ++jt){
+			jc.push_back(junc_line(*it,*jt));
+		}
+	}
+	
+	del_ident_node_lsts(jc);
+	
+	for (unsigned long long i = 0; i < jc.size(); ++i){
+		jd.push_back(line_length(jc[i]) * scaling_factor);
+	}
+	
+	
+	return jd;
+}
+
+vector<united_junction*> find_united_junctions(vector<node*> list, unsigned long long dist){
+	vector<united_junction*> united_junctions;
+	for (unsigned long long i = 0; i < list.size(); ++i){
+		if (list[i]->connections.size() > 2 && !list[i]->is_in(united_junctions)){
+			united_junctions.push_back(new united_junction(list[i],dist));
+		}
+	}
+	return united_junctions;
+}
+
+vector<double> united_junction_distances(vector<united_junction*> u_juncs){
+	vector<double> jd;
+	vector<vector<node*>> jc;
+
+	for (auto it = u_juncs.begin(); it != u_juncs.end(); ++it){
+		for (auto jt = (*it)->outgoing_connections.begin(); jt != (*it)->outgoing_connections.begin(); ++jt){
+			jc.push_back(junc_line((*jt)[0],(*jt)[1]));
+		}
+	}
+
+	del_ident_node_lsts(jc);
+	
+	for (unsigned long long i = 0; i < jc.size(); ++i){
+		jd.push_back((line_length(jc[i]) + sqrt(sqr((*(jc[i].end()))->y - (*(jc[i].end()))->j->y) + sqr((*(jc[i].end()))->x - (*(jc[i].end()))->j->x)) + sqrt(sqr((*(jc[i].begin()))->y - (*(jc[i].begin()))->j->y) + sqr((*(jc[i].begin()))->x - (*(jc[i].begin()))->j->x))) * scaling_factor);
+	}
+	return jd;
+}
+	
 
 vector<node*> find_line_naive(node* n1, node* n2, double curve_angle, vector<node*> &work_list, vector<node*> junctions, unsigned long long unnessesary = 0){
 	vector<node*> line;
@@ -587,34 +644,6 @@ double line_length(vector<node*> line){
 	}
 	return l;
 }
-
-vector<double> junction_distances(vector<node*> junc){
-	vector<double> jd;
-	vector<vector<node*>> jc;
-	
-	
-	for(auto it = junc.begin(); it != junc.end(); ++it){
-		for(auto jt = (*it)->connections.begin(); jt != (*it)->connections.end(); ++jt){
-			jc.push_back(junc_line(*it,*jt));
-		}
-	}
-	
-	for (unsigned long long i = 0; i < jc.size() - 1; ++i){
-		for (unsigned long long j = i + 1; j < jc.size(); ++j){
-			if(node_list_eql(jc[i],jc[j])){
-				jc.erase(jc.begin() + j);
-				--j;
-			}
-		}
-	}
-	
-	for (unsigned long long i = 0; i < jc.size(); ++i){
-		jd.push_back(line_length(jc[i]) * scaling_factor);
-	}
-	
-	
-	return jd;
-}
 double network_length(vector<node*> list){
 	double len = 0;
 	for (auto it = list.begin(); it != list.end(); ++it){
@@ -624,6 +653,5 @@ double network_length(vector<node*> list){
 	}
 	return len/2;
 }
-
 
 #endif
