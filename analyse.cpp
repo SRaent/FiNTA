@@ -347,6 +347,19 @@ void double_vector_to_file(string filename, vector<double> list){
 	}
 	f.close();
 }
+void ull_vector_to_file(string filename, vector<unsigned long long> list){
+	ofstream f;
+	f.open(filename);
+	if (f.is_open()){
+		for(unsigned long long i = 0; i < list.size(); ++i){
+			f << list[i] << "\n";
+		}
+	}
+	else {
+		cout << "WARNING: File: \"" << filename << "\" could not be opened" << endl;
+	}
+	f.close();
+}
 
 double max_loop_area(vector<vector<node*>> loops){
 	double max_a = 0;
@@ -457,8 +470,12 @@ vector<node*> find_junctions(vector<node*> list){
 }
 
 void del_ident_node_lsts(vector<vector<node*>>& jc){
+	//cout << " a" << flush;
+	//PRINT(jc.size())
 	for (unsigned long long i = 0; i < jc.size() - 1; ++i){
+		//cout << " b" << flush;
 		for (unsigned long long j = i + 1; j < jc.size(); ++j){
+			//cout << " c" << flush;
 			if(node_list_eql(jc[i],jc[j])){
 				jc.erase(jc.begin() + j);
 				--j;
@@ -505,16 +522,51 @@ vector<double> united_junction_distances(vector<united_junction*> u_juncs){
 	vector<double> jd;
 	vector<vector<node*>> jc;
 
+	//PRINT((*(u_juncs.begin()))->outgoing_connections.size())
+	//PRINT(u_juncs.size())
+
 	for (auto it = u_juncs.begin(); it != u_juncs.end(); ++it){
-		for (auto jt = (*it)->outgoing_connections.begin(); jt != (*it)->outgoing_connections.begin(); ++jt){
+		for (auto jt = (*it)->outgoing_connections.begin(); jt != (*it)->outgoing_connections.end(); ++jt){
 			jc.push_back(junc_line((*jt)[0],(*jt)[1]));
 		}
 	}
+	//cout << "find united junction distances" << endl;
 
 	del_ident_node_lsts(jc);
+	//cout << "done deleting equal nodelists" << endl;
 	
+	double dx_start = 0;
+	double dy_start = 0;
+	double dx_end = 0;
+	double dy_end = 0;
+	double d_start = 0;
+	double d_end = 0;
 	for (unsigned long long i = 0; i < jc.size(); ++i){
-		jd.push_back((line_length(jc[i]) + sqrt(sqr((*(jc[i].end()))->y - (*(jc[i].end()))->j->y) + sqr((*(jc[i].end()))->x - (*(jc[i].end()))->j->x)) + sqrt(sqr((*(jc[i].begin()))->y - (*(jc[i].begin()))->j->y) + sqr((*(jc[i].begin()))->x - (*(jc[i].begin()))->j->x))) * scaling_factor);
+		//cout << " c" << endl;
+		//PRINT(line_length(jc[i]))
+		//PRINT(jc[i].back()->connections.size())
+		//PRINT(jc[i].back()->y)
+		//PRINT(jc[i].back()->j->y)
+		//PRINT(jc[i].back()->x)
+		//PRINT(jc[i].back()->j->x)
+		//PRINT(jc[i][0]->connections.size())
+		//PRINT(jc[i][0]->y)
+		//PRINT(jc[i][0]->j->y)
+		//PRINT(jc[i][0]->x)
+		//PRINT(jc[i][0]->j->x)
+		dx_start = jc[i][0]->x - jc[i][0]->j->x;
+		dy_start = jc[i][0]->y - jc[i][0]->j->y;
+		d_start = sqrt(sqr(dx_start) + sqr(dy_start));
+		if (jc[i].back()->connections.size() <= 1){
+			d_end = 0;
+		}
+		else {
+			dx_end = jc[i].back()->x - jc[i].back()->j->x;
+			dy_end = jc[i].back()->y - jc[i].back()->j->y;
+			d_end = sqrt(sqr(dx_end) + sqr(dy_end));
+		}
+		jd.push_back((line_length(jc[i]) + d_start + d_end) * scaling_factor);
+		//jd.push_back((line_length(jc[i]) + sqrt(sqr((*(jc[i].back()))->y - (*(jc[i].back()))->j->y) + sqr((*(jc[i].back()))->x - (*(jc[i].back()))->j->x)) + sqrt(sqr((*(jc[i].begin()))->y - (*(jc[i].begin()))->j->y) + sqr((*(jc[i].begin()))->x - (*(jc[i].begin()))->j->x))) * scaling_factor);
 	}
 	return jd;
 }

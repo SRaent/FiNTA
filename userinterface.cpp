@@ -110,6 +110,7 @@ vector<save_loops*> loop_area_settings;
 string loop_circumference_path = "";
 
 bool is_number(string,unsigned long long&);
+string replace_keywords(string);
 class junc_opt{
 	public:
 	string path;
@@ -139,6 +140,14 @@ class junc_opt{
 			}
 		}
 	}
+	void save_data(){
+		if(data_integer.size() == 0){
+			double_vector_to_file(replace_keywords(path),data_floating);
+		}
+		else {
+			ull_vector_to_file(replace_keywords(path),data_integer);
+		}
+	}
 };
 vector<unsigned long long> junc_opt::unite_vals_all;
 vector<unsigned long long> junc_opt::unite_vals_loop;
@@ -164,6 +173,11 @@ void arrange_unite_vals_all(vector<junc_opt*> junc_opts){
 }
 void arrange_unite_vals_loop(vector<junc_opt*> junc_opts){
 	arrange_unite_vals(junc_opts, junc_opt::unite_vals_loop);
+}
+void save_junc_data(vector<junc_opt*> vec){
+	for (auto it = vec.begin(); it != vec.end(); ++it){
+		(*it)->save_data();
+	}
 }
 vector<junc_opt*> junc_dist_all;
 vector<junc_opt*> junc_dist_loop;
@@ -1188,6 +1202,11 @@ void save_aux_data(vector<double> data, vector<string> labels, string path){
 	}
 }
 
+string str_add_double(string str, unsigned long long d){
+	ostringstream cvt;
+	cvt << str << d;
+	return cvt.str();
+}
 /*
 int main(){
 	Mat tmp(50,50, CV_8UC3, Scalar::all(255));

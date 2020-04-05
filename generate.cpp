@@ -134,9 +134,8 @@ void gen_startpoints(vector<node*> &list, vector<node**> &closures, Mat &hessian
 	Point min_loc, max_loc;	
 	Mat temp = tubeness.clone();
 	double min, max;
-	max = numeric_limits<double>::infinity();
+	minMaxLoc(temp, &min, &max, &min_loc, &max_loc);
 	for (unsigned long long i = 0; i < n && max > thresh; ++i){
-		minMaxLoc(temp, &min, &max, &min_loc, &max_loc);
 		//PRINT(max)
 		//PRINT(max_loc.x)
 		//PRINT(max_loc.y)
@@ -144,6 +143,7 @@ void gen_startpoints(vector<node*> &list, vector<node**> &closures, Mat &hessian
 		//PRINT(max_loc.x)
 		//PRINT(max_loc.y)
 		circle(temp, max_loc, rad, Scalar::all(0), -1);
+		minMaxLoc(temp, &min, &max, &min_loc, &max_loc);
 		/*
 		Mat disp;
 		normalize(tubeness,disp,255,0,32);

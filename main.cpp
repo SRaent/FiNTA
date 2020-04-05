@@ -415,9 +415,9 @@ int main(int n, char** args){
 	arrange_unite_vals_all(junc_conn_all);
 
 	for (auto it = junc_opt::unite_vals_all.begin(); it != junc_opt::unite_vals_all.end(); ++it){
-		cout << "analysing united junction discances with unification distance " << (*it) << endl;
+		cout << str_add_double("analysing united junction discances with unification distance " ,(*it)) << endl;
 		vector<united_junction*> united_junctions = find_united_junctions(list,(*it));
-		aux_labels.push_back("total number of junited junctions with unification distance " + (*it));
+		aux_labels.push_back(str_add_double("total number of junited junctions with unification distance " ,(*it)));
 		aux_data.push_back(united_junctions.size());
 		for ( auto jt = junc_dist_all.begin(); jt != junc_dist_all.end(); ++jt){
 			if ((*jt)->unite == (*it)){
@@ -518,12 +518,12 @@ int main(int n, char** args){
 	
 	arrange_unite_vals_loop(junc_dist_loop);
 	arrange_unite_vals_loop(junc_conn_loop);
-	PRINT(junc_opt::unite_vals_loop.size())
+	//PRINT(junc_opt::unite_vals_loop.size())
 
 	for (auto it = junc_opt::unite_vals_loop.begin(); it != junc_opt::unite_vals_loop.end(); ++it){
-		cout << "analysing united junction discances with unification distance " << (*it) << endl;
+		cout << str_add_double("analysing united junctions in the network only containing loops with unification distance " ,(*it)) << endl;
 		vector<united_junction*> united_junctions = find_united_junctions(list,(*it));
-		aux_labels.push_back("total number of junited junctions with unification distance " + (*it));
+		aux_labels.push_back(str_add_double("total number of united junctions the network only containing closed loops with unification distance ",(*it)));
 		aux_data.push_back(united_junctions.size());
 		for ( auto jt = junc_dist_loop.begin(); jt != junc_dist_loop.end(); ++jt){
 			if ((*jt)->unite == (*it)){
@@ -567,6 +567,10 @@ int main(int n, char** args){
 		double_vector_to_file(replace_keywords(junc_conn_loop_path),jc);
 		
 	}*/
+	save_junc_data(junc_dist_all);
+	save_junc_data(junc_dist_loop);
+	save_junc_data(junc_conn_all);
+	save_junc_data(junc_conn_loop);
 	
 	
 	for (unsigned long long i = 0; i < loop_area_settings.size(); ++i){
