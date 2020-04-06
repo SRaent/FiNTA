@@ -199,10 +199,23 @@ int main(int n, char** args){
 	//PRINT(s.height);
 	Mat I3;
 	I2.copyTo(I3);
+	//PRINT(I3.channels());
 	cvtColor(I3,I3,COLOR_BGR2GRAY);
+	//PRINT(I3.channels());
 	Mat I4;
 	I3.convertTo(I4, CV_64F);
-	
+	Mat I_orig_double;
+	I1.copyTo(I_orig_double);
+	cvtColor(I_orig_double,I_orig_double,COLOR_BGR2GRAY);
+	I_orig_double.convertTo(I_orig_double, CV_64F);
+	/*
+	unsigned long long min;
+	unsigned long long max;
+	minMaxLoc(I3, &min, &max);
+	if (node_thresh > min){
+		node_thresh = (node_thresh - min)*255/(max - min);
+	}
+	*/
 	normalize(I4,I4,255,0,32); // the 32 is a flag, that produced errors if the keyword is used directly
 	
 	Mat hessian;
@@ -364,8 +377,30 @@ int main(int n, char** args){
 	if (list.size() != 0){
 		cout << endl << "Tracing finished" << endl;
 	}
+
+	/*
+	cout << "testing" << endl;
+	Size s2 = I_orig_double.size();
+	PRINT(s2.width)
+	PRINT(s2.height)
+	PRINT(I_orig_double.at<double>(s2.height - 1,s2.width - 1))
+	*/
 	
 	
+	if (del_nodes_above_thresh){
+		unsigned long long deleted = 0;
+		for (unsigned long long i = 0; i < list.size(); ++i){
+			if (list[i]->brightness(I_orig_double, crop_x1, crop_y1) > node_thresh_above){ delete list[i]; ++ deleted;}
+		}
+		cout << "Deleted " << deleted << " nodes below threhold" << endl;
+	}
+	if (del_nodes_below_thresh){
+		unsigned long long deleted = 0;
+		for (unsigned long long i = 0; i < list.size(); ++i){
+			if (list[i]->brightness(I_orig_double, crop_x1, crop_y1) < node_thresh_below){ delete list[i]; ++ deleted;}
+		}
+		cout << "Deleted " << deleted << " nodes below threhold" << endl;
+	}
 	
 	//experiment did not work, optimising the node positions after initial tracing was futile
 	/*

@@ -59,6 +59,8 @@ class node {
 	bool is_in(vector<node*>);
 	bool is_in(vector<vector<node*>>);
 	bool is_in(vector<united_junction*>);
+
+	double brightness(Mat, unsigned long long, unsigned long long);
 };
 	
 

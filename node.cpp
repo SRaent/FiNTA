@@ -58,6 +58,24 @@ node::node(double xinit, double yinit,node* mother_init){
 }
 
 node::~node(){
+	//cout << "deleting node" << endl;
+	for (unsigned long long i = 0; i < connections.size(); ++i){
+		//cout << "erasing connection " << i << " of " << connections.size() << endl;
+		(connections[i]->connections).erase((connections[i]->connections).begin() + find_connection_index((connections[i]), this));
+	}
+	//cout << "erased connections" << endl;
+	for (unsigned long long j = 0; j < closures->size(); ++j){
+		if (this == (*closures)[j][0] || this == (*closures)[j][1]){
+			//njow all trjaces mjust bj djelijtjed!!! just ljke staljns opponjents!!
+			delete (*closures)[j];
+			
+			//cout << "about to erase closure" << endl;
+			closures->erase(closures->begin() + j);
+			--j;
+		}
+	}
+	list->erase(list->begin() + find_node_list_position(this, *list));
+	//cout << "erased closure" << endl;
 }
 
 void node::procreate(bool free = 1){
@@ -545,6 +563,22 @@ bool node::junction_in_steps(unsigned long long dist, node* direction){
 	else{
 		return direction->junction_in_steps(dist - 1,direction->connections[((find_connection_index(direction, this) + 1 )%2)]);
 	}
+}
+
+double node::brightness(Mat image, unsigned long long dx = 0, unsigned long long dy = 0){
+/*
+	PRINT(dy)
+	PRINT(y)
+	PRINT(x)
+	PRINT((unsigned long long)y + dy)
+	Size s2 = image.size();
+	PRINT(s2.width)
+	PRINT(s2.height)
+*/
+	double ret = image.at<double>((unsigned long long)y + dy,(unsigned long long)x + dx);
+	//double ret = image.at<double>(883,s2.width - 1);
+	//cout << "no segv" << endl;
+	return ret;
 }
 
 #endif

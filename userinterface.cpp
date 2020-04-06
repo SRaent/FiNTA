@@ -59,6 +59,11 @@ unsigned long long crop_x2 = 0;
 unsigned long long crop_y2 = 0;
 
 
+unsigned long long node_thresh_below = 0;
+unsigned long long node_thresh_above = 0;
+bool del_nodes_below_thresh = false;
+bool del_nodes_above_thresh = false;
+
 
 bool modified_hessian = false;
 
@@ -1100,6 +1105,30 @@ bool read_settings_line(string l){
 		}
 		else if (w[0] == "use_modified_hessian"){
 			modified_hessian = true;
+		}
+		else if (w[0] == "delete_nodes_below_threshold"){
+			if (w.size() == 2){
+				if (!is_number(w[1],node_thresh_below)){
+					cout << "threshold can only be a number" << endl;
+					successful = false;
+				}
+				else {
+					del_nodes_below_thresh = true;
+				}
+			}
+			else{ successful = false; cout << w[0] << " can only take exactly one argument" << endl;}
+		}
+		else if (w[0] == "delete_nodes_above_threshold"){
+			if (w.size() == 2){
+				if (!is_number(w[1],node_thresh_above)){
+					cout << "threshold can only be a number" << endl;
+					successful = false;
+				}
+				else {
+					del_nodes_above_thresh = true;
+				}
+			}
+			else{ successful = false; cout << w[0] << " can only take exactly one argument" << endl;}
 		}
 		
 		//string animation_path = "";

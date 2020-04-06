@@ -143,34 +143,42 @@ vector<vector<node*>> find_loops(vector<node**> closures){
 
 
 void only_loops(vector<node*> &list, vector<node**> &closures){
-	
+	//PRINT(closures.size())
 	bool buisy = true;
 	while (buisy){
 		
 		buisy = false;
 		for (unsigned long long i = 0; i < list.size(); ++i){
 			if (list[i]->connections.size() <= 1){
-				bool unfinished = true;
-				//njow all trajces mjust bj delijtjed!!! just ljke staljns opponjents!!
-				if (list[i]->connections.size() == 1){
-					list[i]->connections[0]->connections.erase(list[i]->connections[0]->connections.begin() + find_connection_index(list[i]->connections[0], list[i]));
-				}
-				
-				for (unsigned long long j = 0; j < closures.size(); ++j){
-					if (list[i] == closures[j][0] || list[i] == closures[j][1]){
-						closures.erase(closures.begin() + j);
-						--j;
-					}
-				}
-				
+				//cout << "about to delete node" << endl;
 				delete (list[i]);
-				list.erase(list.begin() + i);
-				
-//				cout << "r";
+				--i;
 				buisy = true;
 			}
 		}
 	}
+	/*
+	// this is for testing the delete function
+	for (unsigned long long i = 0; i < list.size(); ++i){
+		if (list[i]->connections.size() <= 1){
+			cout << "scraggle not deleted!!!!" << endl;
+		}
+		long test = 0;
+		for (unsigned long long j = 0; j < list[i]->connections.size(); ++j){
+			for (unsigned long long k = 0; k < list[i]->connections[j]->connections.size(); ++k){
+				if (list[i]->connections[j]->connections[k] == list[i]){
+					++test;
+				}
+			}
+		}
+		//cout << "c" << flush;
+		if (test != list[i]->connections.size()) {
+			cout << "fishy!!!" << endl;
+			PRINT(list[i]->connections.size())
+		}
+	}
+	*/
+	//PRINT(closures.size())
 }
 
 
@@ -472,7 +480,7 @@ vector<node*> find_junctions(vector<node*> list){
 void del_ident_node_lsts(vector<vector<node*>>& jc){
 	//cout << " a" << flush;
 	//PRINT(jc.size())
-	for (unsigned long long i = 0; i < jc.size() - 1; ++i){
+	for (unsigned long long i = 0; i < jc.size() - 1 && jc.size() > 0; ++i){
 		//cout << " b" << flush;
 		for (unsigned long long j = i + 1; j < jc.size(); ++j){
 			//cout << " c" << flush;

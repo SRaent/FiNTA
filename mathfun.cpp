@@ -428,8 +428,8 @@ vector<double>* circlefun(Mat* img, double xpos, double ypos, double inner, doub
 	unsigned long long ymin = max((unsigned long long)0,(unsigned long long)floor(ypos - outer));
 	unsigned long long ymax = min((unsigned long long)ceil(ypos + outer), (unsigned long long)s.height);
 	double rad = 0;
-	for (unsigned long long x = xmin; x <= xmax ; ++x){
-		for (unsigned long long y = ymin; y <= ymax; ++y){
+	for (unsigned long long x = xmin; x < xmax ; ++x){
+		for (unsigned long long y = ymin; y < ymax; ++y){
 			rad = sqrt(pow((double)x-xpos,2) + pow((double)y-ypos,2));
 			if (inner <= rad && rad <= outer && x != xpos && y != ypos){
 				(fun[0]).push_back(atan2((double)y-ypos,(double)x-xpos));
