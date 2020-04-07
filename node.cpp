@@ -547,9 +547,9 @@ vector<node*> node::unite_junctions(unsigned long long dist){
 	}
 	return united;
 }
-bool node::is_in(vector<node*> list){
-	for (unsigned long long i = 0; i < list.size(); ++i){
-		if (list[i] == this){
+bool node::is_in(vector<node*> l){
+	for (unsigned long long i = 0; i < l.size(); ++i){
+		if (l[i] == this){
 			return true;
 		}
 	}
@@ -600,6 +600,47 @@ double node::brightness(Mat image, unsigned long long dx = 0, unsigned long long
 	double ret = image.at<double>((unsigned long long)y + dy,(unsigned long long)x + dx);
 	//double ret = image.at<double>(883,s2.width - 1);
 	//cout << "no segv" << endl;
+	return ret;
+}
+void node::nodes_til_junc(vector<node*>& ret){
+	if (connections.size() <= 2){
+		ret.push_back(this);
+		for (auto it = connections.begin(); it != connections.end(); ++it){
+			if (!((*it)->is_in(ret))){
+				(*it)->nodes_til_junc(ret);
+			}
+		}
+	}
+}
+
+vector<node*> node::nodes_til_junc(){
+	vector<node*> ret;
+	ret.push_back(this);
+	for (auto it = connections.begin(); it != connections.end(); ++it){
+		if (!((*it)->is_in(ret))){
+			(*it)->nodes_til_junc(ret);
+		}
+	}
+	return ret;
+}
+
+unsigned long long node::del_til_junc(){
+	vector<node*> to_del = nodes_til_junc();
+	unsigned long long ret = to_del.size();
+	//cout << "bout to delete" << endl;
+	/*
+	node* prev = NULL;
+	for (auto it = to_del.begin(); it != to_del.end(); ++it){
+		if(prev == (*it)){
+			cout << "douplicate " << (*it) << " " << *(it - 1) << " " << prev << endl;
+		}
+		prev = (*it);
+	}
+	*/
+	for (auto it = to_del.begin(); it != to_del.end(); ++it){
+		//cout << (*it) << endl;
+		delete (*it);
+	}
 	return ret;
 }
 

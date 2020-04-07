@@ -392,7 +392,7 @@ int main(int n, char** args){
 		for (unsigned long long i = 0; i < list.size(); ++i){
 			if (list[i]->brightness(I_orig_double, crop_x1, crop_y1) > node_thresh_above){ delete list[i]; ++ deleted;}
 		}
-		cout << "Deleted " << deleted << " nodes below threhold" << endl;
+		cout << "Deleted " << deleted << " nodes above threhold" << endl;
 	}
 	if (del_nodes_below_thresh){
 		unsigned long long deleted = 0;
@@ -400,6 +400,20 @@ int main(int n, char** args){
 			if (list[i]->brightness(I_orig_double, crop_x1, crop_y1) < node_thresh_below){ delete list[i]; ++ deleted;}
 		}
 		cout << "Deleted " << deleted << " nodes below threhold" << endl;
+	}
+	if (del_lines_below_thresh){
+		unsigned long long deleted = 0;
+		for (unsigned long long i = 0; i < list.size(); ++i){
+			if (list[i]->brightness(I_orig_double, crop_x1, crop_y1) < node_line_thresh_below){deleted += list[i]->del_til_junc();}
+		}
+		cout << "Deleted " << deleted << " nodes below threhold along whole lines" << endl;
+	}
+	if (del_lines_above_thresh){
+		unsigned long long deleted = 0;
+		for (unsigned long long i = 0; i < list.size(); ++i){
+			if (list[i]->brightness(I_orig_double, crop_x1, crop_y1) > node_line_thresh_above){deleted += list[i]->del_til_junc();}
+		}
+		cout << "Deleted " << deleted << " nodes above threhold along whole lines" << endl;
 	}
 	
 	//experiment did not work, optimising the node positions after initial tracing was futile

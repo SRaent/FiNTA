@@ -65,6 +65,12 @@ bool del_nodes_below_thresh = false;
 bool del_nodes_above_thresh = false;
 
 
+unsigned long long node_line_thresh_below = 0;
+unsigned long long node_line_thresh_above = 0;
+bool del_lines_below_thresh = false;
+bool del_lines_above_thresh = false;
+
+
 bool modified_hessian = false;
 
 bool start_points_exist = false;
@@ -1126,6 +1132,30 @@ bool read_settings_line(string l){
 				}
 				else {
 					del_nodes_above_thresh = true;
+				}
+			}
+			else{ successful = false; cout << w[0] << " can only take exactly one argument" << endl;}
+		}
+		else if (w[0] == "delete_lines_below_threshold"){
+			if (w.size() == 2){
+				if (!is_number(w[1],node_line_thresh_below)){
+					cout << "threshold can only be a number" << endl;
+					successful = false;
+				}
+				else {
+					del_lines_below_thresh = true;
+				}
+			}
+			else{ successful = false; cout << w[0] << " can only take exactly one argument" << endl;}
+		}
+		else if (w[0] == "delete_lines_above_threshold"){
+			if (w.size() == 2){
+				if (!is_number(w[1],node_line_thresh_above)){
+					cout << "threshold can only be a number" << endl;
+					successful = false;
+				}
+				else {
+					del_lines_above_thresh = true;
 				}
 			}
 			else{ successful = false; cout << w[0] << " can only take exactly one argument" << endl;}
