@@ -42,7 +42,7 @@ The "<imagename\>" keyword can be used in any path that is specified in the sett
 ## Using the Modified hessian
 The "use\_modified\_hessian" keyword causes the program to use a modified hessian matrix which can improve the tracing result. The parameters might have to be adjusted slightly when compared to using the unmodified hessain on the same image.
 
-##Deleting nodes according to image brightness
+## Deleting nodes according to image brightness
 The commands "delete\_nodes\_above\_threshold" and "delete\_nodes\_below\_threshold" can be used to delete all nodes below or above a brightness threshold. The threshold is specified as a positive integer number behind the command. Here the brighness is measured on the grayscale converted original image WITHOUT the brightnes rescaling from 0 to 255 that is performed to aid the tracing. Therefore the brightness values obtained from other image analysis software can be used directly.
 
 ## Drawing commands
