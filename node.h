@@ -49,6 +49,7 @@ class node {
 	vector<node*> get_distant_connected(node*, unsigned long long);
 	vector<node*> get_all_distant_connected(unsigned long long);
 	vector<node*> get_all_distant_connected(node*, unsigned long long);
+	vector<node*> get_all_distant_connected(vector<node*>&, unsigned long long);
 	node* get_straight_distant_connected(node*, unsigned long long);
 	double score_connections(double,double,double);
 	void wiggle(unsigned long long, double);

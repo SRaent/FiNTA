@@ -523,6 +523,7 @@ vector<united_junction*> find_united_junctions(vector<node*> list, unsigned long
 			united_junctions.push_back(new united_junction(list[i],dist));
 		}
 	}
+	cout << "number of united junctions: " << united_junctions.size() << endl;
 	return united_junctions;
 }
 

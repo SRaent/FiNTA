@@ -21,7 +21,7 @@ class node;
 class united_junction {
 	public:
 	vector<node*> nodes;
-	vector<united_junction*>* list;
+	//vector<united_junction*>* list;
 	vector<node**> outgoing_connections;
 	double x;
 	double y;

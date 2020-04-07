@@ -339,7 +339,7 @@ vector<node*> node::get_all_distant_connected(node* origin, unsigned long long d
 		vector<node*> dcr;
 		for (unsigned long long i = 0; i < connections.size(); ++i){
 			if (connections[i] != origin){
-				dcr = connections[i]->get_distant_connected(this, dist - 1);
+				dcr = connections[i]->get_all_distant_connected(this, dist - 1);
 				dc.insert(dc.end(),dcr.begin(),dcr.end());
 			}
 		}
@@ -350,6 +350,31 @@ vector<node*> node::get_all_distant_connected(node* origin, unsigned long long d
 	
 }
 
+vector<node*> node::get_all_distant_connected(vector<node*>& dc, unsigned long long dist){
+	dc.push_back(this);
+	if (dist != 0) {
+		for (unsigned long long i = 0; i < connections.size(); ++i){
+			if (!connections[i]->is_in(dc)){
+				connections[i]->get_all_distant_connected(dc, dist - 1);
+			}
+		}
+	}
+	
+	return dc;
+	
+}
+vector<node*> node::get_all_distant_connected(unsigned long long dist){
+	vector<node*> dc;
+	dc.push_back(this);
+	if (dist != 0){
+		for (unsigned long long i = 0; i < connections.size(); ++i){
+			connections[i]->get_all_distant_connected(dc, dist - 1);
+		}
+	}
+	//cout << "junction size: " << dc.size() << endl;
+	return dc;
+}
+/*
 vector<node*> node::get_all_distant_connected(unsigned long long dist){
 	vector<node*> dc;
 	if (dist == 1){
@@ -364,7 +389,7 @@ vector<node*> node::get_all_distant_connected(unsigned long long dist){
 	}
 	return dc;
 }
-
+*/
 vector<node*> node::get_distant_connected(node* origin, unsigned long long dist){
 	vector<node*> dc;
 	if (dist == 1){
@@ -509,13 +534,12 @@ vector<node*> node::unite_junctions(unsigned long long dist){
 		return united;
 	}
 	united.push_back(this);
-	vector<node*> temp;
-	vector<node*> unitable;
+	//vector<node*> temp;
 	unsigned long long processed = 0;
 	while (processed < united.size()){
-		unitable = united[processed]->get_all_distant_connected(dist);
+		vector<node*> unitable = united[processed]->get_all_distant_connected(dist);
 		for (unsigned long long i = 0; i < unitable.size(); ++i){
-			if (!unitable[i]->is_in(united) && unitable[i]->connections.size() > 2){
+			if (unitable[i]->connections.size() > 2 && !unitable[i]->is_in(united)){
 				united.push_back(unitable[i]);
 			}
 		}
@@ -535,10 +559,8 @@ bool node::is_in(vector<node*> list){
 bool node::is_in(vector<united_junction*> united_junctions){
 	for (unsigned long long j = 0; j < united_junctions.size(); ++j){
 		vector<node*> list = united_junctions[j]->nodes;
-		for (unsigned long long i = 0; i < list.size(); ++i){
-			if (list[i] == this){
-				return true;
-			}
+		if (is_in(list)){
+			return true;
 		}
 	}
 	return false;
