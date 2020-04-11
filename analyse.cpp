@@ -587,6 +587,13 @@ vector<double> find_loop_areas_wo_max_w_diam(vector<vector<node*>> loops,double 
 }
 
 
+vector<double> find_loop_areas_w_diam(vector<vector<node*>> loops,double thickness){
+	vector<double> areas;
+	for (unsigned long long l = 0; l < loops.size(); ++l){
+		areas.push_back(inside_loop_area(loops[l], thickness));
+	}
+	return areas;
+}
 
 
 

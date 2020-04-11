@@ -629,12 +629,12 @@ int main(int n, char** args){
 	
 	
 	for (unsigned long long i = 0; i < loop_area_settings.size(); ++i){
-		vector<double> areas = find_loop_areas_wo_max_w_diam(loops,loop_area_settings[i]->thickness);
+		vector<double> areas = find_loop_areas_w_diam(loops,loop_area_settings[i]->thickness);
 		double_vector_to_file(replace_keywords(loop_area_settings[i]->path),areas);
 	}
 	
 	if (loop_circumference_path != ""){
-		double_vector_to_file(replace_keywords(loop_circumference_path),find_loop_lengths_wo_max(loops));
+		double_vector_to_file(replace_keywords(loop_circumference_path),find_loop_lengths(loops));
 	}
 	
 	
