@@ -66,6 +66,9 @@ class node {
 	unsigned long long del_til_junc();
 	vector<node*> nodes_til_junc();
 	void nodes_til_junc(vector<node*>&);
+
+	void local_network(vector<node*>&);
+	vector<node*> local_network();
 };
 	
 

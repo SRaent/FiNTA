@@ -83,7 +83,7 @@ bool node_list_eql(vector<node*> loop1, vector<node*> loop2){
 		eql = node_is_in(loop2,*it);
 	}
 	for(auto it = loop2.begin(); it != loop2.end() && eql; ++it){
-		eql = node_is_in(loop2,*it);
+		eql = node_is_in(loop1,*it);
 	}
 	return eql;
 }
@@ -119,6 +119,128 @@ double loop_checksum(vector<node*> loop){
 	return ret;
 }
 
+double loop_area(vector<node*>);
+Mat draw_loop(vector<node*>, Mat, Scalar);
+string str_add_double(string,unsigned long long);
+unsigned long long false_loop_ind(vector<unsigned long long>& loop_indices, vector<vector<node*>>& all_loops){
+	
+	double max_area = 0;
+	unsigned long long max_area_index;
+
+	double sum = 0;
+	
+	for (unsigned long long i = 0; i < loop_indices.size(); ++i){
+		double area = loop_area(all_loops[loop_indices[i]]);
+		sum += area;
+		if (area > max_area){
+			max_area = area;
+			max_area_index = loop_indices[i];
+		}
+	}
+	/*
+	PRINT(sum/2.0)
+	PRINT(max_area)
+	if ( abs(max_area - sum/2.0) > 1){
+		cout << " som ting wong" << endl;
+		PRINT(loop_indices.size())
+		Mat dbg;
+		all_loops[0][0]->img->copyTo(dbg);
+		for (unsigned long long i = 0; i < loop_indices.size(); ++i){
+			dbg = draw_loop(all_loops[loop_indices[i]], dbg, Scalar(rand() % 255,rand() % 255,rand() % 255));
+		}
+		imwrite(str_add_double("debugpng",rand()%255) + ".png",dbg);
+
+	}
+	*/
+	if ( abs(max_area - sum/2.0) > 1){cout << "A error occured in the subnet or loop recognition, please contact the developer" << endl;}
+	return max_area_index;
+}
+
+vector<vector<node*>> find_loops(vector<node**> closures){
+	
+	vector<vector<node*>> ret;
+	if (closures.size() == 0){
+		return ret;
+	}
+
+	vector<vector<node*>> subnets;
+
+	//cout << "about to compute subnets" << endl;
+
+	for (auto it = closures[0][0]->list->begin(); it != closures[0][0]->list->end(); ++it){
+		if(!((*it)->is_in(subnets))){
+			subnets.push_back((*(it))->local_network());
+		}
+	}
+
+	cout << subnets.size() << " subnet(s) found" << endl;
+	
+	for (unsigned long long i = 0; i < closures.size(); ++i){
+		ret.push_back(find_loop(closures[i], 1));
+		ret.push_back(find_loop(closures[i], -1));
+	}
+	
+	Mat dbg;
+	ret[0][0]->img->copyTo(dbg);
+	for (unsigned long long i = 0; i < ret.size(); ++i){
+		dbg = draw_loop(ret[i], dbg, Scalar(rand() % 255,rand() % 255,rand() % 255));
+	}
+	imwrite("all_loops.png",dbg);
+
+	for (unsigned long long i = 0; i < ret.size() - 1; ++i){
+		for (unsigned long long j = i + 1; j < ret.size(); ++j){
+			if(node_list_eql(ret[i],ret[j])){
+				ret.erase(ret.begin() + j);
+				--j;
+			}
+		}
+	}
+
+	//may god have mercy on me for what i am about to do
+	vector<unsigned long long>* subnet_loop_indices = new vector<unsigned long long>[subnets.size()];
+
+	for (unsigned long long j = 0; j < ret.size(); ++j){
+		bool searching = true;
+		for (unsigned long long i = 0; i < subnets.size() && searching; ++i){
+			if(ret[j][0]->is_in(subnets[i])){
+				searching = false;
+				subnet_loop_indices[i].push_back(j);
+			}
+		}
+		if (searching) {cout << "node not found in subnets" << endl;}
+	}
+
+	//PRINT(ret.size())
+	vector<unsigned long long> del_ind;
+	for (unsigned long long i = 0; i < subnets.size(); ++i){
+		if(subnet_loop_indices[i].size() > 1){
+			del_ind.push_back(false_loop_ind(subnet_loop_indices[i],ret));
+		}
+		else if (subnet_loop_indices[i].size() == 0){cout << "A error occured in the subnet recognition, please contact the developer" << endl;}
+		//else{PRINT(subnet_loop_indices[i].size())}
+	}
+
+	/*
+	ret[0][0]->img->copyTo(dbg);
+	for (unsigned long long i = 0; i < ret.size(); ++i){
+		dbg = draw_loop(ret[i], dbg, Scalar(rand() % 255,rand() % 255,rand() % 255));
+	}
+	imwrite("all_loops_wo_duplicates.png",dbg);
+
+	PRINT(del_ind.size())
+	*/
+	sort(del_ind.begin(),del_ind.end());
+	for (auto it = del_ind.rbegin(); it != del_ind.rend(); ++it){
+		ret.erase(ret.begin() + (*it));
+	}
+	//PRINT(ret.size())
+
+	delete[] subnet_loop_indices;
+	
+	//cout << "freed memory" << endl;
+	return ret;
+}
+/*
 vector<vector<node*>> find_loops(vector<node**> closures){
 	
 	vector<vector<node*>> ret;
@@ -139,6 +261,7 @@ vector<vector<node*>> find_loops(vector<node**> closures){
 	
 	return ret;
 }
+*/
 
 
 

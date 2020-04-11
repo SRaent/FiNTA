@@ -643,5 +643,22 @@ unsigned long long node::del_til_junc(){
 	}
 	return ret;
 }
+void node::local_network(vector<node*>& ret){
+	if (!is_in(ret)){
+		ret.push_back(this);
+		for (auto it = connections.begin(); it != connections.end(); ++it){
+			(*it)->local_network(ret);
+		}
+	}
+}
+
+vector<node*> node::local_network(){
+	vector<node*> ret;
+	ret.push_back(this);
+	for (auto it = connections.begin(); it != connections.end(); ++it){
+		(*it)->local_network(ret);
+	}
+	return ret;
+}
 
 #endif

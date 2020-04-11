@@ -45,6 +45,16 @@ Mat draw_list_offset(Mat input_image, vector<node*>list,Scalar color = Scalar(0,
 	return image;
 }
 
+Mat draw_loop(vector<node*> loop, Mat image, Scalar color = Scalar(0,0,255)){
+	if (image.channels() == 1){
+		cvtColor(image,image,COLOR_GRAY2BGR);
+	}
+	for (unsigned long long i = 0; i < loop.size() - 1; ++i){
+		line(image,Point(loop[i]->x,loop[i]->y),Point(loop[i + 1]->x,loop[i + 1]->y),color);
+	}
+	return image;
+}
+
 
 void draw_loops(char* folder, vector<vector<node*>> loops, Mat image,bool print_loop_params = false){
 	Mat loops_img;
