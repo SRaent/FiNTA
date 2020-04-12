@@ -179,13 +179,14 @@ vector<vector<node*>> find_loops(vector<node**> closures){
 		ret.push_back(find_loop(closures[i], 1));
 		ret.push_back(find_loop(closures[i], -1));
 	}
-	
+/*	
 	Mat dbg;
 	ret[0][0]->img->copyTo(dbg);
 	for (unsigned long long i = 0; i < ret.size(); ++i){
 		dbg = draw_loop(ret[i], dbg, Scalar(rand() % 255,rand() % 255,rand() % 255));
 	}
 	imwrite("all_loops.png",dbg);
+	*/
 
 	for (unsigned long long i = 0; i < ret.size() - 1; ++i){
 		for (unsigned long long j = i + 1; j < ret.size(); ++j){
