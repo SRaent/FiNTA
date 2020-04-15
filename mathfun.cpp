@@ -346,9 +346,9 @@ Mat visualize_hessian(Mat hes){
 	return ret;
 }
 
+#define bins 180
 void hessian_weighted_angle_distribution(Mat hes, unsigned long long border){
 	Size s = hes.size();
-	int bins = 180;
 	double w;
 	double a;
 	double hist[bins];
@@ -372,7 +372,7 @@ void hessian_weighted_angle_distribution(Mat hes, unsigned long long border){
 
 void hessian_weighted_relative_angle_distribution(Mat hes, double dev, unsigned long long border){
 	Size s = hes.size();
-	int bins = 180;
+	//int bins = 180;
 	double W;
 	double hist[bins] = {0.0};
 	double hist_rel[bins/2] = {0.0};
