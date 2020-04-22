@@ -1,4 +1,10 @@
 #ifndef MATHFUN_CPP
+
+#define PRINT(x) cout << #x << " => " << x << endl;
+
+#define SQRT2 (double)1.4142135623730950488016
+#define PI (double)3.1415926535897932384626433832795
+
 #define MATHFUN_CPP MATHFUN_CPP
 
 #include <iostream>
@@ -15,8 +21,12 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
+#include "userinterface.cpp"
 
-#define PI (double)3.1415926535897932384626433832795
+using namespace std;
+using namespace cv;
+
+
 
 double sqr(double a){
 	return a*a;

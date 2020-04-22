@@ -16,7 +16,10 @@
 
 #include "node.h"
 #include "analyse.cpp"
+#include "userinterface.cpp"
 
+using namespace std;
+using namespace cv;
 
 
 
@@ -29,6 +32,7 @@ node::node(double xinit, double yinit, std::vector<node*>* listinit, cv::Mat* in
 	y = yinit;
 	list->push_back(this);
 	closures = NULL;
+	j = NULL;
 }
 
 node::node(double xinit, double yinit, std::vector<node*>* listinit, std::vector<node**>* closuresinit, cv::Mat* initimg){
@@ -40,6 +44,7 @@ node::node(double xinit, double yinit, std::vector<node*>* listinit, std::vector
 	x = xinit;
 	y = yinit;
 	list->push_back(this);
+	j = NULL;
 }
 
 node::node(double xinit, double yinit,node* mother_init){
@@ -55,6 +60,7 @@ node::node(double xinit, double yinit,node* mother_init){
 	//mother->neighbors.push_back(this);
 	mother->connections.push_back(this);
 	list->push_back(this);
+	j = NULL;
 }
 
 node::~node(){
@@ -77,7 +83,7 @@ node::~node(){
 	list->erase(list->begin() + find_node_list_position(this, *list));
 	//cout << "erased closure" << endl;
 }
-
+/* OBSOLETE
 void node::procreate(bool free = 1){
 	procreated = 1;
 	
@@ -143,7 +149,7 @@ void node::procreate(bool free = 1){
 		delete[] smoothfun[1];
 	}
 }
-
+*/
 
 void node::procreate_hessian(bool free = 1){
 	procreated = 1;
@@ -208,6 +214,7 @@ void node::procreate_hessian(bool free = 1){
 
 //this function is a piece of shit and does not work at all, do not use it without extensive debugging!!!!
 //i know why it does not work! there is no check, weather the intersection is in the 2nd line, one would have to check weather crosspar[3] is between 0 and 1 before saying the 2 lines intersect. not gonna fix it tho, coz this function is a POS!!!
+/*
 void node::procreate_hessian_intersect(bool free = 1){
 	procreated = 1;
 	
@@ -293,7 +300,7 @@ void node::procreate_hessian_intersect(bool free = 1){
 		delete[] smoothfun[1];
 	}
 }
-
+*/
 
 
 bool node::connected(node* n, unsigned long long l){
@@ -530,7 +537,7 @@ vector<node*> node::unite_junctions(unsigned long long dist){
 
 vector<node*> node::unite_junctions(unsigned long long dist){
 	vector<node*> united;
-	if (connections.size() <= 2){
+	if (!is_junc(dist)){
 		return united;
 	}
 	united.push_back(this);
@@ -539,7 +546,7 @@ vector<node*> node::unite_junctions(unsigned long long dist){
 	while (processed < united.size()){
 		vector<node*> unitable = united[processed]->get_all_distant_connected(dist);
 		for (unsigned long long i = 0; i < unitable.size(); ++i){
-			if (unitable[i]->connections.size() > 2 && !unitable[i]->is_in(united)){
+			if (unitable[i]->is_junc(dist) && !unitable[i]->is_in(united)){
 				united.push_back(unitable[i]);
 			}
 		}
@@ -547,6 +554,7 @@ vector<node*> node::unite_junctions(unsigned long long dist){
 	}
 	return united;
 }
+
 bool node::is_in(vector<node*> l){
 	for (unsigned long long i = 0; i < l.size(); ++i){
 		if (l[i] == this){
@@ -578,13 +586,49 @@ bool node::is_in(vector<vector<node*>> lists){
 	return false;
 }
 
+
 bool node::junction_in_steps(unsigned long long dist, node* direction){
 	if (dist == 0){ return false; }
 	else if ( direction->connections.size() > 2){ return true; }
-	else if ( direction->connections.size() <= 1){ return false; }
+	else if ( direction->connections.size() <= 1){ return true; } //return false to not consider scraggle as a junction here. this causes scraggle to always be considered a outgoing connection
 	else{
 		return direction->junction_in_steps(dist - 1,direction->connections[((find_connection_index(direction, this) + 1 )%2)]);
 	}
+}
+
+bool node::junc_free_path(unsigned long long dist, node* direction){
+	if ( dist == 0) {return true;}
+
+	node* pre = this;
+	node* cur = direction;
+
+	while (cur->connections.size() == 2 && dist > 0){
+		--dist;
+		if (cur->connections[0] == pre){
+			pre = cur;
+			cur = cur->connections[1];
+		}
+		else if(cur->connections[1] == pre){
+			pre = cur;
+			cur = cur->connections[0];
+		}
+		else{
+			cout << "Oh shit, somethings fucked!" << endl;
+		}
+	}
+	
+	if (dist == 0){ return true;}
+	if (cur->j != NULL) {return false;}
+	if (cur->connections.size() <= 1) {return false;}// put true here to consider scraggle shorter than dist as a valid line
+	bool found_free_path = false;
+	for ( auto it = cur->connections.begin(); it != cur->connections.end() && !found_free_path; ++it){
+		if (*it != pre){
+			found_free_path = junc_free_path(dist, *it);
+		}
+	}
+
+
+	return found_free_path;
 }
 
 double node::brightness(Mat image, unsigned long long dx = 0, unsigned long long dy = 0){
@@ -659,6 +703,33 @@ vector<node*> node::local_network(){
 		(*it)->local_network(ret);
 	}
 	return ret;
+}
+
+bool node::scraggle(node* prev, unsigned long long steps){
+	if (steps == 0) {return false;}
+	if (connections.size() <= 1) {return true;}
+	if (connections.size() > 2) {return false;}
+	for (const auto& connection:connections){
+		if(connection != prev){
+			return connection->scraggle(this, steps-1);
+		}
+	}
+	return false;
+}
+
+bool node::is_junc(unsigned long long dist = 0){
+	unsigned long long s = connections.size();
+	if (s <= 2){ return false;}
+	if (dist == 0) {return true;}
+	for (auto it = connections.begin(); (it != connections.end() && s > 2); ++it){
+		if ((*it)->scraggle(this,dist)){
+			--s;
+		}
+	}
+	if (s > 2) {
+		return true;
+	}
+	return false;
 }
 
 #endif

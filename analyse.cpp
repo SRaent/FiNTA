@@ -17,10 +17,13 @@
 
 #include "mathfun.cpp"
 #include "node.h"
-#include "node.cpp"
+#include "userinterface.cpp"
+//#include "node.cpp"
 #include "united_junction.h"
-#include "united_junction.cpp"
+//#include "united_junction.cpp"
 
+using namespace std;
+using namespace cv;
 
 #define PI (double)3.1415926535897932384626433832795
 
@@ -647,10 +650,21 @@ vector<double> junction_distances(vector<node*> junc){
 	return jd;
 }
 
-vector<united_junction*> find_united_junctions(vector<node*> list, unsigned long long dist){
+vector<united_junction*> find_united_junctions_naive(vector<node*> list, unsigned long long dist){
 	vector<united_junction*> united_junctions;
 	for (unsigned long long i = 0; i < list.size(); ++i){
 		if (list[i]->connections.size() > 2 && !list[i]->is_in(united_junctions)){
+			united_junctions.push_back(new united_junction(list[i],dist));
+		}
+	}
+	cout << "number of united junctions: " << united_junctions.size() << endl;
+	return united_junctions;
+}
+
+vector<united_junction*> find_united_junctions(vector<node*> list, unsigned long long dist){
+	vector<united_junction*> united_junctions;
+	for (unsigned long long i = 0; i < list.size(); ++i){
+		if (list[i]->is_junc(dist) && !list[i]->is_in(united_junctions)){
 			united_junctions.push_back(new united_junction(list[i],dist));
 		}
 	}
@@ -825,7 +839,23 @@ vector<node*> junc_line(node* junc, node* dir){
 			line[-1];
 		}
 	}
-	
+
+	if (cur->connections.size() > 2 && cur->j == NULL){
+		bool found_junc = false;
+		vector<node*> poss_con;
+		vector<node*> best_con;
+		for (auto it = cur->connections.begin();it != cur->connections.end() && !found_junc; ++it){
+			poss_con = junc_line(cur,(*it));
+			if (poss_con.back()->j != NULL){
+				found_junc = true;
+				best_con = poss_con;
+			}
+			else if (poss_con.size() > best_con.size()){
+				best_con = poss_con;
+			}
+		}
+		line.insert(line.end(),best_con.begin(),best_con.end());
+	}
 	return line;
 }
 

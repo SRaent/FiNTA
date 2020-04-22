@@ -1,4 +1,6 @@
 
+#include "opencv2/imgcodecs.hpp"
+#include <cstdlib>
 #define PRINT(x) cout << #x << " => " << x << endl;
 
 #define SQRT2 (double)1.4142135623730950488016
@@ -22,8 +24,6 @@ print statistics about local maxima of smoothed angfun
 
 
 
-unsigned long long THREADS = 1;
-bool THREADS_set = false;
 
 
 //#define RV 8 // 8 vision radius (~2 times fibre thickness)
@@ -35,14 +35,6 @@ bool THREADS_set = false;
 //#define ML 7 //minimum loop length
 //#define SG 1.8 //1.8 ; 2.3 (a bit less than half fibre thickness)
 
-double RV = 8;						// 8 vision radius (~2 times fibre thickness)
-double RM = 0;						//minimum vision radius
-double RS = 3;						//step radius (~ 0.5 - 1 x fiber thickness)
-unsigned long long STEPS = 360;		//number of steps the smoothing function is computed for
-double DEV = 0.5;					// 0.55 deviation of gaussian smooth of circlefun
-double TH = 0;						//0.5 threshold for findpks
-unsigned long long ML = 6;			//minimum loop length
-double SG = 1.8;					//1.8 ; 2.3 (a bit less than half fibre thickness)
 
 
 
@@ -472,8 +464,24 @@ int main(int n, char** args){
 	for (auto it = junc_opt::unite_vals_all.begin(); it != junc_opt::unite_vals_all.end(); ++it){
 		cout << str_add_double("analysing united junction discances with unification distance " ,(*it)) << endl;
 		vector<united_junction*> united_junctions = find_united_junctions(list,(*it));
-		aux_labels.push_back(str_add_double("total number of junited junctions with unification distance " ,(*it)));
+		aux_labels.push_back(str_add_double("total number of united junctions with unification distance " ,(*it)));
 		aux_data.push_back(united_junctions.size());
+
+		Mat img;
+		I2.copyTo(img);
+		img = draw_list(img,list,Scalar(0,0,0),3);
+		for (auto const& uni_junc: united_junctions){
+			uint8_t c1 = rand()%255;
+			uint8_t c2 = rand()%255;
+			uint8_t c3 = rand()%255;
+			Scalar color = Scalar(c1,c2,c3);
+			//Scalar color2 = Scalar(c1,c2,c3);
+			Scalar color2 = Scalar(0,0,255);
+			img = draw_list(img,uni_junc->nodes,color);
+			img = draw_closures(img,uni_junc->outgoing_connections,color2);
+		}
+		imwrite(str_add_double("junc_vis",*it)+".png",img);
+
 		for ( auto jt = junc_dist_all.begin(); jt != junc_dist_all.end(); ++jt){
 			if ((*jt)->unite == (*it)){
 				(*jt)->data_floating = united_junction_distances(united_junctions);

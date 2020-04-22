@@ -29,17 +29,26 @@ double scaling_factor = 1.0;
 
 //#include "datafun.h"
 //#include "datafun.cpp"
-#include "mathfun.cpp"
 #include "node.h"
-#include "node.cpp"
-#include "analyse.cpp"
-#include "visualise.cpp"
-#include "generate.cpp"
 #include "united_junction.h"
-#include "united_junction.cpp"
 
 
+unsigned long long THREADS = 1;
+bool THREADS_set = false;
 
+double RV = 8;						// 8 vision radius (~2 times fibre thickness)
+double RM = 0;						//minimum vision radius
+double RS = 3;						//step radius (~ 0.5 - 1 x fiber thickness)
+unsigned long long STEPS = 360;		//number of steps the smoothing function is computed for
+double DEV = 0.5;					// 0.55 deviation of gaussian smooth of circlefun
+double TH = 0;						//0.5 threshold for findpks
+unsigned long long ML = 6;			//minimum loop length
+double SG = 1.8;					//1.8 ; 2.3 (a bit less than half fibre thickness)
+
+
+//computed
+#define RN RF+RS //neighbor radius
+#define RF RS/SQRT2  //forbidden radius
 
 bool RV_set = false;
 bool RM_set = false;
@@ -121,6 +130,9 @@ vector<save_loops*> loop_area_settings;
 
 string loop_circumference_path = "";
 
+//this is only nessesary because i am a shit programmer in my next project i am gonna do things right
+void double_vector_to_file(string,vector<double>);
+void ull_vector_to_file(string,vector<unsigned long long>);
 bool is_number(string,unsigned long long&);
 string replace_keywords(string);
 class junc_opt{
@@ -1215,7 +1227,7 @@ string replace_keywords(string s){
 	return ret;
 }
 
-
+unsigned long long find_node_list_position(node*, vector<node*>);
 void save_tracing_data(vector<node*> list, string path){
 	ofstream f;
 	f.open(path);

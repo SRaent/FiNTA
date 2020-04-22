@@ -70,7 +70,7 @@ void draw_loops(char* folder, vector<vector<node*>> loops, Mat image,bool print_
 			line(loops_img,Point(loops[l][i]->x,loops[l][i]->y),Point(loops[l][i + 1]->x,loops[l][i + 1]->y),Scalar(255, 255 * i / loops[l].size(), 255));
 		}
 		char filename[500];
-		sprintf(filename,"%sloop%d.tif",folder,l);
+		sprintf(filename,"%sloop%d.tif",folder,(int)l);
 		//cout << filename << endl;
 		imwrite(filename,loops_img);
 	}

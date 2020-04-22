@@ -15,6 +15,8 @@
 #include <opencv2/imgproc.hpp>
 
 
+using namespace std;
+using namespace cv;
 
 
 class united_junction;
@@ -55,6 +57,7 @@ class node {
 	void wiggle(unsigned long long, double);
 	vector<node*> unite_junctions(unsigned long long);
 	bool junction_in_steps(unsigned long long, node*);
+	bool junc_free_path(unsigned long long, node*);
 
 
 	bool is_in(vector<node*>);
@@ -69,6 +72,9 @@ class node {
 
 	void local_network(vector<node*>&);
 	vector<node*> local_network();
+
+	bool is_junc(unsigned long long);
+	bool scraggle(node*, unsigned long long);
 };
 	
 
