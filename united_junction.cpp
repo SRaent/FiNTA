@@ -20,18 +20,18 @@
 united_junction::united_junction(node* n, unsigned long long d){ 
 	dist = d;
 	nodes = n->unite_junctions(dist);
-	find_outgoing_connections();
-	determine_position();
 	for (auto it = nodes.begin(); it != nodes.end(); ++it){
 		(*it)->j = this;
 	}
+	find_outgoing_connections();
+	determine_position();
 }
 
 
 void united_junction::find_outgoing_connections(){
 	for ( auto it = nodes.begin(); it != nodes.end(); ++it){
 		for ( auto jt = (*it)->connections.begin(); jt != (*it)->connections.end(); ++jt){
-			if ((*it)->junc_free_path(dist,(*jt))){
+			if ((*it)->junc_free_path(dist,(*jt), NULL)){
 				outgoing_connections.push_back(new node*[2]);
 				(outgoing_connections.back())[0] = *it;
 				(outgoing_connections.back())[1] = *jt;
@@ -54,6 +54,9 @@ void united_junction::determine_position(){
 }
 
 united_junction::~united_junction(){
+	for (const auto& n:nodes){
+		n->j=NULL;
+	}
 	for (auto it = outgoing_connections.begin(); it != outgoing_connections.end(); ++it){
 		delete[] (*it);
 	}

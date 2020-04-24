@@ -151,6 +151,7 @@ void node::procreate(bool free = 1){
 }
 */
 
+
 void node::procreate_hessian(bool free = 1){
 	procreated = 1;
 	
@@ -201,6 +202,77 @@ void node::procreate_hessian(bool free = 1){
 				closures->push_back(closure);
 				closure[0] = this;
 				closure[1] = inbetween;
+			}
+		}
+	}
+	if (free){
+		delete[] smoothfun[0];
+		delete[] smoothfun[1];
+	}
+}
+
+void node::repair_tight_closure(node* close){
+	node* inbetween = new node((x + close->x)/2.0, (y + close->y)/2.0, this);
+	inbetween->procreated = true;
+	inbetween->connections.push_back(close);
+	close->connections.push_back(inbetween);
+}
+
+void node::procreate_hessian_rate(bool free = 1){
+	procreated = 1;
+	
+	for (std::vector<node*>::iterator it = list->begin(); it != list->end(); ++it){
+//		if (sqrt(pow((*it)->x - x,2) + pow((*it)->y - y,2)) <= RN && *it != mother){
+		if (abs((*it)->x - x) <= RN && abs((*it)->y - y) <= RN){
+			neighbors.push_back(*it);			
+		}
+	}
+	
+	std::vector<double>* fun = circlefun_hessian(img, x, y, RM, RV);
+	double** smoothfun = gaussavgcircle_MT(fun, STEPS, DEV, free);
+	std::vector<unsigned long long> pks = findpks_thresh(smoothfun[1], STEPS,TH);
+	node* child = NULL;
+	bool too_close = false;
+	bool closable = false;
+	double dist = 0;
+	double min_dist = numeric_limits<double>::infinity();
+	for (std::vector<unsigned long long>::iterator it = pks.begin(); it != pks.end(); ++it){
+		double xnew = x + (double)RS * cos(smoothfun[0][(*it)]);
+		double ynew = y + (double)RS * sin(smoothfun[0][(*it)]);
+		if (xnew > 0 && xnew < s.width && ynew > 0 && ynew < s.height){
+			too_close = false;
+			closable = false;
+			min_dist = numeric_limits<double>::infinity();
+			for (unsigned long long j = 0; j < neighbors.size(); ++j){
+				dist = pow(xnew - (neighbors[j])->x,2) + pow(ynew - (neighbors[j])->y,2);
+				if (dist < pow(RF,2)){
+					too_close = true;
+					if(dist < min_dist ){
+						child = neighbors[j];
+						min_dist = dist;
+						if (!connected(neighbors[j],ML)){
+							closable = true;
+						}
+					}
+				}
+			}
+			if (!too_close){
+				new node(xnew, ynew, this);
+//				std::cout << xnew << " " << ynew << std::endl;
+			}
+			else if(closable){
+				//cout << "c" << flush;
+				node* inbetween = new node((x + child->x)/2.0, (y + child->y)/2.0, this);
+				inbetween->procreated = true;
+				inbetween->connections.push_back(child);
+				child->connections.push_back(inbetween);
+				node** closure = new node*[2];
+				closures->push_back(closure);
+				closure[0] = this;
+				closure[1] = inbetween;
+			}
+			else {
+				repair_tight_closure(child);
 			}
 		}
 	}
@@ -596,7 +668,7 @@ bool node::junction_in_steps(unsigned long long dist, node* direction){
 	}
 }
 
-bool node::junc_free_path(unsigned long long dist, node* direction){
+bool node::junc_free_path(unsigned long long dist, node* direction, bool* found_junc){
 	if ( dist == 0) {return true;}
 
 	node* pre = this;
@@ -618,16 +690,25 @@ bool node::junc_free_path(unsigned long long dist, node* direction){
 	}
 	
 	if (dist == 0){ return true;}
-	if (cur->j != NULL) {return false;}
+	if (cur->j != NULL) {
+		if( found_junc != NULL){
+		       	//cout << "jap" << endl;
+			*found_junc = true;
+		}
+		//cout << "jep" << endl;
+		//PRINT(found_junc)
+	       	return false;
+	}
+	//else { cout << "jup" << endl;}
 	if (cur->connections.size() <= 1) {return false;}// put true here to consider scraggle shorter than dist as a valid line
 	bool found_free_path = false;
-	for ( auto it = cur->connections.begin(); it != cur->connections.end() && !found_free_path; ++it){
-		if (*it != pre){
-			found_free_path = junc_free_path(dist, *it);
+	bool done = false;
+	for (auto it = cur->connections.begin(); it != cur->connections.end(); ++it){
+		if (*it != pre && cur->junc_free_path(dist-1, *it, &done)){
+			found_free_path = true;
+			if (done) {return false;}
 		}
 	}
-
-
 	return found_free_path;
 }
 
@@ -708,13 +789,13 @@ vector<node*> node::local_network(){
 bool node::scraggle(node* prev, unsigned long long steps){
 	if (steps == 0) {return false;}
 	if (connections.size() <= 1) {return true;}
-	if (connections.size() > 2) {return false;}
+	if (j != NULL) {return false;}
 	for (const auto& connection:connections){
-		if(connection != prev){
-			return connection->scraggle(this, steps-1);
+		if(connection != prev && !connection->scraggle(this, steps-1)){
+			return false;
 		}
 	}
-	return false;
+	return true;
 }
 
 bool node::is_junc(unsigned long long dist = 0){
@@ -726,10 +807,7 @@ bool node::is_junc(unsigned long long dist = 0){
 			--s;
 		}
 	}
-	if (s > 2) {
-		return true;
-	}
-	return false;
+	return s > 2;
 }
 
 #endif

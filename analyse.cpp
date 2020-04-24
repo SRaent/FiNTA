@@ -668,6 +668,13 @@ vector<united_junction*> find_united_junctions(vector<node*> list, unsigned long
 			united_junctions.push_back(new united_junction(list[i],dist));
 		}
 	}
+	for (unsigned long long i = 0; i < united_junctions.size(); ++i){
+		if (united_junctions[i]->nodes.size() == 0){
+			delete united_junctions[i];
+			united_junctions.erase(united_junctions.begin() + i);
+			--i;
+		}
+	}
 	cout << "number of united junctions: " << united_junctions.size() << endl;
 	return united_junctions;
 }
@@ -845,16 +852,20 @@ vector<node*> junc_line(node* junc, node* dir){
 		vector<node*> poss_con;
 		vector<node*> best_con;
 		for (auto it = cur->connections.begin();it != cur->connections.end() && !found_junc; ++it){
-			poss_con = junc_line(cur,(*it));
-			if (poss_con.back()->j != NULL){
-				found_junc = true;
-				best_con = poss_con;
-			}
-			else if (poss_con.size() > best_con.size()){
-				best_con = poss_con;
+			if (*it != pre){
+				poss_con = junc_line(cur,(*it));
+				if (poss_con.back()->j != NULL){
+					found_junc = true;
+					best_con = poss_con;
+				}
+				else if (poss_con.size() > best_con.size()){
+					best_con = poss_con;
+				}
 			}
 		}
-		line.insert(line.end(),best_con.begin(),best_con.end());
+		if (best_con.size() > 1){
+			line.insert(line.end(),best_con.begin() + 1,best_con.end());
+		}
 	}
 	return line;
 }

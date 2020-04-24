@@ -469,7 +469,7 @@ int main(int n, char** args){
 
 		Mat img;
 		I2.copyTo(img);
-		img = draw_list(img,list,Scalar(0,0,0),3);
+		img = draw_list(img,list,Scalar(0,0,0),1);
 		for (auto const& uni_junc: united_junctions){
 			uint8_t c1 = rand()%255;
 			uint8_t c2 = rand()%255;

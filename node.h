@@ -44,7 +44,9 @@ class node {
 	~node();
 	void procreate(bool);
 	void procreate_hessian(bool);
-	void procreate_hessian_intersect(bool);
+	void procreate_hessian_rate(bool);
+	void repair_tight_closure(node*);
+//	void procreate_hessian_intersect(bool);
 	bool connected(node*, unsigned long long);
 	bool connected(node*, node*, unsigned long long);
 	vector<node*> get_distant_connected(unsigned long long);
@@ -57,7 +59,7 @@ class node {
 	void wiggle(unsigned long long, double);
 	vector<node*> unite_junctions(unsigned long long);
 	bool junction_in_steps(unsigned long long, node*);
-	bool junc_free_path(unsigned long long, node*);
+	bool junc_free_path(unsigned long long, node*, bool*);
 
 
 	bool is_in(vector<node*>);
