@@ -84,4 +84,35 @@ Mat draw_closures(Mat input_image, vector<node**> closures,Scalar color = Scalar
 	}
 	return image;
 }
+
+Mat draw_scale_list(Mat input_image, vector<node*> list, double scale, Scalar color = Scalar(0,255,0),double thickness = 1){
+	Mat image;
+	input_image.copyTo(image);
+	cv::resize(image, image, Size(0,0), scale, scale);
+	for (unsigned long long i = 0; i < list.size(); ++i){
+		for (unsigned long long j = 0; j < list[i]->connections.size(); ++j){
+			line(image,Point(scale*list[i]->x,scale*list[i]->y),Point(scale*list[i]->connections[j]->x,scale*list[i]->connections[j]->y),color, thickness, LINE_AA);
+			
+		}
+	}
+	return image;
+}
+
+Mat draw_closures_scaled(Mat input_image, vector<node**> closures, double scale, Scalar color = Scalar(0,0,255)){
+	Mat image;
+	input_image.copyTo(image);
+	for (unsigned long long i = 0; i < closures.size(); ++i){
+		line(image,Point(scale*closures[i][0]->x,scale*closures[i][0]->y),Point(scale*closures[i][1]->x,scale*closures[i][1]->y),color);
+	}
+	return image;
+}
+
+Mat draw_dots_scaled(Mat input_image, vector<node*> list, double scale, Scalar color = Scalar(255,0,0)){
+	Mat image;
+	input_image.copyTo(image);
+	for (const auto& n:list){
+		circle(image,Point(scale*n->x,scale*n->y),2,color);
+	}
+	return image;
+}
 #endif

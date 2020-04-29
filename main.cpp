@@ -41,8 +41,8 @@ print statistics about local maxima of smoothed angfun
 
 
 //computed
-#define RN RF+RS //neighbor radius
-#define RF RS/SQRT2  //forbidden radius
+#define RN (RF+RS) //neighbor radius
+#define RF (RS/SQRT2)  //forbidden radius
 
 
 //nolonger used
@@ -344,7 +344,7 @@ int main(int n, char** args){
 		unsigned long long end = list.size();
 		for (unsigned long long it = 0; it < end; ++it){
 			if (!(list[it]->procreated)){
-				list[it]->procreate_hessian();
+				list[it]->procreate_hessian_rate();
 				buisy = 1;
 			}
 		}
@@ -369,6 +369,38 @@ int main(int n, char** args){
 	if (list.size() != 0){
 		cout << endl << "Tracing finished" << endl;
 	}
+
+	
+	cout << "checking network integrety" << endl;
+	for (const auto& n:list){
+		for (const auto& c:n->connections){
+			if (!n->is_in(c->connections) || !c->is_in(list)){
+				cout << "we have a problem" << endl;
+			}
+		}
+		/*
+		if (abs(322.5 - n->x) < 1 && abs(657.0 - n->y) < 1){
+			cout << "ladies and gentleman" << endl;
+			cout << "we got him" << endl;
+		}
+		*/
+	}
+	for (const auto& c:closures){
+		if (!c[0]->is_in(list) || !c[1]->is_in(list) || !c[0]->is_in(c[1]->connections) || !c[1]->is_in(c[0]->connections)){
+			cout << "closures are fucked" << endl;
+		}
+	}
+	//return 0;
+	
+	Mat testimg;
+	testimg = draw_scale_list(I2,list,10);
+	imwrite("test1.png",testimg);
+	testimg = draw_closures_scaled(testimg,closures,10);
+	testimg = draw_dots_scaled(testimg,list,10);
+	imwrite("test2.png",testimg);
+	return 0;
+	
+	
 
 	/*
 	cout << "testing" << endl;
@@ -536,6 +568,11 @@ int main(int n, char** args){
 	
 	
 	only_loops(list, closures);
+	for (const auto& c:closures){
+		if((!c[0]->is_in(c[1]->connections)) || (!c[1]->is_in(c[0]->connections)) ){
+			cout << "false closure not removed" << endl;
+		}
+	}
 	
 	if (list.size() == 0){
 		cout << "WARNING: no loops present in the traced network" << endl;

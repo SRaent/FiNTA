@@ -732,6 +732,18 @@ double linefun_score_hessian(Mat* img, double xstart, double ystart, double xend
 	return score/pow(len,3);
 }
 
+double score_line(vector<node*> line, double thick){
+	double score = 0;
+	if (line.size() < 2){return score;}
+	Mat* img = line[0]->img;
+	for (unsigned long long i = 0; i < line.size() - 1; ++i){
+		score += linefun_score_hessian(img,line[i]->x, line[i]->y, line[i+1]->x, line[i+1]->y, thick);
+	}
+	score = score/((double)(line.size() - 1));
+
+	return score;
+}
+
 bool gaussavgoverthresh(vector<double>* fun,double length,unsigned long long steps,double dev, double thresh, bool free = 1){
 	double avgx[steps];
 	bool overthresh = true;

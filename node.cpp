@@ -1,6 +1,7 @@
 #ifndef NODE_CPP
 #define NODE_CPP NODE_CPP
 
+#include <limits>
 #include <iostream>
 #include <math.h>
 #include <stdio.h>
@@ -9,7 +10,7 @@
 #include <vector>
 
 
-
+#include "opencv2/core.hpp"
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
@@ -22,6 +23,7 @@ using namespace std;
 using namespace cv;
 
 
+bool went_down = false;
 
 node::node(double xinit, double yinit, std::vector<node*>* listinit, cv::Mat* initimg){
 	list = listinit;
@@ -33,6 +35,12 @@ node::node(double xinit, double yinit, std::vector<node*>* listinit, cv::Mat* in
 	list->push_back(this);
 	closures = NULL;
 	j = NULL;
+	/*
+	if (abs(332.5 - x) < 1 && abs(657.0 - y) < 1){
+		cout << "ladies and gentleman" << endl;
+		cout << "we got him" << endl;
+	}
+	*/
 }
 
 node::node(double xinit, double yinit, std::vector<node*>* listinit, std::vector<node**>* closuresinit, cv::Mat* initimg){
@@ -45,6 +53,12 @@ node::node(double xinit, double yinit, std::vector<node*>* listinit, std::vector
 	y = yinit;
 	list->push_back(this);
 	j = NULL;
+	/*
+	if (abs(332.5 - x) < 1 && abs(657.0 - y) < 1){
+		cout << "ladies and gentleman" << endl;
+		cout << "we got him" << endl;
+	}
+	*/
 }
 
 node::node(double xinit, double yinit,node* mother_init){
@@ -61,9 +75,30 @@ node::node(double xinit, double yinit,node* mother_init){
 	mother->connections.push_back(this);
 	list->push_back(this);
 	j = NULL;
+	/*
+	if (abs(322.5 - x) < 1 && abs(657.0 - y) < 1){
+		cout << "ladies and gentleman" << endl;
+		PRINT(this)
+		PRINT(x)
+		PRINT(y)
+		cout << "we got him" << endl;
+	}
+	*/
+	for (const auto& n:*list){
+		if (n != this && abs(n->x - x) < 0.01 && abs(n->y - y) < 0.01){
+			cout << "SHIT WENT DOWN BOIS" << endl;
+		}
+	}
 }
 
 node::~node(){
+	for (const auto& n:*list){
+		if (n != this){
+			if (abs(n->x - x) < 0.01 && abs(n->y - y) < 0.01){
+				cout << "SHIT GOT FIXED BOIS, we good" << endl;
+			}
+		}
+	}
 	//cout << "deleting node" << endl;
 	for (unsigned long long i = 0; i < connections.size(); ++i){
 		//cout << "erasing connection " << i << " of " << connections.size() << endl;
@@ -73,7 +108,7 @@ node::~node(){
 	for (unsigned long long j = 0; j < closures->size(); ++j){
 		if (this == (*closures)[j][0] || this == (*closures)[j][1]){
 			//njow all trjaces mjust bj djelijtjed!!! just ljke staljns opponjents!!
-			delete (*closures)[j];
+			delete[] (*closures)[j];
 			
 			//cout << "about to erase closure" << endl;
 			closures->erase(closures->begin() + j);
@@ -81,7 +116,7 @@ node::~node(){
 		}
 	}
 	list->erase(list->begin() + find_node_list_position(this, *list));
-	//cout << "erased closure" << endl;
+	//cout << "erased node" << endl;
 }
 /* OBSOLETE
 void node::procreate(bool free = 1){
@@ -211,12 +246,186 @@ void node::procreate_hessian(bool free = 1){
 	}
 }
 
-void node::repair_tight_closure(node* close){
-	node* inbetween = new node((x + close->x)/2.0, (y + close->y)/2.0, this);
+bool node::connect(node* con){
+	double xpos = (x + con->x)/2.0;
+	double ypos = (y + con->y)/2.0;
+	vector<node*> neigh;
+	for (std::vector<node*>::iterator it = list->begin(); it != list->end(); ++it){
+//		if (sqrt(pow((*it)->x - x,2) + pow((*it)->y - y,2)) <= RN && *it != mother){
+		if ((*it) != this && (*it) != con && abs((*it)->x - xpos) < RF && abs((*it)->y - ypos) < RF){
+			neigh.push_back(*it);			
+		}
+	}
+	for (const auto& n:neigh){
+		if (sqr(n->x-xpos)+sqr(n->y-ypos) < sqr(RF)){
+			return false;
+		}
+	}
+	
+	node* inbetween = new node(xpos,ypos, this);
 	inbetween->procreated = true;
-	inbetween->connections.push_back(close);
-	close->connections.push_back(inbetween);
+	inbetween->connections.push_back(con);
+	con->connections.push_back(inbetween);
+	node** closure = new node*[2];
+	closures->push_back(closure);
+	closure[0] = this;
+	closure[1] = inbetween;
+	return true;
 }
+bool node::connect(node* con, node*& inbet){
+	double xpos = (x + con->x)/2.0;
+	double ypos = (y + con->y)/2.0;
+	vector<node*> neigh;
+	for (std::vector<node*>::iterator it = list->begin(); it != list->end(); ++it){
+//		if (sqrt(pow((*it)->x - x,2) + pow((*it)->y - y,2)) <= RN && *it != mother){
+		if (abs((*it)->x - xpos) <= RF && abs((*it)->y - ypos) <= RF){
+			neigh.push_back(*it);			
+		}
+	}
+	for (const auto& n:neigh){
+		if (sqr(n->x-xpos)+sqr(n->y-ypos) < sqr(RF)){
+			return false;
+		}
+	}
+	
+	node* inbetween = new node(xpos,ypos, this);
+	inbetween->procreated = true;
+	inbetween->connections.push_back(con);
+	con->connections.push_back(inbetween);
+	node** closure = new node*[2];
+	closures->push_back(closure);
+	closure[0] = this;
+	closure[1] = inbetween;
+	inbet = inbetween;
+	return true;
+}
+
+void node::disconnect(node* con){
+	bool f1 = false;
+	bool f2 = false;
+	for (auto it = connections.begin(); it != connections.end(); ++it){
+		if (*it == con){
+			connections.erase(it);
+			f1 = true;
+			break;
+		}
+	}
+	for (auto it = con->connections.begin(); it != con->connections.end(); ++it){
+		if (*it == this){
+			f2 = true;
+			con->connections.erase(it);
+			break;
+		}
+	}
+	for (auto it = closures->begin(); it != closures->end(); ++it){
+		if ((*it)[0] == this && (*it)[1] == con){
+			//cout << "erased_closure" << endl;
+			delete[] (*it);
+			closures->erase(it);
+			break;
+		}
+		if ((*it)[1] == this && (*it)[0] == con){
+			//cout << "erased_closure" << endl;
+			delete[] (*it);
+			closures->erase(it);
+			break;
+		}
+	}
+	if (!f1 && !f2) {cout << "trying to disconnect non connected nodes" << endl;}
+	else if (!f1 || !f2) {cout << "node_structure_fucked" << endl;}
+}
+
+vector<node*> node::find_worst_sect(const vector<vector<node*>>& sections){
+	vector<node*> worst_section;
+	double worst_score = numeric_limits<double>::infinity();
+	double score;
+
+	for (const auto& s:sections){
+		if (!is_line(s) || s.front()->connections.size() < 3 || s.back()->connections.size() < 3){cout << "sectioning gone wrong" << endl;}
+		score = score_line(s,2.0*SG);
+		if( score < worst_score){
+			worst_score = score;
+			worst_section = s;
+		}
+	}
+	return worst_section;
+}
+
+vector<vector<node*>> split_loop_junc(vector<node*>);
+
+bool node::repair_tight_closure(node* close, unsigned long long min_loop_length, vector<node*>& deleted){
+	while (connected(close,min_loop_length)){
+		went_down = false;
+		vector<node*> loop = connecting_line(close);
+		node* inbetween;
+		if (!connect(close,inbetween)){
+			return false;
+		}
+		loop.push_back(inbetween);
+
+		vector<vector<node*>> sections = split_loop_junc(loop);
+		if (sections.size() <= 1){
+			delete inbetween;
+			return false;
+		}
+		vector<node*> worst_section = find_worst_sect(sections);
+
+		if (worst_section.size() == 2){
+			worst_section.front()->disconnect(worst_section.back());
+		}
+		else {
+			bool harakiri = false;
+			bool del_inbetween = false;
+			for (unsigned long long i = 1; i < worst_section.size() - 1; ++i){
+				if (worst_section[i] != this){
+					if (worst_section[i] == inbetween){del_inbetween = true;}
+					deleted.push_back(worst_section[i]);
+					delete worst_section[i];
+				}
+				else {harakiri = true;}
+			}
+			if (harakiri) {return true;}
+			else if (del_inbetween) {return false;} //the else is only for code readability
+		}
+		delete inbetween;
+	}
+	connect(close);
+	return false;
+}
+/*
+bool node::repair_tight_closure(node* close, unsigned long long min_loop_length, vector<node*>& deleted){
+	node* inbetween = connect(close);
+
+	vector<node*> loop = find_loop(closure,1);
+	if (!is_loop(loop)){
+		cout << "loop is not a loop" << endl;
+	}
+
+	vector<vector<node*>> sections = split_loop_junc(loop);
+
+	if (sections.size() <= 1){
+		delete inbetween;
+		return false;
+	}
+
+	vector<node*> worst_section = find_worst_sect(sections);
+
+	if( worst_section.size() == 2){
+		worst_section.front()->disconnect(worst_section.back());
+	}
+	else if (worst_section.size() > 2){
+		for (unsigned long long i = 1; i < worst_section.size() - 1; ++i){
+			if(worst_section[i] != this){
+				delete worst_section[i];
+			}
+			else {return true;}
+		}
+	}
+	else {cout << "the sectioning function is fucked" << endl;}
+
+	return false;
+}
+*/
 
 void node::procreate_hessian_rate(bool free = 1){
 	procreated = 1;
@@ -227,6 +436,9 @@ void node::procreate_hessian_rate(bool free = 1){
 			neighbors.push_back(*it);			
 		}
 	}
+
+	vector<node*> tight_closures;
+	vector<node*> deleted;
 	
 	std::vector<double>* fun = circlefun_hessian(img, x, y, RM, RV);
 	double** smoothfun = gaussavgcircle_MT(fun, STEPS, DEV, free);
@@ -243,11 +455,13 @@ void node::procreate_hessian_rate(bool free = 1){
 			too_close = false;
 			closable = false;
 			min_dist = numeric_limits<double>::infinity();
+			child = NULL;
 			for (unsigned long long j = 0; j < neighbors.size(); ++j){
 				dist = pow(xnew - (neighbors[j])->x,2) + pow(ynew - (neighbors[j])->y,2);
 				if (dist < pow(RF,2)){
 					too_close = true;
-					if(dist < min_dist ){
+					if(dist < min_dist && !neighbors[j]->is_in(connections)){
+						closable = false;
 						child = neighbors[j];
 						min_dist = dist;
 						if (!connected(neighbors[j],ML)){
@@ -257,28 +471,40 @@ void node::procreate_hessian_rate(bool free = 1){
 				}
 			}
 			if (!too_close){
-				new node(xnew, ynew, this);
+				neighbors.push_back(new node(xnew, ynew, this));
 //				std::cout << xnew << " " << ynew << std::endl;
 			}
-			else if(closable){
-				//cout << "c" << flush;
-				node* inbetween = new node((x + child->x)/2.0, (y + child->y)/2.0, this);
-				inbetween->procreated = true;
-				inbetween->connections.push_back(child);
-				child->connections.push_back(inbetween);
-				node** closure = new node*[2];
-				closures->push_back(closure);
-				closure[0] = this;
-				closure[1] = inbetween;
+			else if(child != NULL){
+				if (closable){
+					//cout << "c" << flush;
+					node* inbetween;
+					if (connect(child,inbetween)){
+						neighbors.push_back(inbetween);
+					}
+					deleted.push_back(child);
+				}
+				else if (!child->is_in(tight_closures)) {
+					tight_closures.push_back(child);
+				}
 			}
-			else {
-				repair_tight_closure(child);
-			}
+		}
+	}
+	bool harakiri = false;
+	//if (tight_closures.size() > 1)
+		//PRINT(tight_closures.size())
+	for (const auto& c:tight_closures){
+		if (!c->is_in(deleted) && !harakiri){
+			harakiri = repair_tight_closure(c,ML,deleted);
 		}
 	}
 	if (free){
 		delete[] smoothfun[0];
 		delete[] smoothfun[1];
+	}
+	if (harakiri){
+		// it was an honor serving with you
+		//cout << "AXIOS" << endl;
+		delete this;
 	}
 }
 
@@ -373,6 +599,55 @@ void node::procreate_hessian_intersect(bool free = 1){
 	}
 }
 */
+
+vector<node*> node::connecting_line(node* con){
+	vector<node*> ret;
+	vector<node*> processing;
+	vector<unsigned long long> prev_n_ind;
+
+	processing.push_back(this);
+
+	unsigned long long processed = 0;
+	bool searching = true;
+
+	//cout << "bout to branch out" << endl;
+
+	while (processed < processing.size() && searching){
+		for (const auto& n:processing[processed]->connections){
+			if(n == con){
+				searching = false;
+				//prev_n_ind.push_back(processed);
+			}
+			else if(!n->is_in(processing) && searching){
+				processing.push_back(n);
+				prev_n_ind.push_back(processed);
+			}
+		}
+		++processed;
+	}
+	--processed;
+	//cout << "branched out" << endl;
+
+	if (searching == true) {cout << "no connecting line" << endl;return ret;}
+
+	ret.push_back(con);
+	//processed = prev_n_ind.back(); //Not necessary
+
+	//PRINT(processing.size())
+	//PRINT(prev_n_ind.size())
+	while(processed > 0){
+		//PRINT(processed)
+		ret.push_back(processing[processed]);
+		processed = prev_n_ind[processed - 1];
+	}
+
+	ret.push_back(this);
+	//PRINT(ret.size())
+	
+	if (!is_line(ret)){cout << "connecting_line function is fucked" << endl;}
+
+	return ret;
+}
 
 
 bool node::connected(node* n, unsigned long long l){
@@ -522,7 +797,7 @@ node* node::get_straight_distant_connected(node* origin, unsigned long long dist
 			else if(connections[1] == origin){
 				dc = connections[0]->get_straight_distant_connected(this, dist - 1);
 			}
-			else {cout << "something fucky goin on, you tryna find the streightest connection between 2 non connected nodes" << endl;}
+			//else {cout << "something fucky goin on, you tryna find the streightest connection between 2 non connected nodes" << endl;}
 		}
 		else {
 			double max_angle = 0;

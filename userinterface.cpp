@@ -47,8 +47,8 @@ double SG = 1.8;					//1.8 ; 2.3 (a bit less than half fibre thickness)
 
 
 //computed
-#define RN RF+RS //neighbor radius
-#define RF RS/SQRT2  //forbidden radius
+#define RN (RF+RS) //neighbor radius
+#define RF (RS/SQRT2)  //forbidden radius
 
 bool RV_set = false;
 bool RM_set = false;

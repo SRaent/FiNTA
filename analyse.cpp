@@ -33,7 +33,8 @@ unsigned long long find_node_list_position(node* n, vector<node*> list){
 			return i;
 		}
 	}
-	return 0;
+	cout << "shits fucked" << endl;
+	return -1;
 }
 
 unsigned long long find_connection_index(node* n, node* connection){
@@ -95,7 +96,7 @@ bool node_list_eql(vector<node*> loop1, vector<node*> loop2){
 vector<node*> find_loop(node* prev, node* n, node* start, node* end, long long sign){
 	vector<node*> ret;
 	node* next_loop_node;
-//	cout << n->x << " " << n->y << " " << n << " " << prev << " " << start << " ";
+	//cout << n->x << " " << n->y << " " << n << " " << prev << " "  << start->x << " " << start->y << " " << start << " "  << end->x << " " << end->y << " " << end << endl;
 	if (n == start && find_next_loop_node(prev, n, sign) == end){
 		ret.push_back(n);
 		return ret;
@@ -111,6 +112,7 @@ vector<node*> find_loop(node* prev, node* n, node* start, node* end, long long s
 }
 
 vector<node*> find_loop(node** closure, long long sign){
+	//cout << "x1 " << closure[0]->x << " y1 " << closure[0]->y << " x2 " << closure[1]->x << " y2 " << closure[1]->y << endl;
 	return find_loop(closure[0],closure[1],closure[0],closure[1],sign);
 }
 
@@ -179,9 +181,11 @@ vector<vector<node*>> find_loops(vector<node**> closures){
 	cout << subnets.size() << " subnet(s) found" << endl;
 	
 	for (unsigned long long i = 0; i < closures.size(); ++i){
+		//cout << "handling closure" << endl;
 		ret.push_back(find_loop(closures[i], 1));
 		ret.push_back(find_loop(closures[i], -1));
 	}
+	//cout << "handled closures" << endl;
 /*	
 	Mat dbg;
 	ret[0][0]->img->copyTo(dbg);
@@ -211,7 +215,7 @@ vector<vector<node*>> find_loops(vector<node**> closures){
 				subnet_loop_indices[i].push_back(j);
 			}
 		}
-		if (searching) {cout << "node not found in subnets" << endl;}
+		//if (searching) {cout << "node not found in subnets" << endl;}
 	}
 
 	//PRINT(ret.size())
@@ -885,6 +889,51 @@ double network_length(vector<node*> list){
 		}
 	}
 	return len/2;
+}
+
+vector<vector<node*>> split_loop_junc(vector<node*> loop){
+	vector<vector<node*>> ret;
+	ret.emplace_back();
+	for (const auto& n:loop){
+		if(n->is_junc(0)){
+			ret.back().push_back(n);
+			ret.emplace_back();
+		}
+		ret.back().push_back(n);
+	}
+	if (ret.size() > 1){
+		ret.front().insert(ret.front().begin(),ret.back().begin(),ret.back().end());
+		ret.pop_back();
+	}
+	return ret;
+}
+
+bool is_line(vector<node*> line){
+	for (unsigned long long i = 0; i < line.size() - 1; ++i){
+		if (!line[i]->is_in(line[i+1]->connections)){
+			return false;
+		}
+		if (!line[i+1]->is_in(line[i]->connections)){
+			cout << "node structure is seriously fucked" << endl;
+			PRINT(line.size())
+			return false;
+		}
+		
+	}
+	return true;
+}
+
+bool is_loop(vector<node*> loop){
+	if (!is_line(loop)){return false;}
+	if (!loop.front()->is_in(loop.back()->connections)){
+	       return false;
+	}	       
+	if (!loop.back()->is_in(loop.front()->connections)){
+		cout << "node structure is seriously fucked" << endl;
+		PRINT(loop.size())
+		return false;
+	}	       
+	return true;
 }
 
 #endif
