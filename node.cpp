@@ -258,6 +258,7 @@ bool node::connect(node* con){
 	}
 	for (const auto& n:neigh){
 		if (sqr(n->x-xpos)+sqr(n->y-ypos) < sqr(RF)){
+			//cout << this << " " << con << " " << n << endl;
 			return false;
 		}
 	}
@@ -278,7 +279,7 @@ bool node::connect(node* con, node*& inbet){
 	vector<node*> neigh;
 	for (std::vector<node*>::iterator it = list->begin(); it != list->end(); ++it){
 //		if (sqrt(pow((*it)->x - x,2) + pow((*it)->y - y,2)) <= RN && *it != mother){
-		if (abs((*it)->x - xpos) <= RF && abs((*it)->y - ypos) <= RF){
+		if ((*it) != this && (*it) != con && abs((*it)->x - xpos) < RF && abs((*it)->y - ypos) < RF){
 			neigh.push_back(*it);			
 		}
 	}
@@ -432,7 +433,7 @@ void node::procreate_hessian_rate(bool free = 1){
 	
 	for (std::vector<node*>::iterator it = list->begin(); it != list->end(); ++it){
 //		if (sqrt(pow((*it)->x - x,2) + pow((*it)->y - y,2)) <= RN && *it != mother){
-		if (abs((*it)->x - x) <= RN && abs((*it)->y - y) <= RN){
+		if (abs((*it)->x - x) <= RN && abs((*it)->y - y) <= RN && *it != this){
 			neighbors.push_back(*it);			
 		}
 	}
@@ -476,11 +477,12 @@ void node::procreate_hessian_rate(bool free = 1){
 			}
 			else if(child != NULL){
 				if (closable){
-					//cout << "c" << flush;
 					node* inbetween;
 					if (connect(child,inbetween)){
+						//cout << "c" << flush;
 						neighbors.push_back(inbetween);
 					}
+					//else {cout <<"n"<<flush;}
 					deleted.push_back(child);
 				}
 				else if (!child->is_in(tight_closures)) {

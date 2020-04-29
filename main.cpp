@@ -344,7 +344,7 @@ int main(int n, char** args){
 		unsigned long long end = list.size();
 		for (unsigned long long it = 0; it < end; ++it){
 			if (!(list[it]->procreated)){
-				list[it]->procreate_hessian_rate();
+				list[it]->procreate_hessian_rate();//this is the whole spiel basically
 				buisy = 1;
 			}
 		}
@@ -398,7 +398,7 @@ int main(int n, char** args){
 	testimg = draw_closures_scaled(testimg,closures,10);
 	testimg = draw_dots_scaled(testimg,list,10);
 	imwrite("test2.png",testimg);
-	return 0;
+	//return 0;
 	
 	
 
