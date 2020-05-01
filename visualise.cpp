@@ -161,7 +161,7 @@ Scalar HSVtRGB(double h, double s, double v){
 		case 5: b = q; g = p; r = v; break;
 		case 6: b = p; g = t; r = v; break;
 	}
-	return Scalar(b,g,r);
+	return Scalar(b*255.0,g*255.0,r*255.0);
 }
 
 void draw_lines(const Mat input_image, const vector<vector<node*>> lines, const string path, const double imagenumber = 10, const double thickness = 1){
@@ -183,6 +183,7 @@ void draw_lines(const Mat input_image, const vector<vector<node*>> lines, const 
 			color = HSVtRGB(360*acc_length/image_line_length,1,1);
 			acc_length += line_length(*it);
 			temp = draw_line(*it,temp,thickness,color);
+			++it;
 		}
 		++inum;
 		imwrite(str_add_double(path,inum)+".png",temp);
