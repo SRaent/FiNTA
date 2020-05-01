@@ -224,7 +224,7 @@ void node::procreate_hessian(bool free = 1){
 				}
 			}
 			if (!too_close){
-				new node(xnew, ynew, this);
+				neighbors.push_back(new node(xnew, ynew, this));
 //				std::cout << xnew << " " << ynew << std::endl;
 			}
 			else if(closable){
@@ -236,7 +236,8 @@ void node::procreate_hessian(bool free = 1){
 				node** closure = new node*[2];
 				closures->push_back(closure);
 				closure[0] = this;
-				closure[1] = inbetween;
+				closure[1] = inbetween;	
+				neighbors.push_back(inbetween);
 			}
 		}
 	}

@@ -341,6 +341,19 @@ double loop_length(vector<node*> loop){
 	return length * scaling_factor;
 }
 
+double loop_circleness(vector<node*> loop){
+	double circleness = loop_area(loop) * 4 * PI /sqr(loop_length(loop));
+	return circleness;
+}
+
+vector<double> loops_circleness(vector<vector<node*>> loops){
+	vector<double> ret;
+	for (const auto& l:loops){
+		ret.push_back(loop_circleness(l));
+	}
+	return ret;
+}
+
 
 double inside_loop_area(vector<node*> loop, double thickness){
 	return loop_area(loop) - (loop_length(loop)*thickness * scaling_factor/2.0) + PI * thickness * thickness * 0.25 * scaling_factor * scaling_factor; // the last term is a approximation for the overlapping of the assumed fiber thickness

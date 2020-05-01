@@ -1,6 +1,6 @@
 #ifndef USERINTERFACE_CPP
 #define USERINTERFACE_CPP USERINTERFACE_CPP
-	
+
 #include <limits> 
 #include <string>
 #include <stdlib.h>
@@ -84,6 +84,7 @@ bool del_lines_above_thresh = false;
 
 
 bool modified_hessian = false;
+bool del_worst_sect = false;
 
 bool start_points_exist = false;
 vector<Point*> man_start_points;
@@ -204,8 +205,11 @@ class save_loops{
 
 vector<save_loops*> loop_area_settings;
 
+string circleness_path = "";
 
 string loop_circumference_path = "";
+
+double add_noise = 0;
 
 //this is only nessesary because i am a shit programmer in my next project i am gonna do things right
 void double_vector_to_file(string,vector<double>);
@@ -1251,6 +1255,33 @@ bool read_settings_line(string l){
 		}
 		else if (w[0] == "save_loop_line_lengths" || w[0] == "save_all_line_lengths"){
 			line_analysis::line_options.push_back(new line_analysis(w,successful));
+		}
+		else if (w[0] == "save_loop_circleness"){
+			if (w.size() == 1){
+				circleness_path = "<imagename>_circleness.dat";
+			}
+			else if (w.size() == 2){
+				circleness_path = w[1];
+			}
+			else {
+				cout << "to many argunemts for save_loop_circleness";
+				successful = false;
+			}
+		}
+		else if (w[0] == "add_noise"){
+			if (!(w.size() == 2 && is_number(w[1],add_noise))){
+				cout << "noise level could not be read" << endl;
+				successful = false;
+			}
+		}
+		else if(w[0] == "delete_worst_sections"){
+			if (w.size() == 1){
+				del_worst_sect = true;
+			}
+			else {
+				successful = false;
+				cout << "delete_worst_sections cant take any arguments" << endl;
+			}
 		}
 		
 		//string animation_path = "";

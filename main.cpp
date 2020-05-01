@@ -1,6 +1,4 @@
 
-#include "opencv2/imgcodecs.hpp"
-#include <cstdlib>
 #define PRINT(x) cout << #x << " => " << x << endl;
 
 #define SQRT2 (double)1.4142135623730950488016
@@ -55,6 +53,7 @@ print statistics about local maxima of smoothed angfun
 
 
 #include <stdlib.h>
+#include <cstdlib>
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
@@ -73,6 +72,7 @@ print statistics about local maxima of smoothed angfun
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/videoio.hpp>
+#include "opencv2/imgcodecs.hpp"
 
 
 using namespace std;
@@ -185,6 +185,9 @@ int main(int n, char** args){
 	}
 	else {
 		I2 = I1;
+	}
+	if (add_noise != 0){
+		I2 = noisify_gauss_absolute(I2, add_noise);
 	}
 	s = I2.size();
 	//PRINT(s.width);
@@ -344,7 +347,12 @@ int main(int n, char** args){
 		unsigned long long end = list.size();
 		for (unsigned long long it = 0; it < end; ++it){
 			if (!(list[it]->procreated)){
-				list[it]->procreate_hessian_rate();//this is the whole spiel basically
+				if (del_worst_sect){
+					list[it]->procreate_hessian_rate();//this is the whole spiel basically
+				}
+				else {
+					list[it]->procreate_hessian();
+				}
 				buisy = 1;
 			}
 		}
@@ -619,6 +627,11 @@ int main(int n, char** args){
 
 	if (loop_data_path != ""){
 		save_loop_data(loops, loop_data_path);
+	}
+
+	if (circleness_path != ""){
+		vector<double> c = loops_circleness(loops);
+		double_vector_to_file(replace_keywords(circleness_path),c);
 	}
 	
 	arrange_unite_vals_loop(junc_dist_loop);
