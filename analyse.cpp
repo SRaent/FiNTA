@@ -808,7 +808,7 @@ vector<node*> find_whole_line(node* n, double curve_angle, vector<node*> &work_l
 	return line;
 }
 
-vector<vector<node*>> find_lines(vector<node*> list, double angle, unsigned long long rec_steps = 0){
+vector<vector<node*>> find_lines(vector<node*> list, double angle){
 	vector<node*> junctions = find_junctions(list);
 	vector<vector<node*>> lines;
 	vector<node*> work_list;
@@ -881,6 +881,14 @@ double line_length(vector<node*> line){
 	}
 	return l;
 }
+vector<double> line_lengths(vector<vector<node*>> lines){
+	vector<double> ret;
+	for (const auto& l:lines){
+		ret.push_back(line_length(l));
+	}
+	return ret;
+}
+
 double network_length(vector<node*> list){
 	double len = 0;
 	for (auto it = list.begin(); it != list.end(); ++it){

@@ -371,34 +371,6 @@ int main(int n, char** args){
 	}
 
 	
-	cout << "checking network integrety" << endl;
-	for (const auto& n:list){
-		for (const auto& c:n->connections){
-			if (!n->is_in(c->connections) || !c->is_in(list)){
-				cout << "we have a problem" << endl;
-			}
-		}
-		/*
-		if (abs(322.5 - n->x) < 1 && abs(657.0 - n->y) < 1){
-			cout << "ladies and gentleman" << endl;
-			cout << "we got him" << endl;
-		}
-		*/
-	}
-	for (const auto& c:closures){
-		if (!c[0]->is_in(list) || !c[1]->is_in(list) || !c[0]->is_in(c[1]->connections) || !c[1]->is_in(c[0]->connections)){
-			cout << "closures are fucked" << endl;
-		}
-	}
-	//return 0;
-	
-	Mat testimg;
-	testimg = draw_scale_list(I2,list,10);
-	imwrite("test1.png",testimg);
-	testimg = draw_closures_scaled(testimg,closures,10);
-	testimg = draw_dots_scaled(testimg,list,10);
-	imwrite("test2.png",testimg);
-	//return 0;
 	
 	
 
@@ -465,6 +437,34 @@ int main(int n, char** args){
 */	
 	
 	
+	cout << "checking network integrety" << endl;
+	for (const auto& n:list){
+		for (const auto& c:n->connections){
+			if (!n->is_in(c->connections) || !c->is_in(list)){
+				cout << "we have a problem" << endl;
+			}
+		}
+		/*
+		if (abs(322.5 - n->x) < 1 && abs(657.0 - n->y) < 1){
+			cout << "ladies and gentleman" << endl;
+			cout << "we got him" << endl;
+		}
+		*/
+	}
+	for (const auto& c:closures){
+		if (!c[0]->is_in(list) || !c[1]->is_in(list) || !c[0]->is_in(c[1]->connections) || !c[1]->is_in(c[0]->connections)){
+			cout << "closures are fucked" << endl;
+		}
+	}
+	//return 0;
+	
+	Mat testimg;
+	testimg = draw_scale_list(I2,list,10);
+	imwrite("test1.png",testimg);
+	testimg = draw_closures_scaled(testimg,closures,10);
+	testimg = draw_dots_scaled(testimg,list,10);
+	imwrite("test2.png",testimg);
+	//return 0;
 	
 	
 	
@@ -529,6 +529,12 @@ int main(int n, char** args){
 		}
 	}
 
+	for (const auto& line_opt:line_analysis::line_options){
+		if(!line_opt->on_only_loops){
+			line_opt->process(I2, list);
+		}
+	}
+
 
 /*
 
@@ -580,7 +586,6 @@ int main(int n, char** args){
 			//Mat test(s.height,s.width, CV_8UC3, Scalar::all(255));
 			//cout << "TEST " << replace_keywords(draw_commands[i]->folder+draw_commands[i]->name+draw_commands[i]->ending) << endl;
 			if(!imwrite(replace_keywords(draw_commands[i]->folder+draw_commands[i]->name+draw_commands[i]->ending),draw_commands[i]->image)){
-			//if(!imwrite("test.png",test)){//draw_commands[i]->image)){
 				cout << "WARNING: File: \"" << replace_keywords(draw_commands[i]->folder+draw_commands[i]->name+draw_commands[i]->ending) << "\" could not be opened" << endl;
 				return -1;
 			}
@@ -637,6 +642,11 @@ int main(int n, char** args){
 					}
 			}
 			delete (*jt);
+		}
+	}
+	for (const auto& line_opt:line_analysis::line_options){
+		if(line_opt->on_only_loops){
+			line_opt->process(I2, list);
 		}
 	}
 	if (aux_data_path != ""){

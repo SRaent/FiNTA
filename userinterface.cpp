@@ -1,5 +1,8 @@
 #ifndef USERINTERFACE_CPP
 #define USERINTERFACE_CPP USERINTERFACE_CPP
+	
+#include <limits> 
+#include <string>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -91,6 +94,79 @@ double rad_startpoints = 20*RS;
 bool rad_startpoints_specified = false;
 double thresh_startpoints = 0;
 
+//i suppose this i why one uses header files...
+bool is_number(string, double&);
+bool is_number(string);
+bool is_number(string, unsigned long long&);
+vector<vector<node*>> find_lines(vector<node*>,double);
+void double_vector_to_file(string, vector<double>);
+vector<double> line_lengths(vector<vector<node*>>);
+void draw_lines(const Mat, const vector<vector<node*>>, const string, const double, const double);
+
+class line_analysis{
+	public:
+	static vector<line_analysis*> line_options;
+	double angle = 3.14159*22.5/180.0;
+	bool angle_set = false;
+	bool visualize = false;
+	bool on_only_loops = false;
+	string data_path = "<imagename>_line_lengths.dat";
+	bool data_path_set = false;
+	unsigned long long imgnum = 10;
+	bool imgnum_set = false;
+	string images_folder = "./";
+	line_analysis(vector<string> line, bool& successful){
+		if (line[0] == "save_loop_line_lengths"){ on_only_loops = true;}
+		for (unsigned long long i = 1; i < line.size(); ++i){
+			if (is_number(line[i],angle)){
+					if(angle_set){
+						cout << "line angle can only be set once per line analysis";
+						successful = false;
+						return;
+					}
+					else {angle_set = true;}
+			}
+			else if (line[i] == "draw_lines" && !visualize){
+				visualize = true;
+				if (i + 1 < line.size()){
+					++i; //the = is correct here
+					if (!(imgnum_set = is_number(line[i], imgnum))){
+						images_folder = line[i];
+					}
+					if (i + 1 < line.size()){
+						if (imgnum_set){
+							++i;
+							images_folder = line[i];
+						}
+						else if (is_number(line[i+1], imgnum)){
+							++i;
+						}
+					}
+				}
+
+			}
+			else if (!data_path_set){
+				data_path_set = true;
+				data_path = line[i];
+			}
+			else{
+				successful = false;
+				return;
+			}
+			
+		}
+		if (!angle_set) {successful = false;}
+	}
+	void process(Mat I, vector<node*> list){
+		vector<vector<node*>> lines = find_lines(list,angle);
+		vector<double> linelengths = line_lengths(lines);
+		double_vector_to_file(data_path,linelengths);
+		if(visualize){
+			draw_lines(I,lines,images_folder,imgnum,1);
+		}
+	}
+};
+vector<line_analysis*> line_analysis::line_options;
 
 class draw_command{
 	public:
@@ -1171,6 +1247,9 @@ bool read_settings_line(string l){
 				}
 			}
 			else{ successful = false; cout << w[0] << " can only take exactly one argument" << endl;}
+		}
+		else if (w[0] == "save_loop_line_lengths" || w[0] == "save_all_line_lengths"){
+			line_analysis::line_options.push_back(new line_analysis(w,successful));
 		}
 		
 		//string animation_path = "";

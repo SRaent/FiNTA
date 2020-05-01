@@ -1,6 +1,8 @@
 #ifndef VISUALISE_CPP
 #define VISUALISE_CPP VISUALISE_CPP
-
+#include "userinterface.cpp"
+#include "opencv2/imgcodecs.hpp"
+#include "opencv2/core/types.hpp"
 #include <iostream>
 #include <math.h>
 #include <stdio.h>
@@ -114,5 +116,77 @@ Mat draw_dots_scaled(Mat input_image, vector<node*> list, double scale, Scalar c
 		circle(image,Point(scale*n->x,scale*n->y),2,color);
 	}
 	return image;
+}
+Mat draw_line(vector<node*> loop, Mat image, double thickness, Scalar color = Scalar(0,0,255)){
+	if (image.channels() == 1){
+		cvtColor(image,image,COLOR_GRAY2BGR);
+	}
+	for (unsigned long long i = 0; i < loop.size() - 1; ++i){
+		line(image,Point(loop[i]->x,loop[i]->y),Point(loop[i + 1]->x,loop[i + 1]->y),color,thickness);
+	}
+	return image;
+}
+bool linecomp(vector<node*> a, vector<node*> b){
+	double d1 = line_length(a);
+	double d2 = line_length(b);
+	return (d1 < d2);
+}
+double lines_length(vector<vector<node*>> lines){
+	double length = 0;
+	for (const auto& l:lines){
+		length += line_length(l);
+	}
+	return length;
+}
+Scalar HSVtRGB(double h, double s, double v){
+	double r;
+	double g;
+	double b;
+	uint8_t hi;
+	double f;
+	double p;
+	double q;
+	double t;
+	hi = h / 60;
+	f = h / 60.0 - hi;
+	p = v * (1.0 - s);
+	q = v * (1.0 - s * f);
+	t = v * (1.0 - s * (1.0 - f));
+	switch(hi) {
+		case 0: b = p; g = t; r = v; break;
+		case 1: b = p; g = v; r = q; break;
+		case 2: b = t; g = v; r = p; break;
+		case 3: b = v; g = q; r = p; break;
+		case 4: b = v; g = p; r = t; break;
+		case 5: b = q; g = p; r = v; break;
+		case 6: b = p; g = t; r = v; break;
+	}
+	return Scalar(b,g,r);
+}
+
+void draw_lines(const Mat input_image, const vector<vector<node*>> lines, const string path, const double imagenumber = 10, const double thickness = 1){
+	Mat image;
+	input_image.copyTo(image);
+
+	vector<vector<node*>> ls = lines;
+	double total_length = lines_length(ls);
+	sort(ls.begin(),ls.end(),linecomp);
+	double acc_length = 0;
+	const double image_line_length = (total_length / imagenumber);
+	auto it = ls.begin();
+	Scalar color;
+	unsigned long long inum = 0;
+	while (it != ls.end()){
+		Mat temp;
+		image.copyTo(temp);
+		while (it != ls.end() && acc_length <= image_line_length){
+			color = HSVtRGB(360*acc_length/image_line_length,1,1);
+			acc_length += line_length(*it);
+			temp = draw_line(*it,temp,thickness,color);
+		}
+		++inum;
+		imwrite(str_add_double(path,inum)+".png",temp);
+		acc_length = 0;
+	}
 }
 #endif
