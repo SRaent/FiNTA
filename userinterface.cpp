@@ -102,6 +102,7 @@ vector<vector<node*>> find_lines(vector<node*>,double);
 void double_vector_to_file(string, vector<double>);
 vector<double> line_lengths(vector<vector<node*>>);
 void draw_lines(const Mat, const vector<vector<node*>>, const string, const double, const double);
+string replace_keywords(string);
 
 class line_analysis{
 	public:
@@ -160,7 +161,7 @@ class line_analysis{
 	void process(Mat I, vector<node*> list){
 		vector<vector<node*>> lines = find_lines(list,angle);
 		vector<double> linelengths = line_lengths(lines);
-		double_vector_to_file(data_path,linelengths);
+		double_vector_to_file(replace_keywords(data_path),linelengths);
 		if(visualize){
 			draw_lines(I,lines,images_folder,imgnum,1);
 		}

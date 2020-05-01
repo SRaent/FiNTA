@@ -164,6 +164,7 @@ Scalar HSVtRGB(double h, double s, double v){
 	return Scalar(b*255.0,g*255.0,r*255.0);
 }
 
+string replace_keywords(string);
 void draw_lines(const Mat input_image, const vector<vector<node*>> lines, const string path, const double imagenumber = 10, const double thickness = 1){
 	Mat image;
 	input_image.copyTo(image);
@@ -186,7 +187,7 @@ void draw_lines(const Mat input_image, const vector<vector<node*>> lines, const 
 			++it;
 		}
 		++inum;
-		imwrite(str_add_double(path,inum)+".png",temp);
+		imwrite(str_add_double(replace_keywords(path),inum)+".png",temp);
 		acc_length = 0;
 	}
 }
