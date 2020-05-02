@@ -85,6 +85,8 @@ bool del_lines_above_thresh = false;
 
 bool modified_hessian = false;
 bool del_worst_sect = false;
+bool sect_thickness_set = false;
+double sect_thickness;
 
 bool start_points_exist = false;
 vector<Point*> man_start_points;
@@ -1275,8 +1277,15 @@ bool read_settings_line(string l){
 			}
 		}
 		else if(w[0] == "delete_worst_sections"){
-			if (w.size() == 1){
+			if (del_worst_sect){
+				cout << "ERROR: command already called" << endl;
+			}
+			else if (w.size() == 1){
 				del_worst_sect = true;
+			}
+			else if( w.size() == 2 && is_number(w[1],sect_thickness)){
+				del_worst_sect = true;
+				sect_thickness_set = true;
 			}
 			else {
 				successful = false;

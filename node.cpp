@@ -338,13 +338,17 @@ void node::disconnect(node* con){
 }
 
 vector<node*> node::find_worst_sect(const vector<vector<node*>>& sections){
+	double thickness = 2.0*SG;
+	if (sect_thickness_set){
+		thickness = sect_thickness;
+	}
 	vector<node*> worst_section;
 	double worst_score = numeric_limits<double>::infinity();
 	double score;
 
 	for (const auto& s:sections){
 		if (!is_line(s) || s.front()->connections.size() < 3 || s.back()->connections.size() < 3){cout << "sectioning gone wrong" << endl;}
-		score = score_line(s,2.0*SG);
+		score = score_line(s,thickness);
 		if( score < worst_score){
 			worst_score = score;
 			worst_section = s;
