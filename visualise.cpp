@@ -161,6 +161,7 @@ Scalar HSVtRGB(double h, double s, double v){
 		case 5: b = q; g = p; r = v; break;
 		case 6: b = p; g = t; r = v; break;
 	}
+	//cout << r << " " << g << " " << b << endl;
 	return Scalar(b*255.0,g*255.0,r*255.0);
 }
 

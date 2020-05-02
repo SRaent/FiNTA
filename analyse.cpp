@@ -897,7 +897,7 @@ double line_length(vector<node*> line){
 vector<double> line_lengths(vector<vector<node*>> lines){
 	vector<double> ret;
 	for (const auto& l:lines){
-		ret.push_back(line_length(l));
+		ret.push_back(scaling_factor*line_length(l));
 	}
 	return ret;
 }

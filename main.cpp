@@ -195,7 +195,9 @@ int main(int n, char** args){
 	Mat I3;
 	I2.copyTo(I3);
 	//PRINT(I3.channels());
-	cvtColor(I3,I3,COLOR_BGR2GRAY);
+	if (I3.channels() > 1){
+		cvtColor(I3,I3,COLOR_BGR2GRAY);
+	}
 	//PRINT(I3.channels());
 	Mat I4;
 	I3.convertTo(I4, CV_64F);

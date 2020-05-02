@@ -242,7 +242,9 @@ Mat noisify_gauss_absolute(Mat image, double noiselevel = 10){
 	Mat img;
 	image.copyTo(img);
 	
-	cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
+	if (img.channels() > 1){
+		cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
+	}
 	img.convertTo(img, CV_64F);
 	
 	Size s = img.size();
