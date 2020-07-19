@@ -1325,6 +1325,24 @@ bool read_settings(char* filename){
 	return successful;
 }
 
+bool read_settings_from_args(char** args,int i_start, int n){
+	bool successful = true;
+
+	string all_set;
+	
+	for (int i = i_start; i < n; ++i){
+		all_set += args[i];
+	}
+
+	vector<string> set_lines = split_string_exclude(all_set,";");
+
+	for (auto it = set_lines.begin(); it != set_lines.end() && successful; ++it){
+		successful = read_settings_line(*it);
+	}
+
+	return successful;
+}
+
 
 bool file_specified = false;
 

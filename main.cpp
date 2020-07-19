@@ -114,6 +114,8 @@ int main(int n, char** args){
 			}
 		}
 		else if(strcmp(args[i],"-f") == 0 && ++i < n){
+			if (file_specified){ cout << "ERROR: file already specified" << endl; return -1;}
+			file_specified = true;
 			
 			if(!split_path(args[i], folder, file, ending)){
 				cout << "ERROR: Path to image: \"" + string(args[i]) + "\" appers to be a directory" << endl;
@@ -123,6 +125,17 @@ int main(int n, char** args){
 				cout << "analyzing image: " << file+ending << endl;
 			}
 			//cout << "\nfolder: " + folder + "\nfile: " + file + "\nending: " + ending << endl;
+		}
+		else if(strcmp(args[i],"-settings") == 0 && ++i < n){
+			if (settings_read || !file_specified){
+				cout << "ERROR: when passing the settings in the command line, the file has to be specified before and the settings can only be read once" << endl;
+				return -1;
+			}
+			if(!read_settings_from_args(args,i+1,n)){
+				cout << "ERROR: could not read settings from command" << endl;
+				return -1;
+			}
+			i = n;
 		}
 		else {
 			cout << "ERROR: argument \"" << args[i] << "\" could not be interpreted" << endl;
