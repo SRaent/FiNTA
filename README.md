@@ -131,3 +131,6 @@ To generate a animation of the tracing, the keyword "animate\_tracing" can be us
 
 ## Adding noise
 To evaluate the software it is possible to add noise to the imported image. This will always decrease the tracing quality, but by using a image with a known fiber structure, the effects of noise on the tracing quality can be evaluated this way. The keyword is "add\_noise" followed by the noise level. The noise level is the standard deviation of the gaussian noise which is added to each pixel before the image is rescaled. The noise will be visible in images using the "cropped" background and the effects of the noise will be visible on all image backgrounds related to the tracing, but not when useing the "original" background.
+
+# Using atafut in scripts
+It is also possible for scripting use to pass all the lines of a settings file in the command line. To archieve this, simply specify the image as usual behind the "-f" command line argument and then after that pass the command line argument "-settings" followed by all settings lines you wish to pass. The lines have to be sepperated by a semicolon ";".
