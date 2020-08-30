@@ -1,6 +1,7 @@
 #ifndef GENERATE_CPP
 #define GENERATE_CPP GENERATE_CPP
 
+#include <limits>
 #include <iostream>
 #include <math.h>
 #include <stdio.h>
@@ -117,7 +118,7 @@ void gen_streight_lines(Mat &img, unsigned long long linenumber1, double angle1,
 	
 	//spawnpar1[2] = xsize - spawnpar1[0];
 	//spawnpar1[3] = ysize - spawnpar1[1];
-	//now spawnpar1 containes all the fucking endpoints, where the last possible visible line can be spawned in the direction of angle1
+	//now spawnpar1 containes all the fucking points, where the last possible visible line can be spawned in the direction of angle1
 	//those next two lines calculate the steps that need to be taken from those endpoints in order to evenly distribute the lines
 	double dxs1 = (xsize - 2.0 * spawnpar1[0])/(linenumber1 + 1);
 	double dys1 = (ysize - 2.0 * spawnpar1[1])/(linenumber1 + 1);
@@ -273,20 +274,17 @@ Mat noisify_gauss_absolute(Mat image, double noiselevel = 10){
 
 
 
-Mat gen_grid(double line_thick, int between_line, int desired_pixels){
+Mat gen_grid(int line_thick, int between_line, int desired_pixels){
 	int total_thick = line_thick + between_line;
 	int actual_pixels = (round((double(desired_pixels)/(double)total_thick)) ) * total_thick + 1;
 	int line_num = max(round((double(desired_pixels)/(double)total_thick)) - 1,0.0);
 	
 	Mat ret(actual_pixels,actual_pixels, CV_8UC3,Scalar::all(0));
 	
-	gen_streight_lines(ret, line_num, 0, (double)line_thick - 0.01, Scalar::all(255));
+	gen_streight_lines(ret, line_num, 0, (double)line_thick - (double)line_thick*std::numeric_limits<float>::epsilon(), Scalar::all(255));
 	gen_streight_lines(ret, line_num, -90.0 * PI / 180.0, (double)line_thick - 0.01, Scalar::all(255));
 	
 	return ret;
 }
-
-
-
 
 #endif

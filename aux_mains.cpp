@@ -208,11 +208,12 @@ int main_gen_grid(){
 int main_generate_noisy_grid() {
 	int line_thick = 5;
 	int i = 30;
+	int pixel = 200*line_thick;
 	
 	
 	double signal_to_noise = pow(2,-3);
 	
-	Mat grid = gen_grid(line_thick,i,1000);
+	Mat grid = gen_grid(line_thick,i,pixel);
 	//double black_pixel_fraction = ((double)(i*i))/((double)(line_thick * line_thick + 2 * line_thick *i + i*i));
 	//PRINT(black_pixel_fraction)
 	grid = noisify_gauss(grid, signal_to_noise);
@@ -221,7 +222,7 @@ int main_generate_noisy_grid() {
 	
 	signal_to_noise = pow(2,-2);
 	
-	grid = gen_grid(line_thick,i,1000);
+	grid = gen_grid(line_thick,i,pixel);
 	//double black_pixel_fraction = ((double)(i*i))/((double)(line_thick * line_thick + 2 * line_thick *i + i*i));
 	//PRINT(black_pixel_fraction)
 	grid = noisify_gauss(grid, signal_to_noise);
@@ -230,7 +231,7 @@ int main_generate_noisy_grid() {
 	
 	signal_to_noise = pow(2,-1);
 	
-	grid = gen_grid(line_thick,i,1000);
+	grid = gen_grid(line_thick,i,pixel);
 	//double black_pixel_fraction = ((double)(i*i))/((double)(line_thick * line_thick + 2 * line_thick *i + i*i));
 	//PRINT(black_pixel_fraction)
 	grid = noisify_gauss(grid, signal_to_noise);
@@ -239,7 +240,7 @@ int main_generate_noisy_grid() {
 	
 	signal_to_noise = pow(2,0);
 	
-	grid = gen_grid(line_thick,i,1000);
+	grid = gen_grid(line_thick,i,pixel);
 	//double black_pixel_fraction = ((double)(i*i))/((double)(line_thick * line_thick + 2 * line_thick *i + i*i));
 	//PRINT(black_pixel_fraction)
 	grid = noisify_gauss(grid, signal_to_noise);
@@ -248,7 +249,7 @@ int main_generate_noisy_grid() {
 	
 	signal_to_noise = pow(2,1);
 	
-	grid = gen_grid(line_thick,i,1000);
+	grid = gen_grid(line_thick,i,pixel);
 	//double black_pixel_fraction = ((double)(i*i))/((double)(line_thick * line_thick + 2 * line_thick *i + i*i));
 	//PRINT(black_pixel_fraction)
 	grid = noisify_gauss(grid, signal_to_noise);
@@ -257,7 +258,7 @@ int main_generate_noisy_grid() {
 	
 	signal_to_noise = pow(2,2);
 	
-	grid = gen_grid(line_thick,i,1000);
+	grid = gen_grid(line_thick,i,pixel);
 	//double black_pixel_fraction = ((double)(i*i))/((double)(line_thick * line_thick + 2 * line_thick *i + i*i));
 	//PRINT(black_pixel_fraction)
 	grid = noisify_gauss(grid, signal_to_noise);

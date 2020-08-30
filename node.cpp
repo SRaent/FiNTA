@@ -83,15 +83,16 @@ node::node(double xinit, double yinit,node* mother_init){
 		PRINT(y)
 		cout << "we got him" << endl;
 	}
-	*/
 	for (const auto& n:*list){
 		if (n != this && abs(n->x - x) < 0.01 && abs(n->y - y) < 0.01){
 			cout << "SHIT WENT DOWN BOIS" << endl;
 		}
 	}
+	*/
 }
 
 node::~node(){
+	/*
 	for (const auto& n:*list){
 		if (n != this){
 			if (abs(n->x - x) < 0.01 && abs(n->y - y) < 0.01){
@@ -99,6 +100,7 @@ node::~node(){
 			}
 		}
 	}
+	*/
 	//cout << "deleting node" << endl;
 	for (unsigned long long i = 0; i < connections.size(); ++i){
 		//cout << "erasing connection " << i << " of " << connections.size() << endl;
@@ -347,7 +349,7 @@ vector<node*> node::find_worst_sect(const vector<vector<node*>>& sections){
 	double score;
 
 	for (const auto& s:sections){
-		if (!is_line(s) || s.front()->connections.size() < 3 || s.back()->connections.size() < 3){cout << "sectioning gone wrong" << endl;}
+		//if (!is_line(s) || s.front()->connections.size() < 3 || s.back()->connections.size() < 3){cout << "sectioning gone wrong" << endl;}
 		score = score_line(s,thickness);
 		if( score < worst_score){
 			worst_score = score;

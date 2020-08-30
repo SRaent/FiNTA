@@ -1,4 +1,5 @@
 
+#include <string>
 #define PRINT(x) cout << #x << " => " << x << endl;
 
 #define SQRT2 (double)1.4142135623730950488016
@@ -90,6 +91,68 @@ using namespace cv;
 #include "united_junction.h"
 #include "united_junction.cpp"
 
+int main_noise(int n, char** args) {
+	int line_thick = stoi(args[1]);
+	int i = 6*line_thick;
+	int pixel = 200*line_thick;
+	
+	
+	double signal_to_noise = pow(2,-3);
+	
+	Mat grid = gen_grid(line_thick,i,pixel);
+	//double black_pixel_fraction = ((double)(i*i))/((double)(line_thick * line_thick + 2 * line_thick *i + i*i));
+	//PRINT(black_pixel_fraction)
+	grid = noisify_gauss(grid, signal_to_noise);
+	imwrite("./noise_thickness/" + to_string(line_thick) + "linethick_" + to_string(i) + "spaceBetween_" + to_string(signal_to_noise) + "signal_to_noise" + ".png",grid);
+	
+	
+	signal_to_noise = pow(2,-2);
+	
+	grid = gen_grid(line_thick,i,pixel);
+	//double black_pixel_fraction = ((double)(i*i))/((double)(line_thick * line_thick + 2 * line_thick *i + i*i));
+	//PRINT(black_pixel_fraction)
+	grid = noisify_gauss(grid, signal_to_noise);
+	imwrite("./noise_thickness/" + to_string(line_thick) + "linethick_" + to_string(i) + "spaceBetween_" + to_string(signal_to_noise) + "signal_to_noise" + ".png",grid);
+	
+	
+	signal_to_noise = pow(2,-1);
+	
+	grid = gen_grid(line_thick,i,pixel);
+	//double black_pixel_fraction = ((double)(i*i))/((double)(line_thick * line_thick + 2 * line_thick *i + i*i));
+	//PRINT(black_pixel_fraction)
+	grid = noisify_gauss(grid, signal_to_noise);
+	imwrite("./noise_thickness/" + to_string(line_thick) + "linethick_" + to_string(i) + "spaceBetween_" + to_string(signal_to_noise) + "signal_to_noise" + ".png",grid);
+	
+	
+	signal_to_noise = pow(2,0);
+	
+	grid = gen_grid(line_thick,i,pixel);
+	//double black_pixel_fraction = ((double)(i*i))/((double)(line_thick * line_thick + 2 * line_thick *i + i*i));
+	//PRINT(black_pixel_fraction)
+	grid = noisify_gauss(grid, signal_to_noise);
+	imwrite("./noise_thickness/" + to_string(line_thick) + "linethick_" + to_string(i) + "spaceBetween_" + to_string(signal_to_noise) + "signal_to_noise" + ".png",grid);
+	
+	
+	signal_to_noise = pow(2,1);
+	
+	grid = gen_grid(line_thick,i,pixel);
+	//double black_pixel_fraction = ((double)(i*i))/((double)(line_thick * line_thick + 2 * line_thick *i + i*i));
+	//PRINT(black_pixel_fraction)
+	grid = noisify_gauss(grid, signal_to_noise);
+	imwrite("./noise_thickness/" + to_string(line_thick) + "linethick_" + to_string(i) + "spaceBetween_" + to_string(signal_to_noise) + "signal_to_noise" + ".png",grid);
+	
+	
+	signal_to_noise = pow(2,2);
+	
+	grid = gen_grid(line_thick,i,pixel);
+	//double black_pixel_fraction = ((double)(i*i))/((double)(line_thick * line_thick + 2 * line_thick *i + i*i));
+	//PRINT(black_pixel_fraction)
+	grid = noisify_gauss(grid, signal_to_noise);
+	imwrite("./noise_thickness/" + to_string(line_thick) + "linethick_" + to_string(i) + "spaceBetween_" + to_string(signal_to_noise) + "signal_to_noise" + ".png",grid);
+	
+	
+	return 0;
+}
 
 int main(int n, char** args){
 	
@@ -459,7 +522,7 @@ int main(int n, char** args){
 	
 */	
 	
-	
+	/*
 	cout << "checking network integrety" << endl;
 	for (const auto& n:list){
 		for (const auto& c:n->connections){
@@ -467,12 +530,6 @@ int main(int n, char** args){
 				cout << "we have a problem" << endl;
 			}
 		}
-		/*
-		if (abs(322.5 - n->x) < 1 && abs(657.0 - n->y) < 1){
-			cout << "ladies and gentleman" << endl;
-			cout << "we got him" << endl;
-		}
-		*/
 	}
 	for (const auto& c:closures){
 		if (!c[0]->is_in(list) || !c[1]->is_in(list) || !c[0]->is_in(c[1]->connections) || !c[1]->is_in(c[0]->connections)){
@@ -488,7 +545,7 @@ int main(int n, char** args){
 	testimg = draw_dots_scaled(testimg,list,10);
 	imwrite("test2.png",testimg);
 	//return 0;
-	
+	*/
 	
 	
 	vector<double> aux_data;
