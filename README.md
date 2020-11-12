@@ -126,11 +126,19 @@ If one wishes to evaluate the generated tracing data on their own, it is recomme
 ## Saving the loop poligons
 If one wishes to do more extensive analysis on the closed loops in the traced network, it is possible to save those to a file with the keyword "save\_loop\_data", which can only be used once. Behind this keyword after a whitespace, the path, where the loop data should be saved can be entered. This data is represented in the file in the following way: The file containes three columns seperated by whitespaces. The first column containes the index of the loop. Each time the first column increases by 1, a new loop is beeing described. The second and third column contain the x and y koordinates of the nodes the loop consists of. If the "set\_scale" keyword is used in the settings file, the output will be in the unit defined there and scaled accordingly without any indication in the created file.
 
+## Saving the absolute angle distribution.
+Use the keywords "save\_all\_absolute\_angles" or "save\_loop\_absolute\_angles" to save the angles of node connections in the complete network or the network consisting only of closed loops respectively. The keywords can be followed by the path the data should be saved to. The values will be in degrees and lie between 0° and 180° since the connections dont have a direction and therefore rotating them by 180° gives the same angle.
+
 ## Generating a animation of the tracing
 To generate a animation of the tracing, the keyword "animate\_tracing" can be used. It takes a single argument that specifies the thickness of the lines to be drawn. The animation will always be saved with the name "<imagename\>\_animated.avi" and the background will always be the original image and the color of the lines will always be red.
 
-## Adding noise
-To evaluate the software it is possible to add noise to the imported image. This will always decrease the tracing quality, but by using a image with a known fiber structure, the effects of noise on the tracing quality can be evaluated this way. The keyword is "add\_noise" followed by the noise level. The noise level is the standard deviation of the gaussian noise which is added to each pixel before the image is rescaled. The noise will be visible in images using the "cropped" background and the effects of the noise will be visible on all image backgrounds related to the tracing, but not when useing the "original" background.
 
 # Using atafut in scripts
 It is also possible for scripting use to pass all the lines of a settings file in the command line. To archieve this, simply specify the image as usual behind the "-f" command line argument and then after that pass the command line argument "-settings" followed by all settings lines you wish to pass. The lines have to be sepperated by a semicolon ";".
+
+# Worsening the image for testing purposes
+## Adding noise
+To evaluate the software it is possible to add noise to the imported image. This will always decrease the tracing quality, but by using a image with a known fiber structure, the effects of noise on the tracing quality can be evaluated this way. The keyword is "add\_noise" followed by the noise level. The noise level is the standard deviation of the gaussian noise which is added to each pixel before the image is rescaled. The noise will be visible in images using the "cropped" background and the effects of the noise will be visible on all image backgrounds related to the tracing, but not when useing the "original" background.
+
+## Pointilising the image
+In order to simulate STORM images, the keyword "pointilise" can be used, followed by a number between 0 and 1 representing a probability. Now every pixel can be turned compleatly black with the specified probability. Generally STORM images only posess compleatly white or black pixels. To simulate this, the input image must already be compleatly black and white.

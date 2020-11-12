@@ -1306,7 +1306,7 @@ bool read_settings_line(string l){
 				successful = false;
 			}
 		}
-		else if(w[0] == "pointilize"){
+		else if(w[0] == "pointilise"){
 			if (!(w.size() == 2 && is_number(w[1],pointilise))){
 				cout << "ERROR: pointilise level could not be read" << endl;
 				successful = false;
