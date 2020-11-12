@@ -63,6 +63,7 @@ bool ML_set = false;
 bool SG_set = false;
 
 
+bool rescale = true;
 
 bool cropped = false;
 unsigned long long crop_x1 = 0;
@@ -211,7 +212,11 @@ string circleness_path = "";
 
 string loop_circumference_path = "";
 
+string all_abs_angs_path = "";
+string loop_abs_angs_path = "";
+
 double add_noise = 0;
+double pointilise = 0;
 
 //this is only nessesary because i am a shit programmer in my next project i am gonna do things right
 void double_vector_to_file(string,vector<double>);
@@ -1290,6 +1295,38 @@ bool read_settings_line(string l){
 			else {
 				successful = false;
 				cout << "delete_worst_sections cant take any arguments" << endl;
+			}
+		}
+		else if(w[0] == "no_rescaling"){
+			if(w.size() == 1 && !rescale){
+				rescale = false;
+			}
+			else {
+				cout << "ERROR: no_rescaling can only be called once and can not take any arguments" << endl;	
+				successful = false;
+			}
+		}
+		else if(w[0] == "pointilize"){
+			if (!(w.size() == 2 && is_number(w[1],pointilise))){
+				cout << "ERROR: pointilise level could not be read" << endl;
+				successful = false;
+			}
+			
+		}
+		else if(w[0] == "save_all_absolute_angles"){
+			if (w.size() == 2){
+				all_abs_angs_path = w[1];
+			}
+			else if (w.size() == 1){
+				all_abs_angs_path = "<imagename>_all_abs_angs.dat";
+			}
+		}
+		else if(w[0] == "save_loop_absolute_angles"){
+			if (w.size() == 2){
+				loop_abs_angs_path = w[1];
+			}
+			else if (w.size() == 1){
+				loop_abs_angs_path = "<imagename>_loop_abs_angs.dat";
 			}
 		}
 		

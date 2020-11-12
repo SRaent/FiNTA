@@ -239,6 +239,40 @@ Mat noisify_gauss(Mat image, double ston = 1.0){
 	
 	return img;
 }
+Mat pointilise_image(Mat image, double noiselevel = 0.8){
+	Mat img;
+	image.copyTo(img);
+	
+	if (img.channels() > 1){
+		cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
+	}
+	img.convertTo(img, CV_64F);
+	
+	Size s = img.size();
+	/*
+	PRINT(s.width)
+	PRINT(s.height)
+	PRINT(img.channels())
+	*/
+	default_random_engine generator;
+	//independent_bits_engine generator;
+	uniform_real_distribution<double> distribution(0.0,1.0);
+	generator.seed(noiselevel*1000 + time(NULL));
+	
+	for (unsigned long long x = 0; x < s.width; ++x){
+		for (unsigned long long y = 0; y < s.height; ++y){
+			if (distribution(generator) < noiselevel){
+				img.at<double>(y,x) = 0;
+			}
+		}
+	}
+	
+	normalize(img,img,255,0,32);
+	//cv::cvtColor(grid, grid, cv::COLOR_GRAY2BGR);
+	img.convertTo(img, CV_8UC3);
+	
+	return img;
+}
 Mat noisify_gauss_absolute(Mat image, double noiselevel = 10){
 	Mat img;
 	image.copyTo(img);

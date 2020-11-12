@@ -359,6 +359,22 @@ double inside_loop_area(vector<node*> loop, double thickness){
 	return loop_area(loop) - (loop_length(loop)*thickness * scaling_factor/2.0) + PI * thickness * thickness * 0.25 * scaling_factor * scaling_factor; // the last term is a approximation for the overlapping of the assumed fiber thickness
 }
 
+vector<double> abs_angles(vector<node*> list){
+	vector<double> abs_angles;
+	for(unsigned long long i = 0; i < list.size(); ++i){
+		vector<node*> conns = list[i]->connections;
+		double x = list[i]->x;
+		double y = list[i]->y;
+		for(unsigned long long j = 0; j < conns.size(); ++j){
+			double ang = atan2(x - conns[j]->x, y - conns[j]->y) * 180.0 / PI;
+			// this is a bit sketchy but i dont really care. Since all connections occur twice in opposite directions, all angles will occure twice, but shifted by 180°. By only including the angles between 0 and 180 degrees, every connection is only counted once and the symmetry of the problem is considered simultaniously.
+			if (0 <= ang && ang < 180){
+				abs_angles.push_back(ang);
+			}
+		}
+	}
+	return abs_angles;
+}
 
 vector<double> con_angles(vector<node*> list){
 	vector<double> angles;

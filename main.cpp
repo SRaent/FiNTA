@@ -204,6 +204,9 @@ int main(int n, char** args){
 	if (add_noise != 0){
 		I2 = noisify_gauss_absolute(I2, add_noise);
 	}
+	if (pointilise != 0){
+		I2 = pointilise_image(I2,pointilise);
+	}
 	s = I2.size();
 	//PRINT(s.width);
 	//PRINT(s.height);
@@ -228,7 +231,9 @@ int main(int n, char** args){
 		node_thresh = (node_thresh - min)*255/(max - min);
 	}
 	*/
-	normalize(I4,I4,255,0,32); // the 32 is a flag, that produced errors if the keyword is used directly
+	if (rescale){
+		normalize(I4,I4,255,0,32); // the 32 is a flag, that produced errors if the keyword is used directly
+	}
 	
 	Mat hessian;
 	if (modified_hessian){
@@ -585,6 +590,10 @@ int main(int n, char** args){
 	if (tracing_data_path != ""){
 		save_tracing_data(list, tracing_data_path);
 	}
+
+	if (all_abs_angs_path != ""){
+		double_vector_to_file(replace_keywords(all_abs_angs_path),abs_angles(list));
+	}
 	
 	
 	
@@ -613,6 +622,10 @@ int main(int n, char** args){
 			}
 		}
 		return 0;
+	}
+
+	if (loop_abs_angs_path != ""){
+		double_vector_to_file(replace_keywords(loop_abs_angs_path),abs_angles(list));
 	}
 	
 	vector<vector<node*>> loops = find_loops(closures);
