@@ -523,6 +523,7 @@ int main(int n, char** args){
 		aux_labels.push_back(str_add_double("total number of united junctions with unification distance " ,(*it)));
 		aux_data.push_back(united_junctions.size());
 
+		/*
 		Mat img;
 		I2.copyTo(img);
 		img = draw_list(img,list,Scalar(0,0,0),1);
@@ -537,6 +538,7 @@ int main(int n, char** args){
 			img = draw_closures(img,uni_junc->outgoing_connections,color2);
 		}
 		imwrite(str_add_double("junc_vis",*it)+".png",img);
+		*/
 
 		for ( auto jt = junc_dist_all.begin(); jt != junc_dist_all.end(); ++jt){
 			if ((*jt)->unite == (*it)){

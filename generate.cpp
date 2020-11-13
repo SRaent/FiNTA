@@ -235,7 +235,8 @@ Mat noisify_gauss(Mat image, double ston = 1.0){
 	
 	normalize(img,img,255,0,32);
 	//cv::cvtColor(grid, grid, cv::COLOR_GRAY2BGR);
-	img.convertTo(img, CV_8UC3);
+	img.convertTo(img, CV_8U);
+	cv::cvtColor(img, img, cv::COLOR_GRAY2BGR);
 	
 	return img;
 }
@@ -269,7 +270,8 @@ Mat pointilise_image(Mat image, double noiselevel = 0.8){
 	
 	normalize(img,img,255,0,32);
 	//cv::cvtColor(grid, grid, cv::COLOR_GRAY2BGR);
-	img.convertTo(img, CV_8UC3);
+	img.convertTo(img, CV_8U);
+	cv::cvtColor(img, img, cv::COLOR_GRAY2BGR);
 	
 	return img;
 }
