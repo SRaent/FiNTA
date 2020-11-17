@@ -303,7 +303,8 @@ Mat noisify_gauss_absolute(Mat image, double noiselevel = 10){
 	
 	normalize(img,img,255,0,32);
 	//cv::cvtColor(grid, grid, cv::COLOR_GRAY2BGR);
-	img.convertTo(img, CV_8UC3);
+	img.convertTo(img, CV_8U);
+	cv::cvtColor(img, img, cv::COLOR_GRAY2BGR);
 	
 	return img;
 }
