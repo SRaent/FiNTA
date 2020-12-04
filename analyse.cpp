@@ -972,5 +972,71 @@ bool is_loop(vector<node*> loop){
 	}	       
 	return true;
 }
+double least_squares_error(double fun(double), vector<double> xvals, vector<double> yvals){
+	double error = 0;
+	for (unsigned long long i = 0; i < xvals.size(); i++){
+		error += sqr(fun(xvals[i]) - yvals[i]);
+	}
+	return error;
+}
+
+double fit_exp(vector<double> xvals, vector<double> yvals){
+	double l = 1.0/20.0;
+	double error = 0;
+	double grad = 0;
+	double ss = 0.001; //stepsize
+	unsigned long long iters = 500;
+
+	for (unsigned long long i = 1; i < iters; i++){
+		error = 0;
+		for (unsigned long long i = 0; i < xvals.size(); i++){
+			error += sqr(exp(-xvals[i]*l) - yvals[i]);
+		}
+		error = sqrt(error / (double)xvals.size());
+		//PRINT(error);
+		
+		//doing gradient decend bitches!!!
+		grad = 0;
+		for (unsigned long long i = 0; i < xvals.size(); i++){
+			grad += -xvals[i]*(exp(-xvals[i]*l) - yvals[i])*exp(-xvals[i]*l);
+		}
+		grad = grad /((double)xvals.size() * error);
+		//PRINT(grad);
+		l = l - (ss*grad);
+		//PRINT(l);
+	}
+	
+	return l;
+}
+
+double mean_persistence_length(vector<vector<node*>> lines){
+	vector<double> distances;
+	vector<double> correlations;
+	for (auto it = lines.begin(); it != lines.end(); ++it){
+		for (auto jt = it->begin(); (jt+1) != it->end() && jt != it->end(); ++jt){
+			//cout << "about to do iterator arythmatic" << endl;
+			double dx0 = (*(jt+1))->x - (*jt)->x;
+			double dy0 = (*(jt+1))->y - (*jt)->y;
+			double distance = sqrt(sqr(dx0) + sqr(dy0));
+			dx0 = dx0 / distance;
+			dy0 = dy0 / distance;
+			for (auto kt = jt + 1; (kt+1) != it->end() && kt != it->end(); ++kt){
+				//this is only possible, because lines HAVE to contain at least 3 nodes (see find lines if line.size() > 2)
+				double dx = (*(kt+1))->x - (*kt)->x;
+				double dy = (*(kt+1))->y - (*kt)->y;
+				double len = sqrt(sqr(dx) + sqr(dy));
+				dx = dx / len;
+				dy = dy / len;
+				distances.push_back(distance);
+				correlations.push_back((dx0 * dx) + (dy0 * dy));
+				distance += len;
+			}
+		}
+	}
+	//double_vector_to_file("xvals.dat",distances);
+	//double_vector_to_file("yvals.dat",correlations);
+	double pers_len = ((double)1.0)/fit_exp(distances,correlations);
+	return pers_len;
+}
 
 #endif

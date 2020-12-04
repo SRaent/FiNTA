@@ -107,6 +107,7 @@ void double_vector_to_file(string, vector<double>);
 vector<double> line_lengths(vector<vector<node*>>);
 void draw_lines(const Mat, const vector<vector<node*>>, const string, const double, const double);
 string replace_keywords(string);
+double mean_persistence_length(vector<vector<node*>>);
 
 class line_analysis{
 	public:
@@ -162,13 +163,14 @@ class line_analysis{
 		}
 		if (!angle_set) {successful = false;}
 	}
-	void process(Mat I, vector<node*> list){
+	double process(Mat I, vector<node*> list){
 		vector<vector<node*>> lines = find_lines(list,angle);
 		vector<double> linelengths = line_lengths(lines);
 		double_vector_to_file(replace_keywords(data_path),linelengths);
 		if(visualize){
 			draw_lines(I,lines,images_folder,imgnum,1);
 		}
+		return mean_persistence_length(lines);
 	}
 };
 vector<line_analysis*> line_analysis::line_options;
@@ -1453,6 +1455,11 @@ void save_aux_data(vector<double> data, vector<string> labels, string path){
 }
 
 string str_add_double(string str, unsigned long long d){
+	ostringstream cvt;
+	cvt << str << d;
+	return cvt.str();
+}
+string str_add_actual_double(string str, double d){
 	ostringstream cvt;
 	cvt << str << d;
 	return cvt.str();

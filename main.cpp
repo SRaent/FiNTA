@@ -1,5 +1,4 @@
 
-#include <string>
 #define PRINT(x) cout << #x << " => " << x << endl;
 
 #define SQRT2 (double)1.4142135623730950488016
@@ -53,6 +52,7 @@ print statistics about local maxima of smoothed angfun
 #define FA 0.125*PI //forbidden angle for already connected nodes to spawn new ones
 
 
+#include <string>
 #include <stdlib.h>
 #include <cstdlib>
 #include <stdio.h>
@@ -557,7 +557,10 @@ int main(int n, char** args){
 
 	for (const auto& line_opt:line_analysis::line_options){
 		if(!line_opt->on_only_loops){
-			line_opt->process(I2, list);
+			double pers_len = line_opt->process(I2, list);
+			//PRINT(pers_len)
+			aux_labels.push_back(str_add_actual_double("Persistence length of the fibers found on the entire network using the angle threshold of " ,line_opt->angle));
+			aux_data.push_back(pers_len*scaling_factor);
 		}
 	}
 
@@ -685,7 +688,10 @@ int main(int n, char** args){
 	}
 	for (const auto& line_opt:line_analysis::line_options){
 		if(line_opt->on_only_loops){
-			line_opt->process(I2, list);
+			double pers_len = line_opt->process(I2, list);
+			//PRINT(pers_len)
+			aux_labels.push_back(str_add_double("Persistence length of the fibers found on the network containing only loops with the angle threshold of " ,line_opt->angle));
+			aux_data.push_back(pers_len*scaling_factor);
 		}
 	}
 	if (aux_data_path != ""){

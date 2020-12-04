@@ -7,6 +7,7 @@
 
 #define MATHFUN_CPP MATHFUN_CPP
 
+#include <string>
 #include <iostream>
 #include <math.h>
 #include <stdio.h>
@@ -640,6 +641,14 @@ vector<unsigned long long> findpks(double* vals,unsigned long long length, bool 
 
 vector<unsigned long long> findpks_thresh(double* vals,unsigned long long length,double thresh = 0.0, bool free = 1){
 	vector<unsigned long long> pks;
+
+	/*
+	vector<double> vec_vals;
+	for(int i = 0; i < length; ++i){
+		vec_vals.push_back(vals[i]);
+	}
+	double_vector_to_file(to_string(rand()%1024) + ".ang",vec_vals);
+	*/
 	
 	if (vals[1] < vals[0] && vals[0] > vals[length - 1] && vals[0] > thresh){
 		pks.push_back(0);
