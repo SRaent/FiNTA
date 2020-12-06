@@ -1,5 +1,10 @@
 #ifndef VISUALISE_CPP
 #define VISUALISE_CPP VISUALISE_CPP
+
+
+
+
+#include <cmath>
 #include "userinterface.cpp"
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/core/types.hpp"
@@ -40,6 +45,26 @@ Mat draw_list_offset(Mat input_image, vector<node*>list,Scalar color = Scalar(0,
 	input_image.copyTo(image);
 	for (unsigned long long i = 0; i < list.size(); ++i){
 		for (unsigned long long j = 0; j < list[i]->connections.size(); ++j){
+			line(image,Point(list[i]->x+off_x,list[i]->y+off_y),Point(list[i]->connections[j]->x+off_x,list[i]->connections[j]->y+off_y),color, thickness, LINE_AA);
+			
+		}
+	}
+	return image;
+}
+
+Scalar HSVtRGB(double h, double s, double v);
+Mat draw_list_offset_ang_hue(Mat input_image, vector<node*>list,double thickness = 1, double off_x = 0, double off_y = 0){
+	Mat image;
+	input_image.copyTo(image);
+	for (unsigned long long i = 0; i < list.size(); ++i){
+		for (unsigned long long j = 0; j < list[i]->connections.size(); ++j){
+			double dx = list[i]->x - list[i]->connections[j]->x;
+			double dy = list[i]->y - list[i]->connections[j]->y;
+			double ang = (atan2(dx,dy)*360.0/PI); 
+			while (ang >= 360){ ang -= 360.0;}
+			while (ang < 0) {ang += 360.0;}
+			//PRINT(ang)
+			Scalar color = HSVtRGB(ang,1,1);
 			line(image,Point(list[i]->x+off_x,list[i]->y+off_y),Point(list[i]->connections[j]->x+off_x,list[i]->connections[j]->y+off_y),color, thickness, LINE_AA);
 			
 		}

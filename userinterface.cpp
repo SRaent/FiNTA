@@ -1,6 +1,13 @@
 #ifndef USERINTERFACE_CPP
 #define USERINTERFACE_CPP USERINTERFACE_CPP
 
+
+
+
+
+
+#define PRINT(x) cout << #x << " => " << x << endl;
+
 #include <limits> 
 #include <string>
 #include <stdlib.h>
@@ -180,7 +187,9 @@ class draw_command{
 	bool all_nodes = false;
 	bool only_loops = false;
 	Scalar all_nodes_color = Scalar(255,0,0);
+	bool all_nodes_hue = false;
 	Scalar only_loops_color = Scalar(0,0,255);
+	bool only_loops_hue = false;
 	double all_nodes_thickness = 1;
 	double only_loops_thickness = 1;
 	
@@ -507,6 +516,14 @@ bool interprete_draw(vector<string> w){
 						}
 					}
 				}
+				else if (l >= i + 1 && w[i+1] == "angle_hue"){
+					draw_commands.back()->all_nodes_hue = true;
+					i += 1;
+					if (l >= i + 1 && is_number(w[i+1],draw_commands.back()->all_nodes_thickness)){
+						i += 1;
+						PRINT(i)
+					}
+				}
 			}
 			else {
 				cout << "ERROR: the way all node connections are supposed to be drawn was already specified" << endl;
@@ -566,6 +583,13 @@ bool interprete_draw(vector<string> w){
 							cout << "ERROR: color values have to be between 0 and 255" << endl;
 							successful = false;
 						}
+					}
+				}
+				else if (l >= i + 1 && w[i+1] == "angle_hue"){
+					draw_commands.back()->only_loops_hue = true;
+					++i;
+					if (l >= i + 1 && is_number(w[i+1],draw_commands.back()->only_loops_thickness)){
+						++i;
 					}
 				}
 			}
@@ -1329,6 +1353,49 @@ bool read_settings_line(string l){
 			}
 			else if (w.size() == 1){
 				loop_abs_angs_path = "<imagename>_loop_abs_angs.dat";
+			}
+		}
+		else if(w[0] == "default_param_set"){
+			if (!(RV_set || RM_set || RS_set || STEPS_set || DEV_set || TH_set || ML_set || SG_set)){
+				double ft = 5;
+				if(is_number(w[1],ft)){
+					DEV = 0.55;
+					SG = 0.45*ft;
+					RM = 0;
+					RV = 2.0*ft;
+					STEPS = 360;
+					TH = 2.5;
+					RS = 0.75*ft;
+					ML = 7;
+
+					DEV_set = true;
+					SG_set = true;
+					RM_set = true;
+					RV_set = true;
+					STEPS_set = true;
+					TH_set = true;
+					RS_set = true;
+					ML_set = true;
+					DEV_set = true;
+
+
+					cout << "the default parameter set will be used for a fiber thickness of " << ft << endl;
+					cout << "the parameters have been set to the following values:" << endl;
+					cout << "sigma_smooth " << DEV << endl;
+					cout << "sigma_conv " << SG << endl;
+					cout << "r_min " << RM << endl;
+					cout << "r_max " << RV << endl;
+					cout << "steps " << STEPS << endl;
+					cout << "thresh " << TH << endl;
+					cout << "r_step " << RS << endl;
+					cout << "min_loop_length " << ML << endl;
+				}
+				else {
+					cout << "ERROR: Fiber thickness to be used to adjust the default parameter set could not be read" << endl;
+				}
+			}
+			else {
+				cout << "ERROR: When using the default parameter set, the paramters must not be specified anywhere else" << endl;
 			}
 		}
 		

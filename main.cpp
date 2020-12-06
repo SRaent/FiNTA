@@ -504,10 +504,20 @@ int main(int n, char** args){
 	for (unsigned long long i = 0; i < draw_commands.size(); ++i){
 		if (draw_commands[i]->all_nodes){
 			if (draw_commands[i]->cropped){
-				draw_commands[i]->image = draw_list(draw_commands[i]->image,list,draw_commands[i]->all_nodes_color,draw_commands[i]->all_nodes_thickness);
+				if (draw_commands[i]->all_nodes_hue){
+					draw_commands[i]->image = draw_list_offset_ang_hue(draw_commands[i]->image,list,draw_commands[i]->all_nodes_thickness);
+				}
+				else{
+					draw_commands[i]->image = draw_list(draw_commands[i]->image,list,draw_commands[i]->all_nodes_color,draw_commands[i]->all_nodes_thickness);
+				}
 			}
 			else {
-				draw_commands[i]->image = draw_list_offset(draw_commands[i]->image,list,draw_commands[i]->all_nodes_color,draw_commands[i]->all_nodes_thickness,crop_x1,crop_y1);
+				if (draw_commands[i]->all_nodes_hue){
+					draw_commands[i]->image = draw_list_offset_ang_hue(draw_commands[i]->image,list,draw_commands[i]->all_nodes_thickness,crop_x1,crop_y1);
+				}
+				else{
+					draw_commands[i]->image = draw_list_offset(draw_commands[i]->image,list,draw_commands[i]->all_nodes_color,draw_commands[i]->all_nodes_thickness,crop_x1,crop_y1);
+				}
 			}
 		}
 	}
@@ -741,10 +751,20 @@ int main(int n, char** args){
 	for (unsigned long long i = 0; i < draw_commands.size(); ++i){
 		if (draw_commands[i]->only_loops){
 			if (draw_commands[i]->cropped){
-				draw_commands[i]->image = draw_list(draw_commands[i]->image,list,draw_commands[i]->only_loops_color,draw_commands[i]->only_loops_thickness);
+				if (draw_commands[i]->only_loops_hue){
+					draw_commands[i]->image = draw_list_offset_ang_hue(draw_commands[i]->image,list,draw_commands[i]->only_loops_thickness);
+				}
+				else{
+					draw_commands[i]->image = draw_list(draw_commands[i]->image,list,draw_commands[i]->all_nodes_color,draw_commands[i]->only_loops_thickness);
+				}
 			}
 			else {
-				draw_commands[i]->image = draw_list_offset(draw_commands[i]->image,list,draw_commands[i]->only_loops_color,draw_commands[i]->only_loops_thickness,crop_x1,crop_y1);
+				if (draw_commands[i]->only_loops_hue){
+					draw_commands[i]->image = draw_list_offset_ang_hue(draw_commands[i]->image,list,draw_commands[i]->only_loops_thickness,crop_x1,crop_y1);
+				}
+				else{
+					draw_commands[i]->image = draw_list_offset(draw_commands[i]->image,list,draw_commands[i]->only_loops_color,draw_commands[i]->only_loops_thickness,crop_x1,crop_y1);
+				}
 			}
 		}
 	}
