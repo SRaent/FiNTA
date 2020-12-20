@@ -29,6 +29,7 @@ A typical usage case would be, that you add the image, the atafut executable and
 ```
 ./atafut -f ./imagename.png -s ./settingsfilename.set
 ```
+where you exchange the "imagename.png" by the actual imagename you want to trace and the "settingsfilename.set" by the name of the settingsfile. The supplied settingsfile is called "example.set".
 
 # The settings file
 This file defines the tracing parameters as well as the output of the programm. Comments in this file are defined as everything behind a "#".
