@@ -25,7 +25,7 @@ To apply the tracing algorithm to a given image, the path to the image, and the 
 ./atafut -s /path/to/settings_file.set -f /path/to/image.tif
 ```
 into the linux terminal.
-Note that for this to work, the atafut executabel generated in the previous section has to be present in the current working directory of the terminal. You can chech the current working directory by typing "pwd". Alternatively you can check the files in the current working directory for the atafut executable by using the "ls" command.
+Note that for this to work, the atafut executabel generated in the previous section has to be present in the current working directory of the terminal. You can check the current working directory by using the "pwd" command. Alternatively you can check the files in the current working directory for the atafut executable by using the "ls" command.
 A typical usage case would be, that you add the image, the atafut executable and the settings file to a directory. Next you open a terminal in that directory (right click on the file explorer in may cases has this option) and you type
 ```
 ./atafut -f ./imagename.png -s ./settingsfilename.set
