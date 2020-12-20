@@ -11,7 +11,8 @@ Next download the Source code of the software by for example executing the follo
 ```
 git clone https://github.com/SRaent/Actin.git
 ```
-Note that if git is not installed, this will promt an error such as "git: command not found". You can install git using "sudo pacman -Syu git". Next the code needs to be compiled against the OpenCV library. On Manjaro if the "opencv" package is installed as described above simply execute the "compile.sh" script using the following commands:
+Note that if git is not installed, this will promt an error such as "git: command not found". You can install git using "sudo pacman -Syu git".
+Next the code needs to be compiled against the OpenCV library. On Manjaro if the "opencv" package is installed as described above simply execute the "compile.sh" script using the following commands:
 ```
 cd ./Actin
 ./compile.sh
