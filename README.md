@@ -1,6 +1,22 @@
 # Automated tracing algorithm for fibers of uniform thickness
 This programm was specifically developed to trace the actin fibers visible in SEM images of mammalian cells after triton extraction. It can likely also be applied to any other fiber system where the fibers have a sufficiently uniform thickness. The programm works with grayscale images and any color images used as input will be converted to greyscale internally for the tracing.
 
+# Installation
+It is recommendet to use one of the manjaro linux distributions (https://manjaro.org/) which is based on Arch, so other linux distributions based on Arch should also work.
+The software requires the OpenCV library (https://opencv.org/) which can be conviniently installed on Arch based distributions by typing the following command into the command line and pressing enter:
+```
+sudo pacman -Syu opencv
+```
+Next download the Source code of the software by for example executing the following command:
+```
+git clone https://github.com/SRaent/Actin.git
+```
+Note that if git is not installed, this will promt an error such as "git: command not found". You can install git using "sudo pacman -Syu git". Next the code needs to be compiled against the OpenCV library. On Manjaro if the "opencv" package is installed as described above simply execute the "compile.sh" script using the following command:
+```
+./compile.sh
+```
+This will generate the executable. This executalbe has to be called as described in the next section.
+
 # Usage
 To apply the tracing algorithm to a given image, the path to the image, and the path to a configuration file have to be handed over to the programm. To archieve this, run the programm in the command line with the paths as arguments. The path to the image has to be passed as a argument after the "-f" flag and the path to the settings file after the "-s" flag. To successfully execute the programm, type something like
 ```
