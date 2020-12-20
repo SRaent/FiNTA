@@ -25,6 +25,10 @@ To apply the tracing algorithm to a given image, the path to the image, and the 
 ```
 into the linux terminal.
 Note that for this to work, the atafut executabel generated in the previous section has to be present in the current working directory of the terminal. You can chech the current working directory by typing "pwd". Alternatively you can check the files in the current working directory for the atafut executable by using the "ls" command.
+A typical usage case would be, that you add the image, the atafut executable and the settings file to a directory. Next you open a terminal in that directory (right click on the file explorer in may cases has this option) and you type
+```
+./atafut -f ./imagename.png -s ./settingsfilename.set
+```
 
 # The settings file
 This file defines the tracing parameters as well as the output of the programm. Comments in this file are defined as everything behind a "#".
