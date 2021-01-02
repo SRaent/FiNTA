@@ -22,13 +22,13 @@ This will generate the executable. This executalbe has to be called as described
 # Usage
 To apply the tracing algorithm to a given image, the path to the image, and the path to a configuration file have to be handed over to the programm. To archieve this, run the programm in the command line with the paths as arguments. The path to the image has to be passed as a argument after the "-f" flag and the path to the settings file after the "-s" flag. To successfully execute the programm, type something like
 ```
-./atafut -s /path/to/settings_file.set -f /path/to/image.tif
+./finta -s /path/to/settings_file.set -f /path/to/image.tif
 ```
 into the linux terminal.
-Note that for this to work, the atafut executabel generated in the previous section has to be present in the current working directory of the terminal. You can check the current working directory by using the "pwd" command. Alternatively you can check the files in the current working directory for the atafut executable by using the "ls" command.
-A typical usage case would be, that you add the image, the atafut executable and the settings file to a directory. Next you open a terminal in that directory (right click on the file explorer in may cases has this option) and you type
+Note that for this to work, the finta executabel generated in the previous section has to be present in the current working directory of the terminal. You can check the current working directory by using the "pwd" command. Alternatively you can check the files in the current working directory for the finta executable by using the "ls" command.
+A typical usage case would be, that you add the image, the finta executable and the settings file to a directory. Next you open a terminal in that directory (right click on the file explorer in may cases has this option) and you type
 ```
-./atafut -f ./imagename.png -s ./settingsfilename.set
+./finta -f ./imagename.png -s ./settingsfilename.set
 ```
 where you exchange the "imagename.png" by the actual imagename you want to trace and the "settingsfilename.set" by the name of the settingsfile. The supplied settingsfile is called "example.set".
 
@@ -163,7 +163,7 @@ Use the keywords "save\_all\_absolute\_angles" or "save\_loop\_absolute\_angles"
 To generate a animation of the tracing, the keyword "animate\_tracing" can be used. It takes a single argument that specifies the thickness of the lines to be drawn. The animation will always be saved with the name "<imagename\>\_animated.avi" and the background will always be the original image and the color of the lines will always be red.
 
 
-# Using atafut in scripts
+# Using finta in scripts
 It is also possible for scripting use to pass all the lines of a settings file in the command line. To archieve this, simply specify the image as usual behind the "-f" command line argument and then after that pass the command line argument "-settings" followed by all settings lines you wish to pass. The lines have to be sepperated by a semicolon ";".
 
 # Worsening the image for testing purposes

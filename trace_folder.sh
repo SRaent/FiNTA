@@ -2,6 +2,6 @@
 
 for file in ./*
 do
-	./atafut -f $file -s $1
+	./finta -f $file -s $1
 done
 	

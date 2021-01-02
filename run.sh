@@ -1,4 +1,4 @@
 #!/bin/sh
-rm ./atafut
+rm ./finta
 ./compile.sh
-./atafut
+./finta
