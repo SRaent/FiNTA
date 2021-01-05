@@ -6,6 +6,7 @@
 
 
 
+
 #define PRINT(x) cout << #x << " => " << x << endl;
 
 #include <limits> 
@@ -29,7 +30,7 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/videoio.hpp>
-
+#include "opencv2/core/types.hpp"
 
 using namespace std;
 using namespace cv;
@@ -1221,14 +1222,55 @@ bool read_settings_line(string l){
 		else if (w[0] == "animate_tracing"){
 			if (animation_path == ""){
 				animation_path = "<imagename>_animated.avi";
-				if (w.size() == 2){
-					try{
-						animation_thickness = stod(w[1]);
+				int i = 1;
+				if (w.size() >= i + 1 && is_number(w[i+1])){
+					if (w.size() >= i + 4 && is_number(w[i+2]) && is_number(w[i+3]) && is_number(w[i+4])){
+						int r = stoi(w[i+1]);
+						int g = stoi(w[i+2]);
+						int b = stoi(w[i+3]);
+						if ( 0 <= r && 0 <= g && 0 <= b && 255 >= r && 255 >= g && 255 >= b){
+							animation_color = Scalar(b,g,r);
+						}
+						else {
+							cout << "ERROR: color values have to be between 0 and 255" << endl;
+							successful = false;
+						}
+						animation_thickness = abs(stoi(w[i+4]));
 					}
-					catch(const std::invalid_argument& ia){
-						cout << w[1] << " could not be interpreted as a number" << endl;
+					else if (w.size() >= i + 3 && is_number(w[i+2]) && is_number(w[i+3])){
+						int r = stoi(w[i+1]);
+						int g = stoi(w[i+2]);
+						int b = stoi(w[i+3]);
+						if ( 0 <= r && 0 <= g && 0 <= b && 255 >= r && 255 >= g && 255 >= b){
+							animation_color = Scalar(b,g,r);
+						}
+						else {
+							cout << "ERROR: color values have to be between 0 and 255" << endl;
+							successful = false;
+						}
+					}
+					else if (w.size() >= i + 2 && is_number(w[i+2])) {
+						int c = stoi(w[i+1]);
+						if ( 0 <= c && 255 >= c){
+							animation_color = Scalar(c,c,c);
+						}
+						else {
+							cout << "ERROR: color values have to be between 0 and 255" << endl;
+							successful = false;
+						}
+						animation_thickness = abs(stoi(w[i+2]));
+					}
+					else if (w.size() == i + 1){
+						animation_thickness = abs(stoi(w[i+1]));
+					}
+					else {
+						cout << "ERROR: arguments of \"animate_tracing\" could not be interpreted" << endl;
 						successful = false;
 					}
+				}
+				else if(w.size() >= i + 1){
+					cout << "ERROR: arguments of \"animate_tracing\" could not be interpreted" << endl;
+					successful = false;
 				}
 			}
 			else {
