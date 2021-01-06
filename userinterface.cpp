@@ -1222,7 +1222,7 @@ if (w.size() != 0){
 	else if (w[0] == "animate_tracing"){
 		if (animation_path == ""){
 			animation_path = "<imagename>_animated.avi";
-			int i = 1;
+			const int i = 0;
 			if (w.size() - 1 >= i + 1 && is_number(w[i+1])){
 				if (w.size() - 1 >= i + 4 && is_number(w[i+2]) && is_number(w[i+3]) && is_number(w[i+4])){
 					int r = stoi(w[i+1]);
@@ -1235,7 +1235,7 @@ if (w.size() != 0){
 						cout << "ERROR: color values have to be between 0 and 255" << endl;
 						successful = false;
 					}
-					animation_thickness = abs(stoi(w[i+4]));
+					animation_thickness = abs(stod(w[i+4]));
 				}
 				else if (w.size() - 1 >= i + 3 && is_number(w[i+2]) && is_number(w[i+3])){
 					int r = stoi(w[i+1]);
@@ -1258,10 +1258,10 @@ if (w.size() != 0){
 						cout << "ERROR: color values have to be between 0 and 255" << endl;
 						successful = false;
 					}
-					animation_thickness = abs(stoi(w[i+2]));
+					animation_thickness = abs(stod(w[i+2]));
 				}
 				else if (w.size() - 1 == i + 1){
-					animation_thickness = abs(stoi(w[i+1]));
+					animation_thickness = abs(stod(w[i+1]));
 				}
 				else {
 					cout << "ERROR: arguments of \"animate_tracing\" could not be interpreted" << endl;
