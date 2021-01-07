@@ -7,8 +7,10 @@
 
 
 
+
 #define PRINT(x) cout << #x << " => " << x << endl;
 
+#include <cstdint>
 #include <limits> 
 #include <string>
 #include <stdlib.h>
@@ -105,6 +107,9 @@ unsigned long long n_startpoints = 100;
 double rad_startpoints = 20*RS;
 bool rad_startpoints_specified = false;
 double thresh_startpoints = 0;
+
+unsigned long long tracing_channel = 0;
+bool trace_channel = false;
 
 //i suppose this i why one uses header files...
 bool is_number(string, double&);
@@ -1222,55 +1227,70 @@ if (w.size() != 0){
 	else if (w[0] == "animate_tracing"){
 		if (animation_path == ""){
 			animation_path = "<imagename>_animated.avi";
-			const int i = 0;
-			if (w.size() - 1 >= i + 1 && is_number(w[i+1])){
-				if (w.size() - 1 >= i + 4 && is_number(w[i+2]) && is_number(w[i+3]) && is_number(w[i+4])){
-					int r = stoi(w[i+1]);
-					int g = stoi(w[i+2]);
-					int b = stoi(w[i+3]);
-					if ( 0 <= r && 0 <= g && 0 <= b && 255 >= r && 255 >= g && 255 >= b){
-						animation_color = Scalar(b,g,r);
+			int i = 0;
+			bool drawstyle_set = false;
+			while (w.size() - 1 >= i + 1 && successful){
+				if (w.size() - 1 >= i + 1 && is_number(w[i+1])){
+					if (!drawstyle_set){
+						drawstyle_set = true;
+						if (w.size() - 1 >= i + 4 && is_number(w[i+2]) && is_number(w[i+3]) && is_number(w[i+4])){
+							int r = stoi(w[i+1]);
+							int g = stoi(w[i+2]);
+							int b = stoi(w[i+3]);
+							if ( 0 <= r && 0 <= g && 0 <= b && 255 >= r && 255 >= g && 255 >= b){
+								animation_color = Scalar(b,g,r);
+							}
+							else {
+								cout << "ERROR: color values have to be between 0 and 255" << endl;
+								successful = false;
+							}
+							animation_thickness = abs(stod(w[i+4]));
+							i += 4;
+						}
+						else if (w.size() - 1 >= i + 3 && is_number(w[i+2]) && is_number(w[i+3])){
+							int r = stoi(w[i+1]);
+							int g = stoi(w[i+2]);
+							int b = stoi(w[i+3]);
+							if ( 0 <= r && 0 <= g && 0 <= b && 255 >= r && 255 >= g && 255 >= b){
+								animation_color = Scalar(b,g,r);
+							}
+							else {
+								cout << "ERROR: color values have to be between 0 and 255" << endl;
+								successful = false;
+							}
+							i += 3;
+						}
+						else if (w.size() - 1 >= i + 2 && is_number(w[i+2])) {
+							int c = stoi(w[i+1]);
+							if ( 0 <= c && 255 >= c){
+								animation_color = Scalar(c,c,c);
+							}
+							else {
+								cout << "ERROR: color values have to be between 0 and 255" << endl;
+								successful = false;
+							}
+							animation_thickness = abs(stod(w[i+2]));
+							i += 2;
+						}
+						else if (w.size() - 1 >= i + 1){
+							animation_thickness = abs(stod(w[i+1]));
+							i += 1;
+						}
 					}
 					else {
-						cout << "ERROR: color values have to be between 0 and 255" << endl;
-						successful = false;
+						cout << "ERROR: numeric arguments of \"animate_tracing\" could not be interpreted, since the style of the line was already specified." << endl;
 					}
-					animation_thickness = abs(stod(w[i+4]));
 				}
-				else if (w.size() - 1 >= i + 3 && is_number(w[i+2]) && is_number(w[i+3])){
-					int r = stoi(w[i+1]);
-					int g = stoi(w[i+2]);
-					int b = stoi(w[i+3]);
-					if ( 0 <= r && 0 <= g && 0 <= b && 255 >= r && 255 >= g && 255 >= b){
-						animation_color = Scalar(b,g,r);
+				else if(w.size() - 1 >= i + 1 && w[i+1] == "name"){
+					++i;
+					if(w.size() - 1 >= i + 1){
+						animation_path = w[i+1] + ".avi";
+						++i;
 					}
 					else {
-						cout << "ERROR: color values have to be between 0 and 255" << endl;
-						successful = false;
+						cout << "ERROR: after the keyword \"name\" a path has to follow." << endl;
 					}
 				}
-				else if (w.size() - 1 >= i + 2 && is_number(w[i+2])) {
-					int c = stoi(w[i+1]);
-					if ( 0 <= c && 255 >= c){
-						animation_color = Scalar(c,c,c);
-					}
-					else {
-						cout << "ERROR: color values have to be between 0 and 255" << endl;
-						successful = false;
-					}
-					animation_thickness = abs(stod(w[i+2]));
-				}
-				else if (w.size() - 1 == i + 1){
-					animation_thickness = abs(stod(w[i+1]));
-				}
-				else {
-					cout << "ERROR: arguments of \"animate_tracing\" could not be interpreted" << endl;
-					successful = false;
-				}
-			}
-			else if(w.size() - 1 >= i + 1){
-				cout << "ERROR: arguments of \"animate_tracing\" could not be interpreted" << endl;
-				successful = false;
 			}
 		}
 		else {
@@ -1438,6 +1458,21 @@ if (w.size() != 0){
 			}
 			else {
 				cout << "ERROR: When using the default parameter set, the paramters must not be specified anywhere else" << endl;
+			}
+		}
+		else if(w[0] == "use_channel"){
+			if( w.size() == 2){
+				if (is_number(w[1],tracing_channel) && tracing_channel > 0){
+					trace_channel = true;
+				}
+				else{
+					cout << "ERROR: tracing channel number could not be read. Note that the first channel has index 1." << endl;
+					successful = false;
+				}
+			}
+			else {
+				cout << "ERROR: use_channel requires exactly one positive intger argument" << endl;
+				successful = false;
 			}
 		}
 		

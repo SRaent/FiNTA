@@ -201,24 +201,31 @@ int main(int n, char** args){
 	else {
 		I2 = I1;
 	}
-	if (add_noise != 0){
-		I2 = noisify_gauss_absolute(I2, add_noise);
-	}
-	if (pointilise != 0){
-		I2 = pointilise_image(I2,pointilise);
-	}
 	s = I2.size();
 	//PRINT(s.width);
 	//PRINT(s.height);
 	Mat I3;
 	I2.copyTo(I3);
 	//PRINT(I3.channels());
-	if (I3.channels() > 1){
+	if (!trace_channel && I3.channels() > 1){
 		cvtColor(I3,I3,COLOR_BGR2GRAY);
+	}
+	else if (trace_channel){
+		if(I3.channels() < tracing_channel){ cout << "ERROR: The image has less channels than the channel that is supposed to be traced" << endl; return -1;}
+		vector<Mat> channels(I3.channels());
+		split(I3,channels);
+		I3 = channels[tracing_channel - 1];
+	}
+	if (add_noise != 0){
+		I3 = noisify_gauss_absolute(I3, add_noise);
+	}
+	if (pointilise != 0){
+		I3 = pointilise_image(I3,pointilise);
 	}
 	//PRINT(I3.channels());
 	Mat I4;
 	I3.convertTo(I4, CV_64F);
+	cvtColor(I3,I3,COLOR_GRAY2BGR);
 	Mat I_orig_double;
 	I1.copyTo(I_orig_double);
 	cvtColor(I_orig_double,I_orig_double,COLOR_BGR2GRAY);
@@ -290,7 +297,7 @@ int main(int n, char** args){
 			draw_commands[i]->cropped = false;
 		}
 		else if ( draw_commands[i]->background == "cropped"){
-			I2.copyTo(draw_commands[i]->image);
+			I3.copyTo(draw_commands[i]->image);
 			draw_commands[i]->cropped = true;
 		}
 		else if ( draw_commands[i]->background == "tubeness"){
