@@ -69,8 +69,9 @@ auto_startpoint
 # Saving parameters extracted from the tracing data is done by the four commands "save_loop_areas", "save_loop_circumferences", "save_all_junction_distances" and "save_loop_junction_distances". Here only save_loop_areas can be called more than once since it takes a parameter apart from the path the data will be saved to. The parameter is the assumed fiber thickness and its default is 0. These commands are explained in more detail in the README.md
 
 #save_loop_areas <imagename>_areas_thickness.dat 1 fiber_diameter
-#save_loop_areas <imagename_areas.dat
+#save_loop_areas <imagename>_areas.dat
 #save_loop_circumferences <imagename>_circumferences.dat
+#save_loop_diameters <imagename>_diameters.dat
 #save_all_junction_distances <imagename>_all_junc_dist.dat
 #save_loop_junction_distances <imagename>_loop_junc_dist.dat
 

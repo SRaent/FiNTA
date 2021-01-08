@@ -1039,4 +1039,21 @@ double mean_persistence_length(vector<vector<node*>> lines){
 	return pers_len;
 }
 
+double loop_diam(vector<node*> loop){
+	double diam = 0;
+	for (auto it = loop.begin(); it != loop.end() && it + 1 != loop.end(); ++it){
+		for (auto jt = it + 1; jt != loop.end(); ++jt){
+			diam = max(sqr((*it)->x - (*jt)->x) + sqr((*it)->y - (*jt)->y),diam);
+		}
+	}
+	return sqrt(diam);
+}
+
+vector<double> loop_diams(vector<vector<node*>> loops){
+	vector<double> diams;
+	for (auto loop = loops.begin(); loop != loops.end(); ++loop){
+		diams.push_back(scaling_factor * loop_diam(*loop));
+	}
+	return diams;
+}
 #endif

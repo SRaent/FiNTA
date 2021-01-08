@@ -229,6 +229,8 @@ string circleness_path = "";
 
 string loop_circumference_path = "";
 
+string loop_diam_path = "";
+
 string all_abs_angs_path = "";
 string loop_abs_angs_path = "";
 
@@ -1037,6 +1039,25 @@ if (w.size() != 0){
 		}
 		else {
 			cout << "ERROR: \"save_loop_circumferences\" was already called" << endl;
+			successful = false;
+		}
+	}
+	else if (w[0] == "save_loop_diameters"){
+		if (loop_circumference_path == ""){
+			if(w.size() == 1){
+				loop_diam_path = "<imagename>_loop_diameters";
+			}
+			else if (w.size() == 2){
+				loop_diam_path = w[1];
+			}
+			else {
+				cout << "ERROR: to many arguments for \"save_loop_diameters\", no more than 1 argument is possible instead of "<< w.size() - 1 << endl;
+				successful = false;
+			}
+			cout << "loop diameters will be saved to: \"" << loop_diam_path << "\"" << endl;
+		}
+		else {
+			cout << "ERROR: \"save_loop_diameters\" was already called" << endl;
 			successful = false;
 		}
 	}

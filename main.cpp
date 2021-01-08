@@ -679,6 +679,10 @@ int main(int n, char** args){
 		vector<double> c = loops_circleness(loops);
 		double_vector_to_file(replace_keywords(circleness_path),c);
 	}
+
+	if (loop_diam_path != ""){
+		double_vector_to_file(replace_keywords(loop_diam_path),loop_diams(loops));
+	}
 	
 	arrange_unite_vals_loop(junc_dist_loop);
 	arrange_unite_vals_loop(junc_conn_loop);
