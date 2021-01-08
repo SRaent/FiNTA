@@ -51,6 +51,9 @@ crop 0 0 1024 884
 ```
 Cropping can also be used to quickly trace a smaller section of the image in order to more quickly optimize the tracing parameters.
 
+## Tracing only one color channel
+In many flourecence microscopy images, the different colorchannels of an image correspond to the signals of different wavelengths. Often it is therefor of interest to only consider one specific color channel of the image for tracing. This can be achieved using the "use\_channel" keyword followed by a number specifying the channel. The channels start at 1 and due to the color handling of OpenCV, channel 1 usually corresponds to blue, channel 2 corresponds to green and channel 3 corresponds to red.
+
 ## Image rescaling
 By default, the image is rescaled before the tracing, such that the darkest pixel has a brightness of 0 and the brightest one a brightness of 255. This rescaling can be turned off using the "no\_rescaling" command.
 
@@ -129,7 +132,7 @@ Where two seperate files would be saved. One with a assumed fiber thickness of 3
 In order to save the loop circumferences of all closed loops, the keyword "save\_loop\_circumferences" is used. It can only be called once and the path, to which the data will be saved can be specified after a white space. If the "set\_scale" keyword is used in the settings file, the output will be in the unit defined there and scaled accordingly without any indication in the created file. If "save\_loop\_areas" is also used with the default considered fiber thickness of 0, the two files will have the same number of values in them and the values will correspond to one another. This means that the 5th entry in the loop area file will correspond to the same loop as the 5th entry in the loop circumference file and so on.
 
 ### Save loop circleness
-The loop circleness is defined as 4 times Pi times the loop area devided by the loop circumference squared. It can be saved to a file by using the "save\_loop\_line\_lengths" keyword optionally followed by the path the data should be saved to. Since the output is dimensionless no rescaling will take place. This command can only be called once.
+The loop circleness is defined as 4 times Pi times the loop area devided by the loop circumference squared. It can be saved to a file by using the "save\_loop\_circleness" keyword optionally followed by the path the data should be saved to. Since the output is dimensionless no rescaling will take place. This command can only be called once.
 
 
 ### Save junction distances
@@ -160,7 +163,7 @@ If one wishes to do more extensive analysis on the closed loops in the traced ne
 Use the keywords "save\_all\_absolute\_angles" or "save\_loop\_absolute\_angles" to save the angles of node connections in the complete network or the network consisting only of closed loops respectively. The keywords can be followed by the path the data should be saved to. The values will be in degrees and lie between 0° and 180° since the connections dont have a direction and therefore rotating them by 180° gives the same angle. The angle is measured counterclockwise to the vertical axis.
 
 ## Generating a animation of the tracing
-To generate a animation of the tracing, the keyword "animate\_tracing" can be used. It takes a single argument that specifies the thickness of the lines to be drawn. The animation will always be saved with the name "<imagename\>\_animated.avi" and the background will always be the original image and the color of the lines will always be red.
+To generate a animation of the tracing, the keyword "animate\_tracing" can be used. It takes arguments very similar to the drawing command. To specify where the ".avi" file should be saved, write the path, without a file ending, behind the "name" keyword in the same line. Additionally, the color and line thickness to be drawn can be specified by between 0 (for default) and 4 numbers, where the first 3 specify the color in RGB and the last one the linethickness in pixel.
 
 
 # Using finta in scripts
