@@ -51,8 +51,11 @@ crop 0 0 1024 884
 ```
 Cropping can also be used to quickly trace a smaller section of the image in order to more quickly optimize the tracing parameters.
 
+## Inverting the image
+Use the keyword "invert" without arguments to invert the image to be traced. This will affect all backgrounds of the draw function exept for "original". This is useful, because FiNTA is designed to trace bright fibers on a dark background. If your imaging technique produces dark fibers on a bright background it has to be inverted.
+
 ## Tracing only one color channel
-In many flourecence microscopy images, the different colorchannels of an image correspond to the signals of different wavelengths. Often it is therefor of interest to only consider one specific color channel of the image for tracing. This can be achieved using the "use\_channel" keyword followed by a number specifying the channel. The channels start at 1 and due to the color handling of OpenCV, channel 1 usually corresponds to blue, channel 2 corresponds to green and channel 3 corresponds to red.
+In many flourecence microscopy images, the different colorchannels of an image correspond to the signals of different wavelengths. Often it is therefor of interest to only consider one specific color channel of the image for tracing. This can be achieved using the "use\_channel" keyword followed by a number specifying the channel. The channels start at 1 and due to the color handling of OpenCV, channel 1 usually corresponds to blue, channel 2 corresponds to green and channel 3 corresponds to red. This will affect all backgrounds of the draw function exept for "original".
 
 ## Image rescaling
 By default, the image is rescaled before the tracing, such that the darkest pixel has a brightness of 0 and the brightest one a brightness of 255. This rescaling can be turned off using the "no\_rescaling" command.

@@ -1,4 +1,5 @@
 
+#include "opencv2/core.hpp"
 #define PRINT(x) cout << #x << " => " << x << endl;
 
 #define SQRT2 (double)1.4142135623730950488016
@@ -221,6 +222,9 @@ int main(int n, char** args){
 	}
 	if (pointilise != 0){
 		I3 = pointilise_image(I3,pointilise);
+	}
+	if (invert_bright) {
+		bitwise_not(I3,I3);
 	}
 	//PRINT(I3.channels());
 	Mat I4;

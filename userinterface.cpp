@@ -111,6 +111,8 @@ double thresh_startpoints = 0;
 unsigned long long tracing_channel = 0;
 bool trace_channel = false;
 
+bool invert_bright = false;
+
 //i suppose this i why one uses header files...
 bool is_number(string, double&);
 bool is_number(string);
@@ -1493,6 +1495,15 @@ if (w.size() != 0){
 			}
 			else {
 				cout << "ERROR: use_channel requires exactly one positive intger argument" << endl;
+				successful = false;
+			}
+		}
+		else if(w[0] == "invert" && w.size() == 1){
+			if (!invert_bright){
+				invert_bright = true;
+			}
+			else {
+				cout << "ERROR: \"invert\" was already called" << endl;
 				successful = false;
 			}
 		}
