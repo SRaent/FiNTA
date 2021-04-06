@@ -1045,7 +1045,7 @@ if (w.size() != 0){
 		}
 	}
 	else if (w[0] == "save_loop_diameters"){
-		if (loop_circumference_path == ""){
+		if (loop_diam_path == ""){
 			if(w.size() == 1){
 				loop_diam_path = "<imagename>_loop_diameters";
 			}
