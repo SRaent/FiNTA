@@ -153,10 +153,10 @@ line_analysis(vector<string> line, bool& successful){
 			visualize = true;
 			if (i + 1 < line.size()){
 				++i; //the = is correct here
-				if (!(imgnum_set = is_number(line[i], imgnum))){
+				if (!(imgnum_set = is_number(line[i], imgnum) || line[i] == "persistence_data")){
 					images_folder = line[i];
 				}
-				if (i + 1 < line.size()){
+				if (i + 1 < line.size() && !(line[i+1] == "persistence_data")){
 					if (imgnum_set){
 						++i;
 						images_folder = line[i];
@@ -169,7 +169,7 @@ line_analysis(vector<string> line, bool& successful){
 			}
 
 		}
-		else if (line[i] == "persistence_data"){
+		else if (line[i] == "persistence_data" && pers_path == ""){
 			pers_path = "<imagename>_persitence_data.dat";
 			if (i + 1 < line.size() && line[i+1] != "draw_lines"){
 				++i;
