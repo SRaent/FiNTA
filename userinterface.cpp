@@ -113,7 +113,7 @@ bool trace_channel = false;
 
 bool invert_bright = false;
 
-//i suppose this i why one uses header files...
+//i suppose this is why one uses header files...
 bool is_number(string, double&);
 bool is_number(string);
 bool is_number(string, unsigned long long&);
@@ -123,6 +123,7 @@ vector<double> line_lengths(vector<vector<node*>>);
 void draw_lines(const Mat, const vector<vector<node*>>, const string, const double, const double);
 string replace_keywords(string);
 double mean_persistence_length(vector<vector<node*>>);
+double mean_persistence_length(vector<vector<node*>>,string);
 
 class line_analysis{
 public:
@@ -136,6 +137,7 @@ bool data_path_set = false;
 unsigned long long imgnum = 10;
 bool imgnum_set = false;
 string images_folder = "./";
+string pers_path = "";
 line_analysis(vector<string> line, bool& successful){
 	if (line[0] == "save_loop_line_lengths"){ on_only_loops = true;}
 	for (unsigned long long i = 1; i < line.size(); ++i){
@@ -162,9 +164,17 @@ line_analysis(vector<string> line, bool& successful){
 					else if (is_number(line[i+1], imgnum)){
 						++i;
 					}
+					else {successful = false; return;}
 				}
 			}
 
+		}
+		else if (line[i] == "persistence_data"){
+			pers_path = "<imagename>_persitence_data";
+			if (i + 1 < line.size() && line[i+1] != "draw_lines"){
+				++i;
+				pers_path = line[i];
+			}
 		}
 		else if (!data_path_set){
 			data_path_set = true;
@@ -185,7 +195,7 @@ double process(Mat I, vector<node*> list){
 	if(visualize){
 		draw_lines(I,lines,images_folder,imgnum,1);
 	}
-	return mean_persistence_length(lines);
+	return mean_persistence_length(lines,pers_path);
 }
 };
 vector<line_analysis*> line_analysis::line_options;

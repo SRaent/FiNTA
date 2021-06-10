@@ -515,6 +515,20 @@ void double_vector_to_file(string filename, vector<double> list){
 	}
 	f.close();
 }
+//both lists are assumed to have equal length
+void double_vectors_to_file(string filename, vector<double> list1, vector<double> list2){
+	ofstream f;
+	f.open(filename);
+	if (f.is_open()){
+		for(unsigned long long i = 0; i < list1.size(); ++i){
+			f << list1[i] << " " << list2[i] << "\n";
+		}
+	}
+	else {
+		cout << "WARNING: File: \"" << filename << "\" could not be opened" << endl;
+	}
+	f.close();
+}
 void ull_vector_to_file(string filename, vector<unsigned long long> list){
 	ofstream f;
 	f.open(filename);
@@ -1009,7 +1023,7 @@ double fit_exp(vector<double> xvals, vector<double> yvals){
 	return l;
 }
 
-double mean_persistence_length(vector<vector<node*>> lines){
+double mean_persistence_length(vector<vector<node*>> lines, string dat_path = ""){
 	vector<double> distances;
 	vector<double> correlations;
 	for (auto it = lines.begin(); it != lines.end(); ++it){
@@ -1033,8 +1047,9 @@ double mean_persistence_length(vector<vector<node*>> lines){
 			}
 		}
 	}
-	//double_vector_to_file("xvals.dat",distances);
-	//double_vector_to_file("yvals.dat",correlations);
+	if (dat_path != ""){
+		double_vectors_to_file(replace_keywords(dat_path),distances,correlations);
+	}
 	double pers_len = ((double)1.0)/fit_exp(distances,correlations);
 	return pers_len;
 }
