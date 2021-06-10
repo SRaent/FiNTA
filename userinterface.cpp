@@ -170,7 +170,7 @@ line_analysis(vector<string> line, bool& successful){
 
 		}
 		else if (line[i] == "persistence_data"){
-			pers_path = "<imagename>_persitence_data";
+			pers_path = "<imagename>_persitence_data.dat";
 			if (i + 1 < line.size() && line[i+1] != "draw_lines"){
 				++i;
 				pers_path = line[i];

@@ -994,7 +994,15 @@ double least_squares_error(double fun(double), vector<double> xvals, vector<doub
 	return error;
 }
 
-double fit_exp(vector<double> xvals, vector<double> yvals){
+double exp_fit_grad(vector<double> xvals, vector<double> yvals, double l){
+	double grad = 0;
+	for (unsigned long long i = 0; i < xvals.size(); i++){
+		grad += -xvals[i]*(exp(-xvals[i]*l) - yvals[i])*exp(-xvals[i]*l);
+	}
+	return grad;
+}
+
+double fit_exp_grad_dec(vector<double> xvals, vector<double> yvals){
 	double l = 1.0/20.0;
 	double error = 0;
 	double grad = 0;
@@ -1021,6 +1029,58 @@ double fit_exp(vector<double> xvals, vector<double> yvals){
 	}
 	
 	return l;
+}
+
+bool sign(double x){
+	return (x > 0) - (x < 0);
+}
+
+double fit_exp(vector<double> xvals, vector<double> yvals){
+	double l1 = 1.0/20.0;
+	double l2 = 2.0/20.0;
+	double grad1 = exp_fit_grad(xvals,yvals,l1);
+	double grad2 = exp_fit_grad(xvals,yvals,l2);
+	//make shure the minimum sits between l1 an l2
+	//cout << "starting fit\n";
+	while (grad1*grad2 > 0){
+		//PRINT(grad1)
+		//PRINT(grad2)
+		//PRINT(l1)
+		//PRINT(l2)
+		l1 = l2;
+		//l2 = l2 * pow(2,-sign(grad2));
+		if (grad2 < 0){
+			l2 = l2 * 2.0;
+		} else {
+			l2 = l2 / 2.0;
+		}
+		grad1 = exp_fit_grad(xvals,yvals,l1);
+		grad2 = exp_fit_grad(xvals,yvals,l2);
+	}
+	//make shure l1 is smaller than l2
+	//cout << "starting regression\n";
+	if (l1 > l2){
+		double tmp = l2;
+		l2 = l1;
+		l1 = tmp;
+	}
+	unsigned long long iters = 500;
+	double nl = (l1 + l2)/2.0;
+	//devide the intervall between l1 and l2 in half and decide in which
+	//of the two new intervalls the minimum is located
+	//then repeat for this new intervall.
+	for(unsigned long long i = 0; i < iters; ++i){
+		//PRINT(exp_fit_grad(xvals,yvals,l1))
+		//PRINT(exp_fit_grad(xvals,yvals,l2))
+		//PRINT(exp_fit_grad(xvals,yvals,nl))
+		//PRINT(l1)
+		//PRINT(l2)
+		if (exp_fit_grad(xvals,yvals,nl) > 0.0) l2 = nl;
+		else l1 = nl;
+		nl = (l1 + l2) / 2.0;
+	}
+
+	return nl;
 }
 
 double mean_persistence_length(vector<vector<node*>> lines, string dat_path = ""){
