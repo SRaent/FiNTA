@@ -27,10 +27,10 @@ sigma_smooth 0.5
 sigma_conv 0.45 fiber_diameter
 
 #r_min has a default value of 0 and can savely be kept at this value. It rarely needs to be increased. It scales with the image
-r_min 0 fiber_diameter
+r_min 0 
 
 #r_max scales with the image. a sensible value seems to be twice fiber thickness.
-r_max 2 fiber_diameter
+r_max 2 
 
 #steps does not scale with the image. Its default value is 360. It is only a tradeoff between runtime and angular resolution. The default value provides more than enough angular resolution. This parameter does not really need to be adjusted.
 steps 360
