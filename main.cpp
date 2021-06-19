@@ -581,7 +581,7 @@ int main(int n, char** args){
 			double pers_len = line_opt->process(I2, list);
 			//PRINT(pers_len)
 			aux_labels.push_back(str_add_actual_double("Persistence length of the fibers found on the entire network using the angle threshold of " ,line_opt->angle));
-			aux_data.push_back(pers_len*scaling_factor);
+			aux_data.push_back(pers_len);
 		}
 	}
 
@@ -716,7 +716,7 @@ int main(int n, char** args){
 			double pers_len = line_opt->process(I2, list);
 			//PRINT(pers_len)
 			aux_labels.push_back(str_add_double("Persistence length of the fibers found on the network containing only loops with the angle threshold of " ,line_opt->angle));
-			aux_data.push_back(pers_len*scaling_factor);
+			aux_data.push_back(pers_len);
 		}
 	}
 	if (aux_data_path != ""){

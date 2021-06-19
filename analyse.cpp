@@ -1101,7 +1101,7 @@ double mean_persistence_length(vector<vector<node*>> lines, string dat_path = ""
 				double len = sqrt(sqr(dx) + sqr(dy));
 				dx = dx / len;
 				dy = dy / len;
-				distances.push_back(distance);
+				distances.push_back(distance * scaling_factor);
 				correlations.push_back((dx0 * dx) + (dy0 * dy));
 				distance += len;
 			}
