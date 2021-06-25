@@ -1322,7 +1322,12 @@ if (w.size() != 0){
 					}
 					else {
 						cout << "ERROR: after the keyword \"name\" a path has to follow." << endl;
+						successful = false;
 					}
+				}
+				else {
+					cout << "ERROR: could not interpret arguments of \"animate_tracing\". possibly you forgot the \"name\" keyword before the path" << endl;
+					successful = false;
 				}
 			}
 		}
