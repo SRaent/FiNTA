@@ -309,7 +309,7 @@ int main(int n, char** args){
 			draw_commands[i]->cropped = true;
 		}
 		else if ( draw_commands[i]->background == "hessian"){
-			hessian.copyTo(draw_commands[i]->image);
+			hessian.convertTo(draw_commands[i]->image,CV_8UC3);
 			normalize(draw_commands[i]->image,draw_commands[i]->image,255,0,32);
 			draw_commands[i]->cropped = true;
 		}
