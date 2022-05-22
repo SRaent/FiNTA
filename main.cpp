@@ -375,8 +375,10 @@ int main(int n, char** args){
 	*/
 	
 	
-	for (bool buisy = 1; buisy && list.size() != 0;){
+	unsigned long long iter = 0;
+	for (bool buisy = 1; buisy && list.size() != 0 &&(max_iter == 0 || max_iter > iter);){
 		buisy = 0;
+		++iter;
 		unsigned long long end = list.size();
 		for (unsigned long long it = 0; it < end; ++it){
 			if (!(list[it]->procreated)){

@@ -111,6 +111,8 @@ double thresh_startpoints = 0;
 unsigned long long tracing_channel = 0;
 bool trace_channel = false;
 
+unsigned long long max_iter = 0;
+
 bool invert_bright = false;
 
 //i suppose this is why one uses header files...
@@ -1510,6 +1512,20 @@ if (w.size() != 0){
 			}
 			else {
 				cout << "ERROR: use_channel requires exactly one positive intger argument" << endl;
+				successful = false;
+			}
+		}
+		else if(w[0] == "max_iter"){
+			if( w.size() == 2){
+				if (is_number(w[1],max_iter) && max_iter > 0){
+				}
+				else{
+					cout << "ERROR: max_iter must be followed by a positive number" << endl;
+					successful = false;
+				}
+			}
+			else {
+				cout << "ERROR: max_iter requires exactly one positive integer argument" << endl;
 				successful = false;
 			}
 		}
