@@ -95,6 +95,7 @@ using namespace cv;
 
 
 int main(int n, char** args){
+	cout << "Launched FiNTA" <<endl;
 	
 	bool settings_read = false;
 	bool image_specified = false;
