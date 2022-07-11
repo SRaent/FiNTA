@@ -911,5 +911,6 @@ int main_tinker(){
 	
 	imwrite(write_folder+file+"_tracing.tif",I3);
 	imwrite(write_folder+file+"_wo_scalebar.tif",I4);
+	cout << "Finta ran successfully" << endl;
 	return 0;
 }
